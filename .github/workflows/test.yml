@@ -1,0 +1,27 @@
+name: test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Set up Go 1.16
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+        
+    - name: Run unit test
+      run: go test -v ./... 
+
+    - name: Run build test
+      run: go build ./cmd/ssup2ket-auth/main.go

@@ -1,0 +1,257 @@
+openapi: 3.0.0
+servers:
+  - url: http://api.dkosv3.9rum.cc
+    description: ssup2ket auth service
+info:
+  description: ssup2ket auth service
+  version: "1.0.0"
+  title: ssup2ket auth service
+  contact:
+    email: supsup5642@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+components:
+  schemas:
+    UserCreate:
+      type: object
+      required:
+        - ID
+        - Password
+        - Phone
+        - Email
+      properties:
+        ID:
+          type: string
+        Password:
+          type: string
+        Phone:
+          type: string
+        Email:
+          type: string 
+    UserUpdate:
+      type: object
+      required:
+        - UUID
+        - Password
+        - Phone
+        - Email
+      properties:
+        UUID:
+          type: string
+        Password:
+          type: string
+        Phone:
+          type: string
+        Email:
+          type: string
+    UserInfo:
+      type: object
+      required:
+        - UUID
+        - ID 
+        - Phone
+        - Email
+      properties:
+        UUID:
+          type: string
+        ID:
+          type: string
+        Phone:
+          type: string
+        Email:
+          type: string
+    UserInfoList:
+      type: object
+      required:
+        - Users
+        - Metadata
+      properties:
+        Users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserInfo'
+        Metadata:
+          $ref: '#/components/schemas/ListMeta'
+    ListMeta:
+      type: object
+      required:
+        - Limit
+        - Offset
+        - Total
+      properties:
+        Limit:
+          type: integer
+        Offset:
+          type: integer
+        Total:
+          type: integer
+    ErrorInfo:
+      type: object
+      required:
+        - Code
+        - RequestID
+      properties:
+        Code:
+          type: string
+        RequestID:
+          type: string
+  parameters:
+    UserUUID:
+      name: UserUUID
+      in: path
+      required: true
+      schema:
+        type: string
+    Offset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 50
+paths:
+  /users:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      tags:
+        - user
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoList'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+    post:
+      tags:
+        - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+  /users/{UserUUID}:
+    parameters:
+      - $ref: '#/components/parameters/UserUUID'
+    get:
+      tags:
+        - user
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+    put:
+      tags:
+        - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: ''
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+    delete:
+      tags:
+        - user
+      responses:
+        '200':
+          description: ''
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'

@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option go_package = "internal/server/grpc_server";
+
+// Message
+message Empty {
+}
+
+// User request
+message UserListRequest {
+    int32 Offset = 1;
+    int32 Limit = 2;
+}
+
+message UserUUIDRequest {
+    string UUID = 1;
+}
+
+message UserCreateRequest {
+    string ID = 1;
+    string Password = 2;
+    string Phone = 3;
+    string Email = 4;
+}
+
+message UserUpdateRequest {
+    string UUID = 1;
+    string Password = 2;
+    string Phone = 3;
+    string Email = 4;
+}
+
+// User response
+message UserListResponse {
+    message User {
+        string UUID = 1;
+        string ID = 2;
+        string Phone = 3;
+        string Email = 4;
+    }
+
+    repeated User uesrs = 1;
+}
+
+message UserInfoResponse {
+    string UUID = 1;
+    string ID = 2;
+    string Phone = 3;
+    string Email = 4;
+}
+
+// Service
+service User {
+    rpc ListUser(UserListRequest) returns (UserListResponse) {}
+    rpc CreateUser(UserCreateRequest) returns (UserInfoResponse) {}
+    rpc GetUser(UserUUIDRequest) returns (UserInfoResponse) {}
+    rpc UpdateUser(UserUpdateRequest) returns (Empty) {}
+    rpc DeleteUser(UserUUIDRequest) returns (Empty) {}
+}
