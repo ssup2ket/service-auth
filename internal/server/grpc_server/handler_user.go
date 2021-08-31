@@ -58,7 +58,7 @@ func (s *ServerGRPC) GetUser(ctx context.Context, req *UserIDRequest) (*UserInfo
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(req.ID)))
+	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(req.Id)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
@@ -89,7 +89,7 @@ func (s *ServerGRPC) UpdateUser(ctx context.Context, req *UserUpdateRequest) (*E
 		return nil, getErrBadRequest()
 	}
 
-	return nil, nil
+	return &Empty{}, nil
 }
 
 func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*Empty, error) {
@@ -100,7 +100,7 @@ func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*Empty
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(req.ID)); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(req.Id)); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			return nil, getErrNoutFound(errors.ErrResouceUser)
@@ -109,7 +109,7 @@ func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*Empty
 		return nil, getErrServerError()
 	}
 
-	return nil, nil
+	return &Empty{}, nil
 }
 
 // Request validate
@@ -118,7 +118,7 @@ func (u *UserListRequest) validate() error {
 }
 
 func (u *UserIDRequest) validate() error {
-	return request.ValidateUserUUID(u.ID)
+	return request.ValidateUserUUID(u.Id)
 }
 
 func (u *UserCreateRequest) validate() error {
@@ -126,7 +126,7 @@ func (u *UserCreateRequest) validate() error {
 }
 
 func (u *UserUpdateRequest) validate() error {
-	return request.ValidateUserUpdate(u.ID, u.Password, u.Phone, u.Email)
+	return request.ValidateUserUpdate(u.Id, u.Password, u.Phone, u.Email)
 }
 
 // DTO <-> Model
@@ -140,7 +140,7 @@ func userCreateToUserInfoModel(userCreate *UserCreateRequest) *model.UserInfo {
 
 func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *model.UserInfo {
 	return &model.UserInfo{
-		ID:    uuid.FromStringOrNil(userUpdate.ID),
+		ID:    uuid.FromStringOrNil(userUpdate.Id),
 		Phone: userUpdate.Phone,
 		Email: userUpdate.Email,
 	}
@@ -148,19 +148,19 @@ func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *model.UserInfo {
 
 func UserModelToUserInfo(userModel *model.UserInfo) *UserInfoResponse {
 	return &UserInfoResponse{
-		ID:      userModel.ID.String(),
-		LoginID: userModel.LoginID,
+		Id:      userModel.ID.String(),
+		LoginId: userModel.LoginID,
 		Phone:   userModel.Phone,
 		Email:   userModel.Email,
 	}
 }
 
 func UserModelListToUserInfoList(userModelList []model.UserInfo) *UserListResponse {
-	userInfos := []*UserListResponse_User{}
+	userInfos := []*UserInfoResponse{}
 	for _, userModel := range userModelList {
-		tmp := UserListResponse_User{
-			ID:      userModel.ID.String(),
-			LoginID: userModel.LoginID,
+		tmp := UserInfoResponse{
+			Id:      userModel.ID.String(),
+			LoginId: userModel.LoginID,
 			Phone:   userModel.Phone,
 			Email:   userModel.Email,
 		}

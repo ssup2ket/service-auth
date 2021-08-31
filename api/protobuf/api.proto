@@ -8,45 +8,38 @@ message Empty {
 
 // User request
 message UserListRequest {
-    int32 Offset = 1;
-    int32 Limit = 2;
+    int32 offset = 1;
+    int32 limit = 2;
 }
 
 message UserIDRequest {
-    string ID = 1;
+    string id = 1;
 }
 
 message UserCreateRequest {
-    string LoginID = 1;
-    string Password = 2;
-    string Phone = 3;
-    string Email = 4;
+    string loginID = 1;
+    string password = 2;
+    string phone = 3;
+    string email = 4;
 }
 
 message UserUpdateRequest {
-    string ID = 1;
-    string Password = 2;
-    string Phone = 3;
-    string Email = 4;
+    string id = 1;
+    string password = 2;
+    string phone = 3;
+    string email = 4;
 }
 
 // User response
 message UserListResponse {
-    message User {
-        string ID = 1;
-        string LoginID = 2;
-        string Phone = 3;
-        string Email = 4;
-    }
-
-    repeated User uesrs = 1;
+    repeated UserInfoResponse uesrs = 1;
 }
 
 message UserInfoResponse {
-    string ID = 1;
-    string LoginID = 2;
-    string Phone = 3;
-    string Email = 4;
+    string id = 1;
+    string loginId = 2;
+    string phone = 3;
+    string email = 4;
 }
 
 // Service
