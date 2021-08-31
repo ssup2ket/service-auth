@@ -22,7 +22,7 @@ gen-mock:
 
 .PHONY: run
 run: gen-openapi gen-protobuf
-	source scripts/local-run-env.sh && go run cmd/ssup2ket-auth/main.go
+	source scripts/env-local && go run cmd/ssup2ket-auth/main.go
 
 .PHONY: test
 test: gen-mock

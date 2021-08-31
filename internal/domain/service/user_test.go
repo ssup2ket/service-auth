@@ -39,12 +39,12 @@ func (u *userSuite) SetupTest() {
 	u.userSecretRepo = mocks.UserSecretRepo{}
 
 	// Init service
-	u.userService = NewUserServiceImp(&u.userInfoRepo, &u.userSecretRepo)
+	u.userService = NewUserServiceImp(&u.userInfoRepo, &u.userInfoRepo, &u.userSecretRepo, &u.userSecretRepo)
 }
 
 func (u *userSuite) TestGetUserSuccess() {
 	// Set repo
-	u.userInfoRepo.On("GetSecondary", context.Background(), userUUIDCorrect).Return(&model.UserInfo{
+	u.userInfoRepo.On("Get", context.Background(), userUUIDCorrect).Return(&model.UserInfo{
 		UUID:  userUUIDCorrect,
 		ID:    userIDCorrect,
 		Phone: userPhoneCorrect,
@@ -63,7 +63,7 @@ func (u *userSuite) TestGetUserSuccess() {
 func (u *userSuite) TestGetUserRepoNotFound() {
 	// Set repo
 	repoError := repo.ErrNotFound
-	u.userInfoRepo.On("GetSecondary", context.Background(), userUUIDCorrect).Return(&model.UserInfo{}, repoError)
+	u.userInfoRepo.On("Get", context.Background(), userUUIDCorrect).Return(&model.UserInfo{}, repoError)
 
 	// Test
 	_, err := u.userService.GetUser(context.Background(), userUUIDCorrect)

@@ -20,14 +20,19 @@ type UserService interface {
 }
 
 type UserServiceImp struct {
-	userInfoRepo   repo.UserInfoRepo
-	userSecretRepo repo.UserSecretRepo
+	userInfoRepoPrimary     repo.UserInfoRepo
+	userInfoRepoSecondary   repo.UserInfoRepo
+	userSecretRepoPrimary   repo.UserSecretRepo
+	userSecretRepoSecondary repo.UserSecretRepo
 }
 
-func NewUserServiceImp(userInfo repo.UserInfoRepo, userSecret repo.UserSecretRepo) *UserServiceImp {
+func NewUserServiceImp(userInfoPrimary repo.UserInfoRepo, userInfoSecondary repo.UserInfoRepo,
+	userSecretPrimary repo.UserSecretRepo, userSecretSecondary repo.UserSecretRepo) *UserServiceImp {
 	return &UserServiceImp{
-		userInfoRepo:   userInfo,
-		userSecretRepo: userSecret,
+		userInfoRepoPrimary:     userInfoPrimary,
+		userInfoRepoSecondary:   userInfoSecondary,
+		userSecretRepoPrimary:   userSecretPrimary,
+		userSecretRepoSecondary: userSecretSecondary,
 	}
 }
 
@@ -40,7 +45,7 @@ func (u *UserServiceImp) ListUser(ctx context.Context, offset int, limit int) ([
 	}
 
 	// List users
-	users, err := u.userInfoRepo.ListSecondary(ctx, offset, limit)
+	users, err := u.userInfoRepoSecondary.List(ctx, offset, limit)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to list user from DB")
 		return nil, getReturnErr(err)
@@ -70,7 +75,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 
 	// Create user info
 	userInfo.UUID = uuid
-	if err = u.userInfoRepo.WithTx(tx).Create(ctx, userInfo); err != nil {
+	if err = u.userInfoRepoPrimary.WithTx(tx).Create(ctx, userInfo); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create user info to DB")
 		return nil, getReturnErr(err)
 	}
@@ -86,7 +91,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 		PasswdHash: hash,
 		PasswdSalt: salt,
 	}
-	if err = u.userSecretRepo.WithTx(tx).Create(ctx, &userSecret); err != nil {
+	if err = u.userSecretRepoPrimary.WithTx(tx).Create(ctx, &userSecret); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create user secret to DB")
 		return nil, getReturnErr(err)
 	}
@@ -103,7 +108,7 @@ func (u *UserServiceImp) GetUser(ctx context.Context, userUUID string) (*model.U
 	var err error
 
 	// Get user info
-	userInfo, err := u.userInfoRepo.GetSecondary(ctx, userUUID)
+	userInfo, err := u.userInfoRepoSecondary.Get(ctx, userUUID)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user from DB")
 		return nil, getReturnErr(err)
@@ -129,14 +134,14 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 	}()
 
 	// Get user info
-	_, err = u.userInfoRepo.WithTx(tx).GetPrimary(ctx, userInfo.UUID)
+	_, err = u.userInfoRepoPrimary.WithTx(tx).Get(ctx, userInfo.UUID)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user from DB")
 		return getReturnErr(err)
 	}
 
 	// Update user info
-	if err = u.userInfoRepo.WithTx(tx).UpdateUser(ctx, userInfo); err != nil {
+	if err = u.userInfoRepoPrimary.WithTx(tx).Update(ctx, userInfo); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to update user from DB")
 		return getReturnErr(err)
 	}
@@ -152,7 +157,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 		PasswdHash: hash,
 		PasswdSalt: salt,
 	}
-	if err = u.userSecretRepo.WithTx(tx).Update(ctx, &userSecret); err != nil {
+	if err = u.userSecretRepoPrimary.WithTx(tx).Update(ctx, &userSecret); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create user secret to DB")
 		return getReturnErr(err)
 	}
@@ -183,20 +188,20 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID string) error 
 	}()
 
 	// Get user info
-	_, err = u.userInfoRepo.WithTx(tx).GetPrimary(ctx, userUUID)
+	_, err = u.userInfoRepoPrimary.WithTx(tx).Get(ctx, userUUID)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user info from DB")
 		return getReturnErr(err)
 	}
 
 	// Delete user info
-	if err := u.userInfoRepo.WithTx(tx).Delete(ctx, userUUID); err != nil {
+	if err := u.userInfoRepoPrimary.WithTx(tx).Delete(ctx, userUUID); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user info from DB")
 		return getReturnErr(err)
 	}
 
 	// Delete user secret
-	if err := u.userSecretRepo.WithTx(tx).Delete(ctx, userUUID); err != nil {
+	if err := u.userSecretRepoPrimary.WithTx(tx).Delete(ctx, userUUID); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user secret from DB")
 		return getReturnErr(err)
 	}

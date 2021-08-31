@@ -29,12 +29,16 @@ func New(c *config.Configs) (*Domain, error) {
 		log.Error().Err(err).Msg("Failed to init repo pkg")
 		return nil, fmt.Errorf("failed to init repo pkg")
 	}
-	userInfoRepoMysql := repo.NewUserInfoRepoMysql()
-	userSecretRepoMysql := repo.NewUserSecretRepoMysql()
+	primaryMySQL, secondaryMySQL := repo.GetDBConns()
+	userInfoRepoPrimaryMysql := repo.NewUserInfoRepoImp(primaryMySQL)
+	userInfoRepoSecondaryMysql := repo.NewUserInfoRepoImp(secondaryMySQL)
+	userSecretRepoPrimaryMysql := repo.NewUserSecretRepoImp(primaryMySQL)
+	userSecretRepoSecondaryMysql := repo.NewUserSecretRepoImp(secondaryMySQL)
 
 	// Init services
 	service.Init(&service.ServiceConfigs{})
-	userService := service.NewUserServiceImp(userInfoRepoMysql, userSecretRepoMysql)
+	userService := service.NewUserServiceImp(userInfoRepoPrimaryMysql, userInfoRepoSecondaryMysql,
+		userSecretRepoPrimaryMysql, userSecretRepoSecondaryMysql)
 	domain.User = userService
 
 	return &domain, nil

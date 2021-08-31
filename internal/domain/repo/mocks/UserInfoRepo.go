@@ -44,8 +44,8 @@ func (_m *UserInfoRepo) Delete(ctx context.Context, userUUID string) error {
 	return r0
 }
 
-// GetPrimary provides a mock function with given fields: ctx, uuid
-func (_m *UserInfoRepo) GetPrimary(ctx context.Context, uuid string) (*model.UserInfo, error) {
+// Get provides a mock function with given fields: ctx, uuid
+func (_m *UserInfoRepo) Get(ctx context.Context, uuid string) (*model.UserInfo, error) {
 	ret := _m.Called(ctx, uuid)
 
 	var r0 *model.UserInfo
@@ -67,31 +67,8 @@ func (_m *UserInfoRepo) GetPrimary(ctx context.Context, uuid string) (*model.Use
 	return r0, r1
 }
 
-// GetSecondary provides a mock function with given fields: ctx, uuid
-func (_m *UserInfoRepo) GetSecondary(ctx context.Context, uuid string) (*model.UserInfo, error) {
-	ret := _m.Called(ctx, uuid)
-
-	var r0 *model.UserInfo
-	if rf, ok := ret.Get(0).(func(context.Context, string) *model.UserInfo); ok {
-		r0 = rf(ctx, uuid)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.UserInfo)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, uuid)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ListPrimary provides a mock function with given fields: ctx, offset, limit
-func (_m *UserInfoRepo) ListPrimary(ctx context.Context, offset int, limit int) ([]model.UserInfo, error) {
+// List provides a mock function with given fields: ctx, offset, limit
+func (_m *UserInfoRepo) List(ctx context.Context, offset int, limit int) ([]model.UserInfo, error) {
 	ret := _m.Called(ctx, offset, limit)
 
 	var r0 []model.UserInfo
@@ -113,31 +90,8 @@ func (_m *UserInfoRepo) ListPrimary(ctx context.Context, offset int, limit int) 
 	return r0, r1
 }
 
-// ListSecondary provides a mock function with given fields: ctx, offset, limit
-func (_m *UserInfoRepo) ListSecondary(ctx context.Context, offset int, limit int) ([]model.UserInfo, error) {
-	ret := _m.Called(ctx, offset, limit)
-
-	var r0 []model.UserInfo
-	if rf, ok := ret.Get(0).(func(context.Context, int, int) []model.UserInfo); ok {
-		r0 = rf(ctx, offset, limit)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]model.UserInfo)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, int, int) error); ok {
-		r1 = rf(ctx, offset, limit)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// UpdateUser provides a mock function with given fields: ctx, userInfo
-func (_m *UserInfoRepo) UpdateUser(ctx context.Context, userInfo *model.UserInfo) error {
+// Update provides a mock function with given fields: ctx, userInfo
+func (_m *UserInfoRepo) Update(ctx context.Context, userInfo *model.UserInfo) error {
 	ret := _m.Called(ctx, userInfo)
 
 	var r0 error

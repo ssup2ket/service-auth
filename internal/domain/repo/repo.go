@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/config"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
@@ -24,11 +25,15 @@ func Init(c *config.Configs) error {
 
 	// Set config
 	cfg = c
+	gormConfig := &gorm.Config{}
+	if cfg.DeployEnv != config.DeployEnvLocal {
+		gormConfig.Logger = logger.Default.LogMode(logger.Silent)
+	}
 
 	// Connect to primary MySQL
 	primaryDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		c.MySQLPrimaryUser, c.MySQLPrimaryPassword, c.MySQLPrimaryIP, c.MySQLPrimaryPort, c.MySQLPrimaryDatabase)
-	primaryMySQL, err = gorm.Open(mysql.Open(primaryDSN), &gorm.Config{})
+	primaryMySQL, err = gorm.Open(mysql.Open(primaryDSN), gormConfig)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to connect to primary MySQL")
 		return err
@@ -37,13 +42,11 @@ func Init(c *config.Configs) error {
 	// Connect to secondary MySQL
 	secondaryDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		c.MySQLSecondaryUser, c.MySQLSecondaryPassword, c.MySQLSecondaryIP, c.MySQLSecondaryPort, c.MySQLSecondaryDatabase)
-	secondaryMySQL, err = gorm.Open(mysql.Open(secondaryDSN), &gorm.Config{})
+	secondaryMySQL, err = gorm.Open(mysql.Open(secondaryDSN), gormConfig)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to connect to secondary MySQL")
 		return err
 	}
-
-	// Set log
 
 	// Init schemas
 	if err = primaryMySQL.AutoMigrate(
@@ -57,7 +60,11 @@ func Init(c *config.Configs) error {
 	return nil
 }
 
-// MySQL transaction
+func GetDBConns() (*gorm.DB, *gorm.DB) {
+	return primaryMySQL, secondaryMySQL
+}
+
+// DB transaction
 type DBTx struct {
 	tx *gorm.DB
 }

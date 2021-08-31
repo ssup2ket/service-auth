@@ -21,28 +21,22 @@ type UserSecretRepo interface {
 }
 
 type UserSecretRepoMysql struct {
-	primaryDB   *gorm.DB
-	secondaryDB *gorm.DB
+	db *gorm.DB
 }
 
-func NewUserSecretRepoMysql() *UserSecretRepoMysql {
+func NewUserSecretRepoImp(repoDB *gorm.DB) *UserSecretRepoMysql {
 	return &UserSecretRepoMysql{
-		primaryDB:   primaryMySQL,
-		secondaryDB: secondaryMySQL,
+		db: repoDB,
 	}
 }
 
 func (u *UserSecretRepoMysql) WithTx(tx *DBTx) UserSecretRepo {
-	gormDB := tx.getTx()
-
-	return &UserSecretRepoMysql{
-		primaryDB:   gormDB,
-		secondaryDB: u.secondaryDB,
-	}
+	transaction := tx.getTx()
+	return NewUserSecretRepoImp(transaction)
 }
 
 func (u *UserSecretRepoMysql) Create(ctx context.Context, userSecret *model.UserSecret) error {
-	result := u.primaryDB.Create(userSecret)
+	result := u.db.Create(userSecret)
 	if result.Error != nil {
 		if result.Error == gorm.ErrInvalidData {
 			log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to create user secret because of duplication")
@@ -56,7 +50,7 @@ func (u *UserSecretRepoMysql) Create(ctx context.Context, userSecret *model.User
 
 func (u *UserSecretRepoMysql) GetPrimary(ctx context.Context, userUUID string) (*model.UserSecret, error) {
 	user := model.UserSecret{}
-	result := u.primaryDB.First(&user, "uuid = ?", userUUID)
+	result := u.db.First(&user, "uuid = ?", userUUID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in primary DB")
@@ -70,7 +64,7 @@ func (u *UserSecretRepoMysql) GetPrimary(ctx context.Context, userUUID string) (
 
 func (u *UserSecretRepoMysql) GetSecondary(ctx context.Context, userUUID string) (*model.UserSecret, error) {
 	user := model.UserSecret{}
-	result := u.secondaryDB.First(&user, "uuid = ?", userUUID)
+	result := u.db.First(&user, "uuid = ?", userUUID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in second DB")
@@ -83,7 +77,7 @@ func (u *UserSecretRepoMysql) GetSecondary(ctx context.Context, userUUID string)
 }
 
 func (u *UserSecretRepoMysql) Update(ctx context.Context, userSecret *model.UserSecret) error {
-	result := u.primaryDB.Updates(userSecret)
+	result := u.db.Updates(userSecret)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in primary DB")
@@ -96,7 +90,7 @@ func (u *UserSecretRepoMysql) Update(ctx context.Context, userSecret *model.User
 }
 
 func (u *UserSecretRepoMysql) Delete(ctx context.Context, userUUID string) error {
-	result := u.primaryDB.Delete(&model.UserSecret{}, "uuid = ?", userUUID)
+	result := u.db.Delete(&model.UserSecret{}, "uuid = ?", userUUID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in primary DB")

@@ -42,20 +42,15 @@ func (u *userInfoSuite) SetupTest() {
 	db, u.sqlMock, err = sqlmock.New()
 	require.NoError(u.T(), err)
 
-	// Init DBs
+	// Init DB
 	primaryMySQL, err = gorm.Open(mysql.New(mysql.Config{
-		Conn:                      db,
-		SkipInitializeWithVersion: true,
-	}))
-	require.NoError(u.T(), err)
-	secondaryMySQL, err = gorm.Open(mysql.New(mysql.Config{
 		Conn:                      db,
 		SkipInitializeWithVersion: true,
 	}))
 	require.NoError(u.T(), err)
 
 	// Init repo
-	u.repo = NewUserInfoRepoMysql()
+	u.repo = NewUserInfoRepoImp(primaryMySQL)
 }
 
 func (u *userInfoSuite) AfterTest(_, _ string) {
@@ -84,7 +79,7 @@ func (u *userInfoSuite) TestGetPrimary() {
 		WillReturnRows(sqlmock.NewRows([]string{"uuid", "id", "phone", "email"}).
 			AddRow(userUUIDCorrect, userIDCorrect, userPhoneCorrect, userEmailCorrect))
 
-	userInfo, err := u.repo.GetPrimary(context.Background(), userUUIDCorrect)
+	userInfo, err := u.repo.Get(context.Background(), userUUIDCorrect)
 	require.NoError(u.T(), err)
 	require.Equal(u.T(), userUUIDCorrect, userInfo.UUID)
 	require.Equal(u.T(), userIDCorrect, userInfo.ID)
@@ -113,7 +108,7 @@ func (u *userInfoSuite) TestCreateAndGetPrimary() {
 	})
 	require.NoError(u.T(), err)
 
-	userInfo, err := u.repo.WithTx(tx).GetPrimary(context.Background(), userUUIDCorrect)
+	userInfo, err := u.repo.WithTx(tx).Get(context.Background(), userUUIDCorrect)
 	require.NoError(u.T(), err)
 	require.Equal(u.T(), userUUIDCorrect, userInfo.UUID)
 	require.Equal(u.T(), userIDCorrect, userInfo.ID)
