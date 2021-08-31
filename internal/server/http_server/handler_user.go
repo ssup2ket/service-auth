@@ -10,6 +10,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/request"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
 )
 
 // List users
@@ -77,7 +78,7 @@ func (s *ServerHTTP) GetUsersUserUUID(w http.ResponseWriter, r *http.Request, us
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, string(userUUID))
+	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(userUUID)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
@@ -131,7 +132,7 @@ func (s *ServerHTTP) DeleteUsersUserUUID(w http.ResponseWriter, r *http.Request,
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, string(userUUID)); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(string(userUUID))); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			render.Render(w, r, getErrRendererNotFound(errors.ErrResouceUser))
@@ -169,7 +170,7 @@ func userCreateToUserInfoModel(userCreate *UserCreate) *model.UserInfo {
 
 func userUpdateToUserInfoModel(userUpdate *UserUpdate) *model.UserInfo {
 	return &model.UserInfo{
-		UUID:  userUpdate.UUID,
+		UUID:  uuid.FromStringOrNil(userUpdate.UUID),
 		Phone: userUpdate.Phone,
 		Email: userUpdate.Email,
 	}
@@ -177,7 +178,7 @@ func userUpdateToUserInfoModel(userUpdate *UserUpdate) *model.UserInfo {
 
 func UserModelToUserInfo(userModel *model.UserInfo) *UserInfo {
 	return &UserInfo{
-		UUID:  userModel.UUID,
+		UUID:  userModel.UUID.String(),
 		ID:    userModel.ID,
 		Phone: userModel.Phone,
 		Email: userModel.Email,
@@ -188,7 +189,7 @@ func UserModelListToUserInfoList(userModelList []model.UserInfo) []UserInfo {
 	userInfos := []UserInfo{}
 	for _, userModel := range userModelList {
 		tmp := UserInfo{
-			UUID:  userModel.UUID,
+			UUID:  userModel.UUID.String(),
 			ID:    userModel.ID,
 			Phone: userModel.Phone,
 			Email: userModel.Email,

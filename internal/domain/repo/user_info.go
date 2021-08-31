@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
 )
 
 // User info repo
@@ -15,27 +16,27 @@ type UserInfoRepo interface {
 
 	List(ctx context.Context, offset int, limit int) ([]model.UserInfo, error)
 	Create(ctx context.Context, userInfo *model.UserInfo) error
-	Get(ctx context.Context, uuid string) (*model.UserInfo, error)
+	Get(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserInfo, error)
 	Update(ctx context.Context, userInfo *model.UserInfo) error
-	Delete(ctx context.Context, userUUID string) error
+	Delete(ctx context.Context, userUUID uuid.UUIDModel) error
 }
 
-type UserInfoRepoMysql struct {
+type UserInfoRepoImp struct {
 	db *gorm.DB
 }
 
-func NewUserInfoRepoImp(repoDB *gorm.DB) *UserInfoRepoMysql {
-	return &UserInfoRepoMysql{
+func NewUserInfoRepoImp(repoDB *gorm.DB) *UserInfoRepoImp {
+	return &UserInfoRepoImp{
 		db: repoDB,
 	}
 }
 
-func (u *UserInfoRepoMysql) WithTx(tx *DBTx) UserInfoRepo {
+func (u *UserInfoRepoImp) WithTx(tx *DBTx) UserInfoRepo {
 	transaction := tx.getTx()
 	return NewUserInfoRepoImp(transaction)
 }
 
-func (u *UserInfoRepoMysql) List(ctx context.Context, offset int, limit int) ([]model.UserInfo, error) {
+func (u *UserInfoRepoImp) List(ctx context.Context, offset int, limit int) ([]model.UserInfo, error) {
 	userInfos := []model.UserInfo{}
 	result := u.db.Offset(offset).Limit(limit).Find(&userInfos)
 	if result.Error != nil {
@@ -45,7 +46,7 @@ func (u *UserInfoRepoMysql) List(ctx context.Context, offset int, limit int) ([]
 	return userInfos, nil
 }
 
-func (u *UserInfoRepoMysql) Create(ctx context.Context, userInfo *model.UserInfo) error {
+func (u *UserInfoRepoImp) Create(ctx context.Context, userInfo *model.UserInfo) error {
 	result := u.db.Create(userInfo)
 	if result.Error != nil {
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to create user")
@@ -54,9 +55,9 @@ func (u *UserInfoRepoMysql) Create(ctx context.Context, userInfo *model.UserInfo
 	return nil
 }
 
-func (u *UserInfoRepoMysql) Get(ctx context.Context, uuid string) (*model.UserInfo, error) {
+func (u *UserInfoRepoImp) Get(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserInfo, error) {
 	userInfo := model.UserInfo{}
-	result := u.db.First(&userInfo, "uuid = ?", uuid)
+	result := u.db.First(&userInfo, "uuid = ?", userUUID)
 	if result.Error != nil {
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user info from primary DB")
 		return nil, getReturnErr(result.Error)
@@ -64,7 +65,7 @@ func (u *UserInfoRepoMysql) Get(ctx context.Context, uuid string) (*model.UserIn
 	return &userInfo, nil
 }
 
-func (u *UserInfoRepoMysql) Update(ctx context.Context, userInfo *model.UserInfo) error {
+func (u *UserInfoRepoImp) Update(ctx context.Context, userInfo *model.UserInfo) error {
 	result := u.db.Updates(userInfo)
 	if result.Error != nil {
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to update user info in primary DB")
@@ -73,8 +74,8 @@ func (u *UserInfoRepoMysql) Update(ctx context.Context, userInfo *model.UserInfo
 	return nil
 }
 
-func (u *UserInfoRepoMysql) Delete(ctx context.Context, uuid string) error {
-	result := u.db.Delete(&model.UserInfo{}, "uuid = ?", uuid)
+func (u *UserInfoRepoImp) Delete(ctx context.Context, userUUID uuid.UUIDModel) error {
+	result := u.db.Delete(&model.UserInfo{}, "uuid = ?", userUUID)
 	if result.Error != nil {
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to delete user info in primary DB")
 		return getReturnErr(result.Error)

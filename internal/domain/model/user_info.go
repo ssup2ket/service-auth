@@ -4,10 +4,12 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
 )
 
 type UserInfo struct {
-	UUID      string `gorm:"primaryKey;size:36"`
+	UUID      uuid.UUIDModel `gorm:"primaryKey;type:binary(16)"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

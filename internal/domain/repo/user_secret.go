@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
 )
 
 // User secret repo
@@ -14,28 +15,27 @@ type UserSecretRepo interface {
 	WithTx(tx *DBTx) UserSecretRepo
 
 	Create(ctx context.Context, userSecret *model.UserSecret) error
-	GetPrimary(ctx context.Context, userUUID string) (*model.UserSecret, error)
-	GetSecondary(ctx context.Context, userUUID string) (*model.UserSecret, error)
+	Get(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserSecret, error)
 	Update(ctx context.Context, userSecret *model.UserSecret) error
-	Delete(ctx context.Context, userUUID string) error
+	Delete(ctx context.Context, userUUID uuid.UUIDModel) error
 }
 
-type UserSecretRepoMysql struct {
+type UserSecretRepoImp struct {
 	db *gorm.DB
 }
 
-func NewUserSecretRepoImp(repoDB *gorm.DB) *UserSecretRepoMysql {
-	return &UserSecretRepoMysql{
+func NewUserSecretRepoImp(repoDB *gorm.DB) *UserSecretRepoImp {
+	return &UserSecretRepoImp{
 		db: repoDB,
 	}
 }
 
-func (u *UserSecretRepoMysql) WithTx(tx *DBTx) UserSecretRepo {
+func (u *UserSecretRepoImp) WithTx(tx *DBTx) UserSecretRepo {
 	transaction := tx.getTx()
 	return NewUserSecretRepoImp(transaction)
 }
 
-func (u *UserSecretRepoMysql) Create(ctx context.Context, userSecret *model.UserSecret) error {
+func (u *UserSecretRepoImp) Create(ctx context.Context, userSecret *model.UserSecret) error {
 	result := u.db.Create(userSecret)
 	if result.Error != nil {
 		if result.Error == gorm.ErrInvalidData {
@@ -48,7 +48,7 @@ func (u *UserSecretRepoMysql) Create(ctx context.Context, userSecret *model.User
 	return nil
 }
 
-func (u *UserSecretRepoMysql) GetPrimary(ctx context.Context, userUUID string) (*model.UserSecret, error) {
+func (u *UserSecretRepoImp) Get(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserSecret, error) {
 	user := model.UserSecret{}
 	result := u.db.First(&user, "uuid = ?", userUUID)
 	if result.Error != nil {
@@ -62,21 +62,7 @@ func (u *UserSecretRepoMysql) GetPrimary(ctx context.Context, userUUID string) (
 	return &user, nil
 }
 
-func (u *UserSecretRepoMysql) GetSecondary(ctx context.Context, userUUID string) (*model.UserSecret, error) {
-	user := model.UserSecret{}
-	result := u.db.First(&user, "uuid = ?", userUUID)
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in second DB")
-			return nil, ErrNotFound
-		}
-		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user secret from second DB")
-		return nil, ErrServerError
-	}
-	return &user, nil
-}
-
-func (u *UserSecretRepoMysql) Update(ctx context.Context, userSecret *model.UserSecret) error {
+func (u *UserSecretRepoImp) Update(ctx context.Context, userSecret *model.UserSecret) error {
 	result := u.db.Updates(userSecret)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
@@ -89,7 +75,7 @@ func (u *UserSecretRepoMysql) Update(ctx context.Context, userSecret *model.User
 	return nil
 }
 
-func (u *UserSecretRepoMysql) Delete(ctx context.Context, userUUID string) error {
+func (u *UserSecretRepoImp) Delete(ctx context.Context, userUUID uuid.UUIDModel) error {
 	result := u.db.Delete(&model.UserSecret{}, "uuid = ?", userUUID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {

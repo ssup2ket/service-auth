@@ -9,6 +9,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/request"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
 )
 
 func (s *ServerGRPC) ListUser(ctx context.Context, req *UserListRequest) (*UserListResponse, error) {
@@ -57,7 +58,7 @@ func (s *ServerGRPC) GetUser(ctx context.Context, req *UserUUIDRequest) (*UserIn
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, string(req.UUID))
+	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(req.UUID)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
@@ -68,12 +69,7 @@ func (s *ServerGRPC) GetUser(ctx context.Context, req *UserUUIDRequest) (*UserIn
 	}
 
 	// Return user info
-	return &UserInfoResponse{
-		UUID:  userInfo.UUID,
-		ID:    userInfo.ID,
-		Phone: userInfo.Phone,
-		Email: userInfo.Email,
-	}, nil
+	return UserModelToUserInfo(userInfo), nil
 }
 
 func (s *ServerGRPC) UpdateUser(ctx context.Context, req *UserUpdateRequest) (*Empty, error) {
@@ -104,7 +100,7 @@ func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserUUIDRequest) (*Emp
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, req.UUID); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(req.UUID)); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			return nil, getErrNoutFound(errors.ErrResouceUser)
@@ -144,7 +140,7 @@ func userCreateToUserInfoModel(userCreate *UserCreateRequest) *model.UserInfo {
 
 func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *model.UserInfo {
 	return &model.UserInfo{
-		UUID:  userUpdate.UUID,
+		UUID:  uuid.FromStringOrNil(userUpdate.UUID),
 		Phone: userUpdate.Phone,
 		Email: userUpdate.Email,
 	}
@@ -152,7 +148,7 @@ func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *model.UserInfo {
 
 func UserModelToUserInfo(userModel *model.UserInfo) *UserInfoResponse {
 	return &UserInfoResponse{
-		UUID:  userModel.UUID,
+		UUID:  userModel.UUID.String(),
 		ID:    userModel.ID,
 		Phone: userModel.Phone,
 		Email: userModel.Email,
@@ -163,7 +159,7 @@ func UserModelListToUserInfoList(userModelList []model.UserInfo) *UserListRespon
 	userInfos := []*UserListResponse_User{}
 	for _, userModel := range userModelList {
 		tmp := UserListResponse_User{
-			UUID:  userModel.UUID,
+			UUID:  userModel.UUID.String(),
 			ID:    userModel.ID,
 			Phone: userModel.Phone,
 			Email: userModel.Email,
