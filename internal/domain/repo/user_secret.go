@@ -50,7 +50,7 @@ func (u *UserSecretRepoImp) Create(ctx context.Context, userSecret *model.UserSe
 
 func (u *UserSecretRepoImp) Get(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserSecret, error) {
 	user := model.UserSecret{}
-	result := u.db.First(&user, "uuid = ?", userUUID)
+	result := u.db.First(&user, "id = ?", userUUID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in primary DB")
@@ -76,7 +76,7 @@ func (u *UserSecretRepoImp) Update(ctx context.Context, userSecret *model.UserSe
 }
 
 func (u *UserSecretRepoImp) Delete(ctx context.Context, userUUID uuid.UUIDModel) error {
-	result := u.db.Delete(&model.UserSecret{}, "uuid = ?", userUUID)
+	result := u.db.Delete(&model.UserSecret{}, "id = ?", userUUID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in primary DB")
