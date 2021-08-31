@@ -35,7 +35,7 @@ func New(url string, d *domain.Domain) (*ServerHTTP, error) {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
-	r.Route("/auth/v1", func(r chi.Router) {
+	r.Route("/v1", func(r chi.Router) {
 		// Auth
 		r.Group(func(r chi.Router) {
 
