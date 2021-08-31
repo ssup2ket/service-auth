@@ -57,7 +57,7 @@ func (u *UserInfoRepoImp) Create(ctx context.Context, userInfo *model.UserInfo) 
 
 func (u *UserInfoRepoImp) Get(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserInfo, error) {
 	userInfo := model.UserInfo{}
-	result := u.db.First(&userInfo, "uuid = ?", userUUID)
+	result := u.db.First(&userInfo, "id = ?", userUUID)
 	if result.Error != nil {
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user info from primary DB")
 		return nil, getReturnErr(result.Error)
@@ -75,7 +75,7 @@ func (u *UserInfoRepoImp) Update(ctx context.Context, userInfo *model.UserInfo) 
 }
 
 func (u *UserInfoRepoImp) Delete(ctx context.Context, userUUID uuid.UUIDModel) error {
-	result := u.db.Delete(&model.UserInfo{}, "uuid = ?", userUUID)
+	result := u.db.Delete(&model.UserInfo{}, "id = ?", userUUID)
 	if result.Error != nil {
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to delete user info in primary DB")
 		return getReturnErr(result.Error)

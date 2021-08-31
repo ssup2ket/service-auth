@@ -20,9 +20,9 @@ const _ = grpc.SupportPackageIsVersion7
 type UserClient interface {
 	ListUser(ctx context.Context, in *UserListRequest, opts ...grpc.CallOption) (*UserListResponse, error)
 	CreateUser(ctx context.Context, in *UserCreateRequest, opts ...grpc.CallOption) (*UserInfoResponse, error)
-	GetUser(ctx context.Context, in *UserUUIDRequest, opts ...grpc.CallOption) (*UserInfoResponse, error)
+	GetUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserInfoResponse, error)
 	UpdateUser(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*Empty, error)
-	DeleteUser(ctx context.Context, in *UserUUIDRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type userClient struct {
@@ -51,7 +51,7 @@ func (c *userClient) CreateUser(ctx context.Context, in *UserCreateRequest, opts
 	return out, nil
 }
 
-func (c *userClient) GetUser(ctx context.Context, in *UserUUIDRequest, opts ...grpc.CallOption) (*UserInfoResponse, error) {
+func (c *userClient) GetUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserInfoResponse, error) {
 	out := new(UserInfoResponse)
 	err := c.cc.Invoke(ctx, "/User/GetUser", in, out, opts...)
 	if err != nil {
@@ -69,7 +69,7 @@ func (c *userClient) UpdateUser(ctx context.Context, in *UserUpdateRequest, opts
 	return out, nil
 }
 
-func (c *userClient) DeleteUser(ctx context.Context, in *UserUUIDRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *userClient) DeleteUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/User/DeleteUser", in, out, opts...)
 	if err != nil {
@@ -84,9 +84,9 @@ func (c *userClient) DeleteUser(ctx context.Context, in *UserUUIDRequest, opts .
 type UserServer interface {
 	ListUser(context.Context, *UserListRequest) (*UserListResponse, error)
 	CreateUser(context.Context, *UserCreateRequest) (*UserInfoResponse, error)
-	GetUser(context.Context, *UserUUIDRequest) (*UserInfoResponse, error)
+	GetUser(context.Context, *UserIDRequest) (*UserInfoResponse, error)
 	UpdateUser(context.Context, *UserUpdateRequest) (*Empty, error)
-	DeleteUser(context.Context, *UserUUIDRequest) (*Empty, error)
+	DeleteUser(context.Context, *UserIDRequest) (*Empty, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -100,13 +100,13 @@ func (UnimplementedUserServer) ListUser(context.Context, *UserListRequest) (*Use
 func (UnimplementedUserServer) CreateUser(context.Context, *UserCreateRequest) (*UserInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
-func (UnimplementedUserServer) GetUser(context.Context, *UserUUIDRequest) (*UserInfoResponse, error) {
+func (UnimplementedUserServer) GetUser(context.Context, *UserIDRequest) (*UserInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserServer) UpdateUser(context.Context, *UserUpdateRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
-func (UnimplementedUserServer) DeleteUser(context.Context, *UserUUIDRequest) (*Empty, error) {
+func (UnimplementedUserServer) DeleteUser(context.Context, *UserIDRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
@@ -159,7 +159,7 @@ func _User_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(int
 }
 
 func _User_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserUUIDRequest)
+	in := new(UserIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func _User_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interf
 		FullMethod: "/User/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).GetUser(ctx, req.(*UserUUIDRequest))
+		return srv.(UserServer).GetUser(ctx, req.(*UserIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -195,7 +195,7 @@ func _User_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(int
 }
 
 func _User_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserUUIDRequest)
+	in := new(UserIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func _User_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/User/DeleteUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).DeleteUser(ctx, req.(*UserUUIDRequest))
+		return srv.(UserServer).DeleteUser(ctx, req.(*UserIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

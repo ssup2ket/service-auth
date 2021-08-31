@@ -8,15 +8,15 @@ import (
 )
 
 const (
-	userUUIDCorrect   = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-	userIDCorrect     = "test0000"
-	userPasswdCorrect = "test0000"
-	userPhoneCorrect  = "000-0000-0000"
-	userEmailCorrect  = "test@test.com"
+	userIDCorrect      = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+	userLoginIDCorrect = "test0000"
+	userPasswdCorrect  = "test0000"
+	userPhoneCorrect   = "000-0000-0000"
+	userEmailCorrect   = "test@test.com"
 
-	userUUIDWrongFormat  = "aaaa-aaaa"
-	userIDShort          = "test0"
-	userIDLong           = "testtesttesttesttesttest"
+	userIDWrongFormat    = "aaaa-aaaa"
+	userLoginIDShort     = "test0"
+	userLoginIDLong      = "testtesttesttesttesttest"
 	userPasswdShort      = "test0"
 	userPasswdLong       = "testtesttesttesttesttest"
 	userPhoneWrongFormat = "00-000-00000"
@@ -33,12 +33,12 @@ func TestInit(t *testing.T) {
 
 // UserCreate
 func (h *userSuite) TestBindUserCreateCorrect() {
-	err := ValidateUserCreate(userIDCorrect, userPasswdCorrect, userPhoneCorrect, userEmailCorrect)
+	err := ValidateUserCreate(userLoginIDCorrect, userPasswdCorrect, userPhoneCorrect, userEmailCorrect)
 	require.NoError(h.T(), err)
 }
 
 func (h *userSuite) TestBindUserCreateIDWrong() {
-	wrongIDs := []string{userIDShort, userIDLong}
+	wrongIDs := []string{userLoginIDShort, userLoginIDLong}
 	for _, wrongID := range wrongIDs {
 		err := ValidateUserCreate(wrongID, userPasswdCorrect, userPhoneCorrect, userEmailCorrect)
 		require.Error(h.T(), err)
@@ -48,46 +48,46 @@ func (h *userSuite) TestBindUserCreateIDWrong() {
 func (h *userSuite) TestBindUserCreatePasswdWrong() {
 	wrongPasswds := []string{userPasswdShort, userPasswdLong}
 	for _, wrongPasswd := range wrongPasswds {
-		err := ValidateUserCreate(userIDCorrect, wrongPasswd, userPhoneCorrect, userEmailCorrect)
+		err := ValidateUserCreate(userLoginIDCorrect, wrongPasswd, userPhoneCorrect, userEmailCorrect)
 		require.Error(h.T(), err)
 	}
 }
 
 func (h *userSuite) TestBindUserCreatePhoneWrong() {
-	err := ValidateUserCreate(userIDCorrect, userPasswdCorrect, userPhoneWrongFormat, userEmailCorrect)
+	err := ValidateUserCreate(userLoginIDCorrect, userPasswdCorrect, userPhoneWrongFormat, userEmailCorrect)
 	require.Error(h.T(), err)
 }
 
 func (h *userSuite) TestBindUserCreateEmailWrong() {
-	err := ValidateUserCreate(userIDCorrect, userPasswdCorrect, userPhoneCorrect, userEmailWrongFormat)
+	err := ValidateUserCreate(userLoginIDCorrect, userPasswdCorrect, userPhoneCorrect, userEmailWrongFormat)
 	require.Error(h.T(), err)
 }
 
 // UserUpdate
 func (h *userSuite) TestBindUserUpdateCorrect() {
-	err := ValidateUserUpdate(userUUIDCorrect, userPasswdCorrect, userPhoneCorrect, userEmailCorrect)
+	err := ValidateUserUpdate(userIDCorrect, userPasswdCorrect, userPhoneCorrect, userEmailCorrect)
 	require.NoError(h.T(), err)
 }
 
 func (h *userSuite) TestBindUserUpdateUUIDWrong() {
-	err := ValidateUserUpdate(userUUIDWrongFormat, userPasswdCorrect, userPhoneCorrect, userEmailCorrect)
+	err := ValidateUserUpdate(userIDWrongFormat, userPasswdCorrect, userPhoneCorrect, userEmailCorrect)
 	require.Error(h.T(), err)
 }
 
 func (h *userSuite) TestBindUserUpdatePasswdWrong() {
 	wrongPasswds := []string{userPasswdShort, userPasswdLong}
 	for _, wrongPasswd := range wrongPasswds {
-		err := ValidateUserUpdate(userUUIDCorrect, wrongPasswd, userPhoneCorrect, userEmailCorrect)
+		err := ValidateUserUpdate(userIDCorrect, wrongPasswd, userPhoneCorrect, userEmailCorrect)
 		require.Error(h.T(), err)
 	}
 }
 
 func (h *userSuite) TestBindUserUpdatePhoneWrong() {
-	err := ValidateUserUpdate(userUUIDCorrect, userPasswdCorrect, userPhoneWrongFormat, userEmailCorrect)
+	err := ValidateUserUpdate(userIDCorrect, userPasswdCorrect, userPhoneWrongFormat, userEmailCorrect)
 	require.Error(h.T(), err)
 }
 
 func (h *userSuite) TestBindUserUpdateEmailWrong() {
-	err := ValidateUserUpdate(userUUIDCorrect, userPasswdCorrect, userPhoneCorrect, userEmailWrongFormat)
+	err := ValidateUserUpdate(userIDCorrect, userPasswdCorrect, userPhoneCorrect, userEmailWrongFormat)
 	require.Error(h.T(), err)
 }

@@ -9,7 +9,7 @@ import (
 )
 
 type UserSecret struct {
-	UUID      uuid.UUIDModel `gorm:"primaryKey;type:binary(16)"`
+	ID        uuid.UUIDModel `gorm:"primaryKey;type:binary(16)"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

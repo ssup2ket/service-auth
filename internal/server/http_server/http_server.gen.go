@@ -18,45 +18,45 @@ import (
 
 // ErrorInfo defines model for ErrorInfo.
 type ErrorInfo struct {
-	Code      string `json:"Code"`
-	RequestID string `json:"RequestID"`
+	Code      string `json:"code"`
+	RequestId string `json:"requestId"`
 }
 
 // ListMeta defines model for ListMeta.
 type ListMeta struct {
-	Limit  int `json:"Limit"`
-	Offset int `json:"Offset"`
-	Total  int `json:"Total"`
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
+	Total  int `json:"total"`
 }
 
 // UserCreate defines model for UserCreate.
 type UserCreate struct {
-	Email    string `json:"Email"`
-	ID       string `json:"ID"`
-	Password string `json:"Password"`
-	Phone    string `json:"Phone"`
+	Email    string `json:"email"`
+	LoginId  string `json:"loginId"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
 }
 
 // UserInfo defines model for UserInfo.
 type UserInfo struct {
-	Email string `json:"Email"`
-	ID    string `json:"ID"`
-	Phone string `json:"Phone"`
-	UUID  string `json:"UUID"`
+	Email   string `json:"email"`
+	Id      string `json:"id"`
+	LoginId string `json:"loginId"`
+	Phone   string `json:"phone"`
 }
 
 // UserInfoList defines model for UserInfoList.
 type UserInfoList struct {
-	Metadata ListMeta   `json:"Metadata"`
-	Users    []UserInfo `json:"Users"`
+	Metadata ListMeta   `json:"metadata"`
+	Users    []UserInfo `json:"users"`
 }
 
 // UserUpdate defines model for UserUpdate.
 type UserUpdate struct {
-	Email    string `json:"Email"`
-	Password string `json:"Password"`
-	Phone    string `json:"Phone"`
-	UUID     string `json:"UUID"`
+	Email    string `json:"email"`
+	Id       string `json:"id"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
 }
 
 // Limit defines model for Limit.
@@ -65,26 +65,26 @@ type Limit int
 // Offset defines model for Offset.
 type Offset int
 
-// UserUUID defines model for UserUUID.
-type UserUUID string
+// UserID defines model for UserID.
+type UserID string
 
 // GetUsersParams defines parameters for GetUsers.
 type GetUsersParams struct {
-	Offset *Offset `json:"offset,omitempty"`
-	Limit  *Limit  `json:"limit,omitempty"`
+	Offset *Offset `json:"Offset,omitempty"`
+	Limit  *Limit  `json:"Limit,omitempty"`
 }
 
 // PostUsersJSONBody defines parameters for PostUsers.
 type PostUsersJSONBody UserCreate
 
-// PutUsersUserUUIDJSONBody defines parameters for PutUsersUserUUID.
-type PutUsersUserUUIDJSONBody UserUpdate
+// PutUsersUserIDJSONBody defines parameters for PutUsersUserID.
+type PutUsersUserIDJSONBody UserUpdate
 
 // PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody PostUsersJSONBody
 
-// PutUsersUserUUIDJSONRequestBody defines body for PutUsersUserUUID for application/json ContentType.
-type PutUsersUserUUIDJSONRequestBody PutUsersUserUUIDJSONBody
+// PutUsersUserIDJSONRequestBody defines body for PutUsersUserID for application/json ContentType.
+type PutUsersUserIDJSONRequestBody PutUsersUserIDJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -95,14 +95,14 @@ type ServerInterface interface {
 	// (POST /users)
 	PostUsers(w http.ResponseWriter, r *http.Request)
 
-	// (DELETE /users/{UserUUID})
-	DeleteUsersUserUUID(w http.ResponseWriter, r *http.Request, userUUID UserUUID)
+	// (DELETE /users/{UserID})
+	DeleteUsersUserID(w http.ResponseWriter, r *http.Request, userID UserID)
 
-	// (GET /users/{UserUUID})
-	GetUsersUserUUID(w http.ResponseWriter, r *http.Request, userUUID UserUUID)
+	// (GET /users/{UserID})
+	GetUsersUserID(w http.ResponseWriter, r *http.Request, userID UserID)
 
-	// (PUT /users/{UserUUID})
-	PutUsersUserUUID(w http.ResponseWriter, r *http.Request, userUUID UserUUID)
+	// (PUT /users/{UserID})
+	PutUsersUserID(w http.ResponseWriter, r *http.Request, userID UserID)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -122,25 +122,25 @@ func (siw *ServerInterfaceWrapper) GetUsers(w http.ResponseWriter, r *http.Reque
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersParams
 
-	// ------------- Optional query parameter "offset" -------------
-	if paramValue := r.URL.Query().Get("offset"); paramValue != "" {
+	// ------------- Optional query parameter "Offset" -------------
+	if paramValue := r.URL.Query().Get("Offset"); paramValue != "" {
 
 	}
 
-	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
+	err = runtime.BindQueryParameter("form", true, false, "Offset", r.URL.Query(), &params.Offset)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid format for parameter offset: %s", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Invalid format for parameter Offset: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	// ------------- Optional query parameter "limit" -------------
-	if paramValue := r.URL.Query().Get("limit"); paramValue != "" {
+	// ------------- Optional query parameter "Limit" -------------
+	if paramValue := r.URL.Query().Get("Limit"); paramValue != "" {
 
 	}
 
-	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	err = runtime.BindQueryParameter("form", true, false, "Limit", r.URL.Query(), &params.Limit)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid format for parameter limit: %s", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Invalid format for parameter Limit: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -170,23 +170,23 @@ func (siw *ServerInterfaceWrapper) PostUsers(w http.ResponseWriter, r *http.Requ
 	handler(w, r.WithContext(ctx))
 }
 
-// DeleteUsersUserUUID operation middleware
-func (siw *ServerInterfaceWrapper) DeleteUsersUserUUID(w http.ResponseWriter, r *http.Request) {
+// DeleteUsersUserID operation middleware
+func (siw *ServerInterfaceWrapper) DeleteUsersUserID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "UserUUID" -------------
-	var userUUID UserUUID
+	// ------------- Path parameter "UserID" -------------
+	var userID UserID
 
-	err = runtime.BindStyledParameter("simple", false, "UserUUID", chi.URLParam(r, "UserUUID"), &userUUID)
+	err = runtime.BindStyledParameter("simple", false, "UserID", chi.URLParam(r, "UserID"), &userID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid format for parameter UserUUID: %s", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Invalid format for parameter UserID: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteUsersUserUUID(w, r, userUUID)
+		siw.Handler.DeleteUsersUserID(w, r, userID)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -196,23 +196,23 @@ func (siw *ServerInterfaceWrapper) DeleteUsersUserUUID(w http.ResponseWriter, r 
 	handler(w, r.WithContext(ctx))
 }
 
-// GetUsersUserUUID operation middleware
-func (siw *ServerInterfaceWrapper) GetUsersUserUUID(w http.ResponseWriter, r *http.Request) {
+// GetUsersUserID operation middleware
+func (siw *ServerInterfaceWrapper) GetUsersUserID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "UserUUID" -------------
-	var userUUID UserUUID
+	// ------------- Path parameter "UserID" -------------
+	var userID UserID
 
-	err = runtime.BindStyledParameter("simple", false, "UserUUID", chi.URLParam(r, "UserUUID"), &userUUID)
+	err = runtime.BindStyledParameter("simple", false, "UserID", chi.URLParam(r, "UserID"), &userID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid format for parameter UserUUID: %s", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Invalid format for parameter UserID: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetUsersUserUUID(w, r, userUUID)
+		siw.Handler.GetUsersUserID(w, r, userID)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -222,23 +222,23 @@ func (siw *ServerInterfaceWrapper) GetUsersUserUUID(w http.ResponseWriter, r *ht
 	handler(w, r.WithContext(ctx))
 }
 
-// PutUsersUserUUID operation middleware
-func (siw *ServerInterfaceWrapper) PutUsersUserUUID(w http.ResponseWriter, r *http.Request) {
+// PutUsersUserID operation middleware
+func (siw *ServerInterfaceWrapper) PutUsersUserID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "UserUUID" -------------
-	var userUUID UserUUID
+	// ------------- Path parameter "UserID" -------------
+	var userID UserID
 
-	err = runtime.BindStyledParameter("simple", false, "UserUUID", chi.URLParam(r, "UserUUID"), &userUUID)
+	err = runtime.BindStyledParameter("simple", false, "UserID", chi.URLParam(r, "UserID"), &userID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid format for parameter UserUUID: %s", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Invalid format for parameter UserID: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PutUsersUserUUID(w, r, userUUID)
+		siw.Handler.PutUsersUserID(w, r, userID)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -292,13 +292,13 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/users", wrapper.PostUsers)
 	})
 	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/users/{UserUUID}", wrapper.DeleteUsersUserUUID)
+		r.Delete(options.BaseURL+"/users/{UserID}", wrapper.DeleteUsersUserID)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/users/{UserUUID}", wrapper.GetUsersUserUUID)
+		r.Get(options.BaseURL+"/users/{UserID}", wrapper.GetUsersUserID)
 	})
 	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/users/{UserUUID}", wrapper.PutUsersUserUUID)
+		r.Put(options.BaseURL+"/users/{UserID}", wrapper.PutUsersUserID)
 	})
 
 	return r
@@ -307,20 +307,19 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xXTW/TQBD9K9XAcbFD2iLhE9BGKFKgFZBTlcNiT+Jtbe92PxJFkf872l3bcRqnaVBb",
-	"EOXWerxv3sx7ntmsIOa54AUWWkG0AkElzVGjdP+NWM60/YMVEMGtQbkEAgXNESLIXJCAilPMqX0rwSk1",
-	"mYbotEdAL4V9ixUaZyihLAlcTKcKd+JxH20D5qxguckh6sYbK5Tj8fC8QRRUp2vAJkxA4q1hEhOItDTY",
-	"TlHBKi1ZMYPSwvqga8BASi6HxZS73kguUGqGLnTGE+wAIPANbw0q7WndhW9TufIY7ROTpk7+8xpjbfFG",
-	"TOkvqOk2hUaeu71pt3o79oNrmnWF7rAbVQJf1ML4g10cbavPJFKN2ywHOWVZZ6c6W0Tgkiq14DLpDqa8",
-	"wP2ddao3QPUxUpHZVUK30ocXsIMjgdqt95OvTOtreDBx65Nt8tY5CfXueS1xChG8CtfffFiZPWxcViG6",
-	"w0xjrvadbBpXNuSolHS5XZaDJWtKu6oZi+RAJ/2WZQ6U4wA3WQRWeSnmhaaxUwY9f1BGKCNO3530P8zs",
-	"oyDmuaWToIolE5pxO8yUMqJ/g/qIGp0eKZRzFtukGYuxUK6gatB9FDRO8agf9ICAkTZFqrWIwnCxWATU",
-	"RQMuZ2F1VIWj4dng6/fBm37QC1KdZ047pjO8J+8cpfLM3ga9oGePcIEFFQwiOHaPiJvATqvQ1Caa+Tlk",
-	"haS2tGECEXxGXduhvXKuuq22fiWshlFJ9r7px1c5sWIqwW3dlke/16tlwcIxo0JkLHbcwmtlK1y1FsRD",
-	"rO8+Paf6poS2RyePmG+9jnYmO3m+ZKfPV5m1J51Zg4D1FUxKAoKrDmNdctU4S/q9+okny0eVvNp0Zekn",
-	"xROb668w1h/VuiTVOAlX9Z2u9PfNDP2e2PTAuXvuXLBxB9wW6mV/QfdO5j2d+/cs/qJm50E7t7GCXabC",
-	"dE1d02Gapxm+1eVw9/D9b6PnGsv2tzLKee2ih11fN+6nVLAgueFqfhy8lyYP4hjKSfkrAAD//9jPhS+V",
-	"EAAA",
+	"H4sIAAAAAAAC/+xXXU/jOhD9K2jufcxNegtc6eZpdwGtKrEf0oon1AdvMm0N8Qf2uFVV5b+v7LhpoCm0",
+	"ErCrZd8gYx+fmTk+466gUEIriZIs5CvQzDCBhCb8d8kFJ/8Hl5DDnUOzhAQkEwh5DCZgixkK5leVOGGu",
+	"IshPBwnQUvtVXBJO0UBdJ/BlMrG4Ey9Gu4CCSy6cgLwf78qiGZ23eJrRbAMXgwkYvHPcYAk5GYdd+Ahp",
+	"yXA5hdpDNsGQ/IUxyozkRIW6GKXREMcQKlSJPQDNWWhpVPbBd6lcNxjdHeM2R/X9BgvyeJfc0icktk2h",
+	"WrfmYV0SUG2Zt2OkiFV9oQfsqthctW5Ks7GPoy/0mUFGuM0SBeNVb6UqNeWyt04JaGbtQpkdwZmS+HR5",
+	"1/gdtPXeJNLalUx/z3enwsvDM9wvCe5JdzLZm77XzXYKAomVrFHT3wYnkMNf2eb+Z1H8Wau6OgFnoxdw",
+	"QmGf2tmWr27JMWPYciuzBjbZUNqVzZUuD1QWfzlR8QP15PfzqKZCSWIFdbiDddo6ffrfyfDd1H9KCyU8",
+	"mxJtYbgmrrytWev08BbpiDmaHVk0c174QyteoLSBdbS895oVMzwapgNIwBl/xIxI51m2WCxSFqKpMtMs",
+	"brXZ5ejs4vO3i3+G6SCdkahC3zhV+Mi5czS2YfZvOkgHwXE0SqY55HAcPiXBi0OfslZA08aTfBOZT81f",
+	"DfiIdBWl0B091/0y2yzJ4rSokydXNnOqHvtWWq183p7HcDBYtwVlYMa0rngRuGU31me46gyLfWQfrl3o",
+	"+v0W+hqdPON5m9G087CT1zvs9PUy8/JkU7t2EBj7u6tsj7C+KtsqK87YD6pcPmvL49Sr68YnXlhcv4Sw",
+	"fmqv6yTaSbZqXnd18+qssJkQ9xVwHr4HDXTegttNetu351FXfrRuv5+435RrHjRtoxD8ENWuz23dlmBe",
+	"xnLjc3C35f6R0GuZsf+1jGa+VtB+j9Z7r1KmeVreKjs/Tv83TqRFAfW4/hEAAP//isYwFZMQAAA=",
 }
 
 // GetSwagger returns the Swagger specification corresponding to the generated code

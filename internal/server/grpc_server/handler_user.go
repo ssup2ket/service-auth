@@ -50,7 +50,7 @@ func (s *ServerGRPC) CreateUser(ctx context.Context, req *UserCreateRequest) (*U
 	return UserModelToUserInfo(user), nil
 }
 
-func (s *ServerGRPC) GetUser(ctx context.Context, req *UserUUIDRequest) (*UserInfoResponse, error) {
+func (s *ServerGRPC) GetUser(ctx context.Context, req *UserIDRequest) (*UserInfoResponse, error) {
 	// Validate request
 	if err := req.validate(); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Wrong get user request")
@@ -58,7 +58,7 @@ func (s *ServerGRPC) GetUser(ctx context.Context, req *UserUUIDRequest) (*UserIn
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(req.UUID)))
+	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(req.ID)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
@@ -92,7 +92,7 @@ func (s *ServerGRPC) UpdateUser(ctx context.Context, req *UserUpdateRequest) (*E
 	return nil, nil
 }
 
-func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserUUIDRequest) (*Empty, error) {
+func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*Empty, error) {
 	// Validate request
 	if err := req.validate(); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Wrong delete user request")
@@ -100,7 +100,7 @@ func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserUUIDRequest) (*Emp
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(req.UUID)); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(req.ID)); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			return nil, getErrNoutFound(errors.ErrResouceUser)
@@ -117,30 +117,30 @@ func (u *UserListRequest) validate() error {
 	return nil
 }
 
-func (u *UserUUIDRequest) validate() error {
-	return request.ValidateUserUUID(u.UUID)
+func (u *UserIDRequest) validate() error {
+	return request.ValidateUserUUID(u.ID)
 }
 
 func (u *UserCreateRequest) validate() error {
-	return request.ValidateUserCreate(u.ID, u.Password, u.Phone, u.Email)
+	return request.ValidateUserCreate(u.LoginID, u.Password, u.Phone, u.Email)
 }
 
 func (u *UserUpdateRequest) validate() error {
-	return request.ValidateUserUpdate(u.UUID, u.Password, u.Phone, u.Email)
+	return request.ValidateUserUpdate(u.ID, u.Password, u.Phone, u.Email)
 }
 
 // DTO <-> Model
 func userCreateToUserInfoModel(userCreate *UserCreateRequest) *model.UserInfo {
 	return &model.UserInfo{
-		ID:    userCreate.ID,
-		Phone: userCreate.Phone,
-		Email: userCreate.Email,
+		LoginID: userCreate.LoginID,
+		Phone:   userCreate.Phone,
+		Email:   userCreate.Email,
 	}
 }
 
 func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *model.UserInfo {
 	return &model.UserInfo{
-		UUID:  uuid.FromStringOrNil(userUpdate.UUID),
+		ID:    uuid.FromStringOrNil(userUpdate.ID),
 		Phone: userUpdate.Phone,
 		Email: userUpdate.Email,
 	}
@@ -148,10 +148,10 @@ func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *model.UserInfo {
 
 func UserModelToUserInfo(userModel *model.UserInfo) *UserInfoResponse {
 	return &UserInfoResponse{
-		UUID:  userModel.UUID.String(),
-		ID:    userModel.ID,
-		Phone: userModel.Phone,
-		Email: userModel.Email,
+		ID:      userModel.ID.String(),
+		LoginID: userModel.LoginID,
+		Phone:   userModel.Phone,
+		Email:   userModel.Email,
 	}
 }
 
@@ -159,10 +159,10 @@ func UserModelListToUserInfoList(userModelList []model.UserInfo) *UserListRespon
 	userInfos := []*UserListResponse_User{}
 	for _, userModel := range userModelList {
 		tmp := UserListResponse_User{
-			UUID:  userModel.UUID.String(),
-			ID:    userModel.ID,
-			Phone: userModel.Phone,
-			Email: userModel.Email,
+			ID:      userModel.ID.String(),
+			LoginID: userModel.LoginID,
+			Phone:   userModel.Phone,
+			Email:   userModel.Email,
 		}
 		userInfos = append(userInfos, &tmp)
 	}

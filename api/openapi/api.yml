@@ -16,102 +16,102 @@ components:
     UserCreate:
       type: object
       required:
-        - ID
-        - Password
-        - Phone
-        - Email
+        - loginId
+        - password
+        - phone
+        - email
       properties:
-        ID:
+        loginId:
           type: string
-        Password:
+        password:
           type: string
-        Phone:
+        phone:
           type: string
-        Email:
+        email:
           type: string 
     UserUpdate:
       type: object
       required:
-        - UUID
-        - Password
-        - Phone
-        - Email
+        - id
+        - password
+        - phone
+        - email
       properties:
-        UUID:
+        id:
           type: string
-        Password:
+        password:
           type: string
-        Phone:
+        phone:
           type: string
-        Email:
+        email:
           type: string
     UserInfo:
       type: object
       required:
-        - UUID
-        - ID 
-        - Phone
-        - Email
+        - id
+        - loginId
+        - phone
+        - email
       properties:
-        UUID:
+        id:
           type: string
-        ID:
+        loginId:
           type: string
-        Phone:
+        phone:
           type: string
-        Email:
+        email:
           type: string
     UserInfoList:
       type: object
       required:
-        - Users
-        - Metadata
+        - users
+        - metadata
       properties:
-        Users:
+        users:
           type: array
           items:
             $ref: '#/components/schemas/UserInfo'
-        Metadata:
+        metadata:
           $ref: '#/components/schemas/ListMeta'
     ListMeta:
       type: object
       required:
-        - Limit
-        - Offset
-        - Total
+        - limit
+        - offset
+        - total
       properties:
-        Limit:
+        limit:
           type: integer
-        Offset:
+        offset:
           type: integer
-        Total:
+        total:
           type: integer
     ErrorInfo:
       type: object
       required:
-        - Code
-        - RequestID
+        - code
+        - requestId
       properties:
-        Code:
+        code:
           type: string
-        RequestID:
+        requestId:
           type: string
   parameters:
-    UserUUID:
-      name: UserUUID
+    UserID:
+      name: UserID
       in: path
       required: true
       schema:
         type: string
     Offset:
-      name: offset
+      name: Offset
       in: query
       required: false
       schema:
         type: integer
         minimum: 0
     Limit:
-      name: limit
+      name: Limit
       in: query
       required: false
       schema:
@@ -177,9 +177,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorInfo'
-  /users/{UserUUID}:
+  /users/{UserID}:
     parameters:
-      - $ref: '#/components/parameters/UserUUID'
+      - $ref: '#/components/parameters/UserID'
     get:
       tags:
         - user

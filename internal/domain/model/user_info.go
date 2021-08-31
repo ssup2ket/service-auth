@@ -9,12 +9,12 @@ import (
 )
 
 type UserInfo struct {
-	UUID      uuid.UUIDModel `gorm:"primaryKey;type:binary(16)"`
+	ID        uuid.UUIDModel `gorm:"primaryKey;type:binary(16)"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	ID    string `gorm:"unique;size:20"` // Unique key
-	Phone string `gorm:"size:13"`
-	Email string `gorm:"size:40"`
+	LoginID string `gorm:"unique;size:20"` // Unique key
+	Phone   string `gorm:"size:13"`
+	Email   string `gorm:"size:40"`
 }

@@ -74,7 +74,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	uuid := uuid.NewV4()
 
 	// Create user info
-	userInfo.UUID = uuid
+	userInfo.ID = uuid
 	if err = u.userInfoRepoPrimary.WithTx(tx).Create(ctx, userInfo); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create user info to DB")
 		return nil, getReturnErr(err)
@@ -87,7 +87,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 		return nil, err
 	}
 	userSecret := model.UserSecret{
-		UUID:       uuid,
+		ID:         uuid,
 		PasswdHash: hash,
 		PasswdSalt: salt,
 	}
@@ -134,7 +134,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 	}()
 
 	// Get user info
-	_, err = u.userInfoRepoPrimary.WithTx(tx).Get(ctx, userInfo.UUID)
+	_, err = u.userInfoRepoPrimary.WithTx(tx).Get(ctx, userInfo.ID)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user from DB")
 		return getReturnErr(err)
@@ -153,7 +153,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 		return getReturnErr(err)
 	}
 	userSecret := model.UserSecret{
-		UUID:       userInfo.UUID,
+		ID:         userInfo.ID,
 		PasswdHash: hash,
 		PasswdSalt: salt,
 	}

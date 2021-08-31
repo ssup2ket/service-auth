@@ -16,20 +16,20 @@ func mwAccessLogger(r *http.Request, status, size int, duration time.Duration) {
 		Send()
 }
 
-func mwUserUUIDSetter(next http.Handler) http.Handler {
+func mwUserIDSetter(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		// Get User UUID from request parameter
-		userUUID := chi.URLParam(r, "UserUUID")
-		if userUUID == "" {
+		// Get User ID from request parameter
+		userID := chi.URLParam(r, "UserID")
+		if userID == "" {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		// Set User UUID to request context
+		// Set User ID to request context
 		zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
-			return c.Str("user_uuid", userUUID)
+			return c.Str("user_id", userID)
 		})
 		next.ServeHTTP(w, r)
 	}

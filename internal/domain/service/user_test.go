@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	userIDCorrect     = "test0000"
-	userPasswdCorrect = "test0000"
-	userPhoneCorrect  = "000-0000-0000"
-	userEmailCorrect  = "test@test.com"
+	userLoginIDCorrect = "test0000"
+	userPasswdCorrect  = "test0000"
+	userPhoneCorrect   = "000-0000-0000"
+	userEmailCorrect   = "test@test.com"
 )
 
 var (
@@ -49,17 +49,17 @@ func (u *userSuite) SetupTest() {
 func (u *userSuite) TestGetUserSuccess() {
 	// Set repo
 	u.userInfoRepo.On("Get", context.Background(), userUUIDCorrect).Return(&model.UserInfo{
-		UUID:  userUUIDCorrect,
-		ID:    userIDCorrect,
-		Phone: userPhoneCorrect,
-		Email: userEmailCorrect,
+		ID:      userUUIDCorrect,
+		LoginID: userLoginIDCorrect,
+		Phone:   userPhoneCorrect,
+		Email:   userEmailCorrect,
 	}, nil)
 
 	// Test
 	userInfo, err := u.userService.GetUser(context.Background(), userUUIDCorrect)
 	require.Nil(u.T(), err, "Failed to get user info")
-	require.Equal(u.T(), userUUIDCorrect, userInfo.UUID, "Not equal UUID")
-	require.Equal(u.T(), userIDCorrect, userInfo.ID, "Not equal ID")
+	require.Equal(u.T(), userUUIDCorrect, userInfo.ID, "Not equal UUID")
+	require.Equal(u.T(), userLoginIDCorrect, userInfo.LoginID, "Not equal ID")
 	require.Equal(u.T(), userPhoneCorrect, userInfo.Phone, "Not equal Phone")
 	require.Equal(u.T(), userEmailCorrect, userInfo.Email, "Not equal Eamil")
 }

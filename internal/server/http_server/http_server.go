@@ -45,13 +45,13 @@ func New(url string, d *domain.Domain) (*ServerHTTP, error) {
 		r.Group(func(r chi.Router) {
 			// User
 			r.Group(func(r chi.Router) {
-				r.Use(mwUserUUIDSetter)
+				r.Use(mwUserIDSetter)
 
 				r.Get("/users", serverWrapper.GetUsers)
 				r.Post("/users", serverWrapper.PostUsers)
-				r.Get("/users/{UserUUID}", serverWrapper.GetUsersUserUUID)
-				r.Put("/users/{UserUUID}", serverWrapper.PutUsersUserUUID)
-				r.Delete("/users/{UserUUID}", serverWrapper.DeleteUsersUserUUID)
+				r.Get("/users/{UserID}", serverWrapper.GetUsersUserID)
+				r.Put("/users/{UserID}", serverWrapper.PutUsersUserID)
+				r.Delete("/users/{UserID}", serverWrapper.DeleteUsersUserID)
 			})
 
 			// Swagger

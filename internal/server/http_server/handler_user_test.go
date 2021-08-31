@@ -7,15 +7,15 @@ import (
 )
 
 const (
-	userUUIDCorrect   = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-	userIDCorrect     = "test0000"
-	userPasswdCorrect = "test0000"
-	userPhoneCorrect  = "000-0000-0000"
-	userEmailCorrect  = "test@test.com"
+	userIDCorrect      = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+	userLoginIDCorrect = "test0000"
+	userPasswdCorrect  = "test0000"
+	userPhoneCorrect   = "000-0000-0000"
+	userEmailCorrect   = "test@test.com"
 
-	userUUIDWrongFormat  = "aaaa-aaaa"
-	userIDShort          = "test0"
-	userIDLong           = "testtesttesttesttesttest"
+	userIDWrongFormat    = "aaaa-aaaa"
+	userLoginIDShort     = "test0"
+	userLoginIDLong      = "testtesttesttesttesttest"
 	userPasswdShort      = "test0"
 	userPasswdLong       = "testtesttesttesttesttest"
 	userPhoneWrongFormat = "00-000-00000"
