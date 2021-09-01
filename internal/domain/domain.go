@@ -15,7 +15,8 @@ type Domain struct {
 	Configs *config.Configs
 
 	// Service
-	User service.UserService
+	User  service.UserService
+	Token service.TokenService
 }
 
 func New(c *config.Configs) (*Domain, error) {
@@ -39,7 +40,10 @@ func New(c *config.Configs) (*Domain, error) {
 	service.Init(&service.ServiceConfigs{})
 	userService := service.NewUserServiceImp(userInfoRepoPrimaryMysql, userInfoRepoSecondaryMysql,
 		userSecretRepoPrimaryMysql, userSecretRepoSecondaryMysql)
+	tokenService := service.NewTokenServiceImp()
+
 	domain.User = userService
+	domain.Token = tokenService
 
 	return &domain, nil
 }

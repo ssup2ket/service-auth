@@ -122,7 +122,7 @@ func (u *UserIDRequest) validate() error {
 }
 
 func (u *UserCreateRequest) validate() error {
-	return request.ValidateUserCreate(u.LoginID, u.Password, u.Phone, u.Email)
+	return request.ValidateUserCreate(u.LoginId, u.Password, u.Phone, u.Email)
 }
 
 func (u *UserUpdateRequest) validate() error {
@@ -132,7 +132,7 @@ func (u *UserUpdateRequest) validate() error {
 // DTO <-> Model
 func userCreateToUserInfoModel(userCreate *UserCreateRequest) *model.UserInfo {
 	return &model.UserInfo{
-		LoginID: userCreate.LoginID,
+		LoginID: userCreate.LoginId,
 		Phone:   userCreate.Phone,
 		Email:   userCreate.Email,
 	}

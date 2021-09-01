@@ -17,7 +17,7 @@ message UserIDRequest {
 }
 
 message UserCreateRequest {
-    string loginID = 1;
+    string loginId = 1;
     string password = 2;
     string phone = 3;
     string email = 4;
@@ -42,6 +42,17 @@ message UserInfoResponse {
     string email = 4;
 }
 
+// Token request
+message TokenCreateRequest {
+    string loginId = 1;
+    string password = 2;
+}
+
+// Token response
+message TokenInfoResponse {
+    string token = 1;
+}
+
 // Service
 service User {
     rpc ListUser(UserListRequest) returns (UserListResponse) {}
@@ -49,4 +60,8 @@ service User {
     rpc GetUser(UserIDRequest) returns (UserInfoResponse) {}
     rpc UpdateUser(UserUpdateRequest) returns (Empty) {}
     rpc DeleteUser(UserIDRequest) returns (Empty) {}
+}
+
+service Token {
+    rpc CreateToken(TokenCreateRequest) returns (TokenInfoResponse) {}
 }

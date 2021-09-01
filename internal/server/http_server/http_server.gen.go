@@ -29,6 +29,17 @@ type ListMeta struct {
 	Total  int `json:"total"`
 }
 
+// TokenCreate defines model for TokenCreate.
+type TokenCreate struct {
+	LoginId  string `json:"loginId"`
+	Password string `json:"password"`
+}
+
+// TokenInfo defines model for TokenInfo.
+type TokenInfo struct {
+	Token string `json:"token"`
+}
+
 // UserCreate defines model for UserCreate.
 type UserCreate struct {
 	Email    string `json:"email"`
@@ -68,6 +79,9 @@ type Offset int
 // UserID defines model for UserID.
 type UserID string
 
+// PostTokensJSONBody defines parameters for PostTokens.
+type PostTokensJSONBody TokenCreate
+
 // GetUsersParams defines parameters for GetUsers.
 type GetUsersParams struct {
 	Offset *Offset `json:"Offset,omitempty"`
@@ -80,6 +94,9 @@ type PostUsersJSONBody UserCreate
 // PutUsersUserIDJSONBody defines parameters for PutUsersUserID.
 type PutUsersUserIDJSONBody UserUpdate
 
+// PostTokensJSONRequestBody defines body for PostTokens for application/json ContentType.
+type PostTokensJSONRequestBody PostTokensJSONBody
+
 // PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody PostUsersJSONBody
 
@@ -88,6 +105,9 @@ type PutUsersUserIDJSONRequestBody PutUsersUserIDJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+
+	// (POST /tokens)
+	PostTokens(w http.ResponseWriter, r *http.Request)
 
 	// (GET /users)
 	GetUsers(w http.ResponseWriter, r *http.Request, params GetUsersParams)
@@ -112,6 +132,21 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+
+// PostTokens operation middleware
+func (siw *ServerInterfaceWrapper) PostTokens(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostTokens(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
 
 // GetUsers operation middleware
 func (siw *ServerInterfaceWrapper) GetUsers(w http.ResponseWriter, r *http.Request) {
@@ -286,6 +321,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/tokens", wrapper.PostTokens)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users", wrapper.GetUsers)
 	})
 	r.Group(func(r chi.Router) {
@@ -307,19 +345,20 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"H4sIAAAAAAAC/+xXTU/bTBD+K2je9+jabgiV6lNbQFUk+iEVTiiHrT1JFmzvsjsmipD/e7UfcQyxQ4II",
+	"qqC3xLMz88zMs8/u3kEqCilKLElDcgeSKVYgobL/znjByfzgJSRwU6FaQAAlKxASbwxApzMsmFmV4YRV",
+	"OUFyFAdAC2lW8ZJwigrqOoAfk4nG3nje2g5Y8JIXVQFJd7wLjWp00sSTjGarcN4YgMKbiivMICFVYTu8",
+	"D6lJ8XIKtQnpjLb4U6WEGpUTYfuihERFHK0pFRl2BHC5UNMo6wrfhnLpYrQ9xk2N4vcVpmTinXFN35DY",
+	"OoR8OZqHfQlANG1et5EglneZHqDL/XDFcijOsQvjubjG8lghI+yAKaa87GxHAJJpPRdqi14to7R8epF0",
+	"T4yM6fFEbllXbEOnviKxYDzvLPGJ5QcgZ6LEJzVm6Rt4WH3FdPepvxSe7V7hdkVwA7pVydbwze5YL6FA",
+	"Yhlze+Z/hRNI4L9opXKR3+JRs7fqACrtFY8TFvoxz6Z9dQOOKcUWa5W5sMEKUl81FzLbkVl8f6TiO/LJ",
+	"+HPPplSUxFJqYQddSV3Jow/Dwaep+RSmojBoMtSp4pK4MOKtdSUH10gHrKLZgUZ1y1OTNOcpltqi9sL+",
+	"WbJ0hgeDMIYAKmVSzIhkEkXz+Txk1hoKNY28q47ORsen33+dvhuEcTijIrdz45Tjhry3qLRD9j6Mw9jq",
+	"qsSSSQ4JHNpPgT1x7JwiKxzuBBWOlGaMzBRnNgf8FJrO3ZpG87+IbLHsGZbWiUmZ89S6RVdaWMVanVeb",
+	"ONlW4bp2I9VSmPqN6yCOnzeV43+9NkfTqOEzJludwj3Jjl4umaENm+rWQWE+RY14TLFj8l+RLrwMtC9X",
+	"l91IVksifx+qg0dXuptYPd7jzO9J7t8w9mE8fO0cM7yCsdHtXklZMmsfitK68exZUFbn6ZvVEz/rRk6i",
+	"O/d+qd27Kkd3O7jPgBP73XKg9dpZH9Lb3j0bVXlj314fud+Uau502noimENUVl1qW60RZj+S658C/ZL7",
+	"j0IvJcZ1AOZBsGTQdg+Wey8SJnmYXQt9exh+VFURpinU4/pPAAAA//9HeSXYdRMAAA==",
 }
 
 // GetSwagger returns the Swagger specification corresponding to the generated code

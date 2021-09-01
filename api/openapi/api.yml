@@ -73,6 +73,23 @@ components:
             $ref: '#/components/schemas/UserInfo'
         metadata:
           $ref: '#/components/schemas/ListMeta'
+    TokenCreate:
+      type: object
+      required:
+        - loginId
+        - password
+      properties:
+        loginId:
+          type: string
+        password:
+          type: string 
+    TokenInfo:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
     ListMeta:
       type: object
       required:
@@ -244,6 +261,34 @@ paths:
         '200':
           description: ''
         '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+  /tokens:
+    post:
+      tags:
+        - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenCreate' 
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenInfo'
+        '400':
           description: ''
           content:
             application/json:

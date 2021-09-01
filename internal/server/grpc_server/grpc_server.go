@@ -15,6 +15,7 @@ type ServerGRPC struct {
 	domain     *domain.Domain
 
 	UnimplementedUserServer
+	UnimplementedTokenServer
 }
 
 func New(d *domain.Domain) (*ServerGRPC, error) {
