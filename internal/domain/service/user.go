@@ -7,7 +7,7 @@ import (
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/password"
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
 )
 
@@ -81,7 +81,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	}
 
 	// Create user secret
-	hash, salt, err := auth.GetPasswordHashAndSalt([]byte(passwd))
+	hash, salt, err := password.GetPasswordHashAndSalt([]byte(passwd))
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create password hash and salt")
 		return nil, err
@@ -147,7 +147,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 	}
 
 	// Update user secret
-	hash, salt, err := auth.GetPasswordHashAndSalt([]byte(passwd))
+	hash, salt, err := password.GetPasswordHashAndSalt([]byte(passwd))
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create password hash and salt")
 		return getReturnErr(err)
