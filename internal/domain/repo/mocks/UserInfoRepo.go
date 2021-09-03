@@ -69,6 +69,29 @@ func (_m *UserInfoRepo) Get(ctx context.Context, userUUID uuid.UUIDModel) (*mode
 	return r0, r1
 }
 
+// GetByLoginID provides a mock function with given fields: ctx, userLoginID
+func (_m *UserInfoRepo) GetByLoginID(ctx context.Context, userLoginID string) (*model.UserInfo, error) {
+	ret := _m.Called(ctx, userLoginID)
+
+	var r0 *model.UserInfo
+	if rf, ok := ret.Get(0).(func(context.Context, string) *model.UserInfo); ok {
+		r0 = rf(ctx, userLoginID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.UserInfo)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, userLoginID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // List provides a mock function with given fields: ctx, offset, limit
 func (_m *UserInfoRepo) List(ctx context.Context, offset int, limit int) ([]model.UserInfo, error) {
 	ret := _m.Called(ctx, offset, limit)

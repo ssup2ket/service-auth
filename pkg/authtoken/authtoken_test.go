@@ -1,9 +1,8 @@
-package token
+package authtoken
 
 import (
 	"testing"
 
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,11 +12,11 @@ const (
 )
 
 func TestCreateDeleteAuthToken(t *testing.T) {
-	token, err := CreateAuthToken(&AuthInfo{UserID: uuid.FromStringOrNil(userIDCorrect), UserLoginID: userLoginIDCorrect})
+	token, err := CreateAuthToken(&AuthInfo{UserID: userIDCorrect, UserLoginID: userLoginIDCorrect})
 	require.NoError(t, err, "Failed to create auth token")
 
 	tokenInfo, err := ValidateAuthToken(token)
 	require.NoError(t, err, "Failed to validate auth token")
-	require.Equal(t, tokenInfo.UserID.String(), userIDCorrect)
+	require.Equal(t, tokenInfo.UserID, userIDCorrect)
 	require.Equal(t, tokenInfo.UserLoginID, userLoginIDCorrect)
 }

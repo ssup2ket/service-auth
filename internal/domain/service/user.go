@@ -81,7 +81,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	}
 
 	// Create user secret
-	hash, salt, err := password.GetPasswordHashAndSalt([]byte(passwd))
+	hash, salt, err := password.GetPasswordHashAndSalt(passwd)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create password hash and salt")
 		return nil, err
@@ -147,7 +147,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 	}
 
 	// Update user secret
-	hash, salt, err := password.GetPasswordHashAndSalt([]byte(passwd))
+	hash, salt, err := password.GetPasswordHashAndSalt(passwd)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create password hash and salt")
 		return getReturnErr(err)

@@ -1,15 +1,15 @@
-package token
+package authtoken
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	uuid "github.com/satori/go.uuid"
 )
 
 const (
-	tokenKey = "ssup2ket"
+	tokenKey        = "ssup2ket"
+	tokenTimeoutMin = 60
 )
 
 type AuthClaim struct {
@@ -18,7 +18,7 @@ type AuthClaim struct {
 }
 
 type AuthInfo struct {
-	UserID      uuid.UUID
+	UserID      string
 	UserLoginID string
 }
 
@@ -26,7 +26,7 @@ func CreateAuthToken(authInfo *AuthInfo) (string, error) {
 	// Create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &AuthClaim{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 60).Unix(),
 		},
 		AuthInfo: AuthInfo{
 			UserID:      authInfo.UserID,

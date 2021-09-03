@@ -21,6 +21,9 @@ var (
 	// Common
 	ErrServerErr error = fmt.Errorf("server error")
 
+	// Auth
+	ErrUnauthorized error = fmt.Errorf("unauthorized")
+
 	// Repository
 	ErrRepoNotFound    error = fmt.Errorf("repo resource not found")
 	ErrRepoConflict    error = fmt.Errorf("repo conflict")
@@ -33,7 +36,7 @@ func getReturnErr(err error) error {
 		return ErrRepoNotFound
 	case repo.ErrConflict:
 		return ErrRepoConflict
-	case ErrRepoServerError:
+	case repo.ErrServerError:
 		return ErrRepoServerError
 	}
 	return ErrServerErr

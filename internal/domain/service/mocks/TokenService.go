@@ -13,20 +13,20 @@ type TokenService struct {
 	mock.Mock
 }
 
-// CreateToken provides a mock function with given fields: ctx, id, passwd
-func (_m *TokenService) CreateToken(ctx context.Context, id string, passwd string) (string, error) {
-	ret := _m.Called(ctx, id, passwd)
+// CreateToken provides a mock function with given fields: ctx, loginID, passwd
+func (_m *TokenService) CreateToken(ctx context.Context, loginID string, passwd string) (string, error) {
+	ret := _m.Called(ctx, loginID, passwd)
 
 	var r0 string
 	if rf, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
-		r0 = rf(ctx, id, passwd)
+		r0 = rf(ctx, loginID, passwd)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, id, passwd)
+		r1 = rf(ctx, loginID, passwd)
 	} else {
 		r1 = ret.Error(1)
 	}

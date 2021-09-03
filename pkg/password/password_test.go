@@ -7,7 +7,7 @@ import (
 )
 
 func TestValidatePasswd(t *testing.T) {
-	passwd := []byte("passwd")
+	passwd := "passwd"
 	hash, salt, err := GetPasswordHashAndSalt(passwd)
 
 	require.Nil(t, err, "Failed to get password hash and salt")

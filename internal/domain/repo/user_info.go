@@ -17,6 +17,7 @@ type UserInfoRepo interface {
 	List(ctx context.Context, offset int, limit int) ([]model.UserInfo, error)
 	Create(ctx context.Context, userInfo *model.UserInfo) error
 	Get(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserInfo, error)
+	GetByLoginID(ctx context.Context, userLoginID string) (*model.UserInfo, error)
 	Update(ctx context.Context, userInfo *model.UserInfo) error
 	Delete(ctx context.Context, userUUID uuid.UUIDModel) error
 }
@@ -60,6 +61,16 @@ func (u *UserInfoRepoImp) Get(ctx context.Context, userUUID uuid.UUIDModel) (*mo
 	result := u.db.First(&userInfo, "id = ?", userUUID)
 	if result.Error != nil {
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user info from primary DB")
+		return nil, getReturnErr(result.Error)
+	}
+	return &userInfo, nil
+}
+
+func (u *UserInfoRepoImp) GetByLoginID(ctx context.Context, userLoginID string) (*model.UserInfo, error) {
+	userInfo := model.UserInfo{}
+	result := u.db.First(&userInfo, "login_id = ?", userLoginID)
+	if result.Error != nil {
+		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user info from primary DB by user login ID")
 		return nil, getReturnErr(result.Error)
 	}
 	return &userInfo, nil

@@ -17,7 +17,7 @@ func ValidateUserUUID(uuid string) error {
 }
 
 func ValidateUserCreate(id, passwd, phone, email string) error {
-	// ID
+	// Login ID
 	idMatched, err := regexp.MatchString("^[a-zA-Z0-9]{8,20}$", id)
 	if err != nil {
 		return fmt.Errorf("wrong id regex")

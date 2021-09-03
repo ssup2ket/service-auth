@@ -40,7 +40,7 @@ func New(c *config.Configs) (*Domain, error) {
 	service.Init(&service.ServiceConfigs{})
 	userService := service.NewUserServiceImp(userInfoRepoPrimaryMysql, userInfoRepoSecondaryMysql,
 		userSecretRepoPrimaryMysql, userSecretRepoSecondaryMysql)
-	tokenService := service.NewTokenServiceImp()
+	tokenService := service.NewTokenServiceImp(userInfoRepoSecondaryMysql, userSecretRepoSecondaryMysql)
 
 	domain.User = userService
 	domain.Token = tokenService

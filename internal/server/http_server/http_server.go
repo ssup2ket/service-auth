@@ -38,11 +38,8 @@ func New(url string, d *domain.Domain) (*ServerHTTP, error) {
 	r.Route("/v1", func(r chi.Router) {
 		// Auth
 		r.Group(func(r chi.Router) {
+			r.Use(mwAuthTokenValidatorAndSetter)
 
-		})
-
-		// Noauth
-		r.Group(func(r chi.Router) {
 			// User
 			r.Group(func(r chi.Router) {
 				r.Use(mwUserIDSetter)
@@ -53,6 +50,12 @@ func New(url string, d *domain.Domain) (*ServerHTTP, error) {
 				r.Put("/users/{UserID}", serverWrapper.PutUsersUserID)
 				r.Delete("/users/{UserID}", serverWrapper.DeleteUsersUserID)
 			})
+		})
+
+		// Noauth
+		r.Group(func(r chi.Router) {
+			// Token
+			r.Post("/tokens", serverWrapper.PostTokens)
 
 			// Swagger
 			r.Get("/", getSwaggerUIHandler(url))

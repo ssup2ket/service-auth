@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/rs/zerolog/log"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
 )
 
 // Create a token
@@ -14,7 +15,7 @@ func (s *ServerHTTP) PostTokens(w http.ResponseWriter, r *http.Request) {
 
 	// Unmarshal request
 	if err := render.Bind(r, &tokenCreate); err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("Wrong ID/Password format")
+		log.Ctx(ctx).Error().Err(err).Msg("Wrong ID/password format")
 		render.Render(w, r, getErrRendererBadRequest())
 		return
 	}
@@ -22,6 +23,14 @@ func (s *ServerHTTP) PostTokens(w http.ResponseWriter, r *http.Request) {
 	// Create token
 	token, err := s.domain.Token.CreateToken(ctx, tokenCreate.LoginId, tokenCreate.Password)
 	if err != nil {
+		if err == service.ErrUnauthorized {
+			log.Ctx(ctx).Error().Err(err).Msg("Wrong ID/password")
+			render.Render(w, r, getErrRendererUnauthorized())
+			return
+		}
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to create token")
+		render.Render(w, r, getErrRendererServerError())
+		return
 	}
 
 	render.JSON(w, r, TokenInfo{Token: token})
