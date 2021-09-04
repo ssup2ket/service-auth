@@ -12,11 +12,11 @@ const (
 )
 
 func TestCreateDeleteAuthToken(t *testing.T) {
-	token, err := CreateAuthToken(&AuthInfo{UserID: userIDCorrect, UserLoginID: userLoginIDCorrect})
+	tokenInfo, err := CreateAuthToken(&AuthClaims{UserID: userIDCorrect, UserLoginID: userLoginIDCorrect})
 	require.NoError(t, err, "Failed to create auth token")
 
-	tokenInfo, err := ValidateAuthToken(token)
+	validatedToken, err := ValidateAuthToken(tokenInfo.Token)
 	require.NoError(t, err, "Failed to validate auth token")
-	require.Equal(t, tokenInfo.UserID, userIDCorrect)
-	require.Equal(t, tokenInfo.UserLoginID, userLoginIDCorrect)
+	require.Equal(t, validatedToken.UserID, userIDCorrect)
+	require.Equal(t, validatedToken.UserLoginID, userLoginIDCorrect)
 }

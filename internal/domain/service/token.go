@@ -11,7 +11,7 @@ import (
 )
 
 type TokenService interface {
-	CreateToken(ctx context.Context, loginID, passwd string) (string, error)
+	CreateToken(ctx context.Context, loginID, passwd string) (*authtoken.AuthTokenInfo, error)
 }
 
 type TokenServiceImp struct {
@@ -26,30 +26,30 @@ func NewTokenServiceImp(userInfoSecondary repo.UserInfoRepo, userSecretSecondary
 	}
 }
 
-func (t *TokenServiceImp) CreateToken(ctx context.Context, loginID, passwd string) (string, error) {
+func (t *TokenServiceImp) CreateToken(ctx context.Context, loginID, passwd string) (*authtoken.AuthTokenInfo, error) {
 	// Get user info, user secret by loginID
 	userInfo, err := t.userInfoRepoSecondary.GetByLoginID(ctx, loginID)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user info by login ID")
-		return "", getReturnErr(err)
+		return nil, getReturnErr(err)
 	}
 	userSecret, err := t.userSecretRepoSecondary.Get(ctx, userInfo.ID)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user secret")
-		return "", getReturnErr(err)
+		return nil, getReturnErr(err)
 	}
 
 	// Validate login ID, password
 	if !password.ValidatePasswd(passwd, userSecret.PasswdHash, userSecret.PasswdSalt) {
-		return "", ErrUnauthorized
+		return nil, ErrUnauthorized
 	}
 
 	// Create auth token
-	token, err := authtoken.CreateAuthToken(&authtoken.AuthInfo{UserID: userInfo.ID.String(), UserLoginID: userInfo.LoginID})
+	tokenInfo, err := authtoken.CreateAuthToken(&authtoken.AuthClaims{UserID: userInfo.ID.String(), UserLoginID: userInfo.LoginID})
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user secret")
-		return "", getReturnErr(err)
+		return nil, getReturnErr(err)
 	}
 
-	return token, nil
+	return tokenInfo, nil
 }

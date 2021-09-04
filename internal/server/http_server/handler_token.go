@@ -21,7 +21,7 @@ func (s *ServerHTTP) PostTokens(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create token
-	token, err := s.domain.Token.CreateToken(ctx, tokenCreate.LoginId, tokenCreate.Password)
+	tokenInfo, err := s.domain.Token.CreateToken(ctx, tokenCreate.LoginId, tokenCreate.Password)
 	if err != nil {
 		if err == service.ErrUnauthorized {
 			log.Ctx(ctx).Error().Err(err).Msg("Wrong ID/password")
@@ -33,7 +33,10 @@ func (s *ServerHTTP) PostTokens(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.JSON(w, r, TokenInfo{Token: token})
+	render.JSON(w, r, TokenInfo{
+		Token:     tokenInfo.Token,
+		IssuedAt:  tokenInfo.IssuedAt,
+		ExpiresAt: tokenInfo.ExpiresAt})
 }
 
 // Validate & Bind

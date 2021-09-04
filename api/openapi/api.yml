@@ -87,9 +87,17 @@ components:
       type: object
       required:
         - token
+        - issuedAt
+        - expiresAt
       properties:
         token:
           type: string
+        issuedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
     ListMeta:
       type: object
       required:

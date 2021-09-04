@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "internal/server/grpc_server";
 
 // Message
@@ -51,6 +53,8 @@ message TokenCreateRequest {
 // Token response
 message TokenInfoResponse {
     string token = 1;
+    google.protobuf.Timestamp issuedAt = 2;
+    google.protobuf.Timestamp expiresAt = 3;
 }
 
 // Service

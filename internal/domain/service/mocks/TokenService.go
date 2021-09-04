@@ -5,6 +5,8 @@ package mocks
 import (
 	context "context"
 
+	authtoken "github.com/ssup2ket/ssup2ket-auth-service/pkg/authtoken"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -14,14 +16,16 @@ type TokenService struct {
 }
 
 // CreateToken provides a mock function with given fields: ctx, loginID, passwd
-func (_m *TokenService) CreateToken(ctx context.Context, loginID string, passwd string) (string, error) {
+func (_m *TokenService) CreateToken(ctx context.Context, loginID string, passwd string) (*authtoken.AuthTokenInfo, error) {
 	ret := _m.Called(ctx, loginID, passwd)
 
-	var r0 string
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
+	var r0 *authtoken.AuthTokenInfo
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *authtoken.AuthTokenInfo); ok {
 		r0 = rf(ctx, loginID, passwd)
 	} else {
-		r0 = ret.Get(0).(string)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*authtoken.AuthTokenInfo)
+		}
 	}
 
 	var r1 error
