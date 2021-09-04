@@ -1,4 +1,4 @@
-package uuid
+package uuidmodel
 
 import (
 	"database/sql/driver"

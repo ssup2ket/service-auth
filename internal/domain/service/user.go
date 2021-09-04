@@ -8,15 +8,15 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/password"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuidmodel"
 )
 
 type UserService interface {
 	ListUser(ctx context.Context, offset int, limit int) ([]model.UserInfo, error)
 	CreateUser(ctx context.Context, userInfo *model.UserInfo, passwd string) (*model.UserInfo, error)
-	GetUser(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserInfo, error)
+	GetUser(ctx context.Context, userUUID uuidmodel.UUIDModel) (*model.UserInfo, error)
 	UpdateUser(ctx context.Context, userInfo *model.UserInfo, passwd string) error
-	DeleteUser(ctx context.Context, userUUID uuid.UUIDModel) error
+	DeleteUser(ctx context.Context, userUUID uuidmodel.UUIDModel) error
 }
 
 type UserServiceImp struct {
@@ -71,7 +71,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	}()
 
 	// Generate UUID to share to userInfo and userSecret
-	uuid := uuid.NewV4()
+	uuid := uuidmodel.NewV4()
 
 	// Create user info
 	userInfo.ID = uuid
@@ -104,7 +104,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	return userInfo, nil
 }
 
-func (u *UserServiceImp) GetUser(ctx context.Context, userUUID uuid.UUIDModel) (*model.UserInfo, error) {
+func (u *UserServiceImp) GetUser(ctx context.Context, userUUID uuidmodel.UUIDModel) (*model.UserInfo, error) {
 	var err error
 
 	// Get user info
@@ -170,7 +170,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 	return nil
 }
 
-func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID uuid.UUIDModel) error {
+func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID uuidmodel.UUIDModel) error {
 	var err error
 
 	// Begin transaction

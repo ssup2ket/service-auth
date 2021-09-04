@@ -10,7 +10,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo/mocks"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuidmodel"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	userUUIDCorrect = uuid.FromStringOrNil("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	userUUIDCorrect = uuidmodel.FromStringOrNil("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 )
 
 func TestInit(t *testing.T) {

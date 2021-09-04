@@ -9,7 +9,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/request"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuidmodel"
 )
 
 func (s *ServerGRPC) ListUser(ctx context.Context, req *UserListRequest) (*UserListResponse, error) {
@@ -58,7 +58,7 @@ func (s *ServerGRPC) GetUser(ctx context.Context, req *UserIDRequest) (*UserInfo
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(req.Id)))
+	userInfo, err := s.domain.User.GetUser(ctx, uuidmodel.FromStringOrNil(string(req.Id)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
@@ -100,7 +100,7 @@ func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*Empty
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(req.Id)); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuidmodel.FromStringOrNil(req.Id)); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			return nil, getErrNoutFound(errors.ErrResouceUser)
@@ -140,7 +140,7 @@ func userCreateToUserInfoModel(userCreate *UserCreateRequest) *model.UserInfo {
 
 func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *model.UserInfo {
 	return &model.UserInfo{
-		ID:    uuid.FromStringOrNil(userUpdate.Id),
+		ID:    uuidmodel.FromStringOrNil(userUpdate.Id),
 		Phone: userUpdate.Phone,
 		Email: userUpdate.Email,
 	}
