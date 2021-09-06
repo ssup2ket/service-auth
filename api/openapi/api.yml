@@ -13,6 +13,31 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 components:
   schemas:
+    TokenCreate:
+      type: object
+      required:
+        - loginId
+        - password
+      properties:
+        loginId:
+          type: string
+        password:
+          type: string 
+    TokenInfo:
+      type: object
+      required:
+        - token
+        - issuedAt
+        - expiresAt
+      properties:
+        token:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
     UserCreate:
       type: object
       required:
@@ -73,31 +98,6 @@ components:
             $ref: '#/components/schemas/UserInfo'
         metadata:
           $ref: '#/components/schemas/ListMeta'
-    TokenCreate:
-      type: object
-      required:
-        - loginId
-        - password
-      properties:
-        loginId:
-          type: string
-        password:
-          type: string 
-    TokenInfo:
-      type: object
-      required:
-        - token
-        - issuedAt
-        - expiresAt
-      properties:
-        token:
-          type: string
-        issuedAt:
-          type: string
-          format: date-time
-        expiresAt:
-          type: string
-          format: date-time
     ListMeta:
       type: object
       required:
@@ -143,6 +143,34 @@ components:
         type: integer
         default: 50
 paths:
+  /tokens:
+    post:
+      tags:
+        - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenCreate' 
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenInfo'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
   /users:
     get:
       parameters:
@@ -269,34 +297,6 @@ paths:
         '200':
           description: ''
         '404':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        '500':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-  /tokens:
-    post:
-      tags:
-        - token
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TokenCreate' 
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TokenInfo'
-        '400':
           description: ''
           content:
             application/json:

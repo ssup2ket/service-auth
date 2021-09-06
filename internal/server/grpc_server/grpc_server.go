@@ -3,6 +3,8 @@ package grpc_server
 import (
 	"net"
 
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2"
+	grpc_recover "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
@@ -14,16 +16,25 @@ type ServerGRPC struct {
 	grpcServer *grpc.Server
 	domain     *domain.Domain
 
-	UnimplementedUserServer
 	UnimplementedTokenServer
+	UnimplementedUserServer
 }
 
 func New(d *domain.Domain) (*ServerGRPC, error) {
 	server := ServerGRPC{
-		grpcServer: grpc.NewServer(),
-		domain:     d,
+		grpcServer: grpc.NewServer(
+			grpc_middleware.WithUnaryServerChain(
+				icLoggerSetterUnary(),
+				icAccessLoggerUary(),
+				icAuthTokenValidaterAndSetterUary(),
+				icUserIDSetterUary(),
+				grpc_recover.UnaryServerInterceptor(),
+			),
+		),
+		domain: d,
 	}
 
+	RegisterTokenServer(server.grpcServer, &server)
 	RegisterUserServer(server.grpcServer, &server)
 
 	return &server, nil

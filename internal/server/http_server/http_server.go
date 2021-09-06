@@ -45,7 +45,6 @@ func New(url string, d *domain.Domain) (*ServerHTTP, error) {
 				r.Use(mwUserIDSetter)
 
 				r.Get("/users", serverWrapper.GetUsers)
-				r.Post("/users", serverWrapper.PostUsers)
 				r.Get("/users/{UserID}", serverWrapper.GetUsersUserID)
 				r.Put("/users/{UserID}", serverWrapper.PutUsersUserID)
 				r.Delete("/users/{UserID}", serverWrapper.DeleteUsersUserID)
@@ -56,6 +55,9 @@ func New(url string, d *domain.Domain) (*ServerHTTP, error) {
 		r.Group(func(r chi.Router) {
 			// Token
 			r.Post("/tokens", serverWrapper.PostTokens)
+
+			// User
+			r.Post("/users", serverWrapper.PostUsers)
 
 			// Swagger
 			r.Get("/", getSwaggerUIHandler(url))

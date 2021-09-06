@@ -8,6 +8,19 @@ option go_package = "internal/server/grpc_server";
 message Empty {
 }
 
+// Token request
+message TokenCreateRequest {
+    string loginId = 1;
+    string password = 2;
+}
+
+// Token response
+message TokenInfoResponse {
+    string token = 1;
+    google.protobuf.Timestamp issuedAt = 2;
+    google.protobuf.Timestamp expiresAt = 3;
+}
+
 // User request
 message UserListRequest {
     int32 offset = 1;
@@ -44,28 +57,15 @@ message UserInfoResponse {
     string email = 4;
 }
 
-// Token request
-message TokenCreateRequest {
-    string loginId = 1;
-    string password = 2;
-}
-
-// Token response
-message TokenInfoResponse {
-    string token = 1;
-    google.protobuf.Timestamp issuedAt = 2;
-    google.protobuf.Timestamp expiresAt = 3;
-}
-
 // Service
+service Token {
+    rpc CreateToken(TokenCreateRequest) returns (TokenInfoResponse) {}
+}
+
 service User {
     rpc ListUser(UserListRequest) returns (UserListResponse) {}
     rpc CreateUser(UserCreateRequest) returns (UserInfoResponse) {}
     rpc GetUser(UserIDRequest) returns (UserInfoResponse) {}
     rpc UpdateUser(UserUpdateRequest) returns (Empty) {}
     rpc DeleteUser(UserIDRequest) returns (Empty) {}
-}
-
-service Token {
-    rpc CreateToken(TokenCreateRequest) returns (TokenInfoResponse) {}
 }
