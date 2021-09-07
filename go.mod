@@ -4,12 +4,13 @@ go 1.14
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/deepmap/oapi-codegen v1.5.6
-	github.com/getkin/kin-openapi v0.51.0
+	github.com/deepmap/oapi-codegen v1.6.0
+	github.com/getkin/kin-openapi v0.53.0
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-chi/render v1.0.1
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/zerolog/v2 v2.0.0-rc.2
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.0-rc.2

@@ -7,7 +7,8 @@ all: test run
 gen-openapi:
 	oapi-codegen --generate types,chi-server,spec -o internal/server/http_server/http_server.gen.go --package http_server api/openapi/api.yml
 
-# brew install protobuf
+# Ubuntu : apt install protobuf-compiler
+# MacOS : brew install protobuf
 # go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26
 # go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
 .PHONY: gen-protobuf
@@ -22,7 +23,7 @@ gen-mock:
 
 .PHONY: run
 run: gen-openapi gen-protobuf
-	source scripts/env-local && go run cmd/ssup2ket-auth/main.go
+	. scripts/env-local && go run cmd/ssup2ket-auth/main.go
 
 .PHONY: test
 test: gen-mock
