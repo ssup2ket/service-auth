@@ -41,7 +41,7 @@ func main() {
 	// Init domain
 	d, err := domain.New(cfg)
 	if err != nil {
-		log.Fatal().Msg("Failed to create domain instance")
+		log.Fatal().Err(err).Msg("Failed to create domain instance")
 	}
 
 	// Init and run HTTP server
