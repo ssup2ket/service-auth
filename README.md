@@ -30,7 +30,13 @@ $ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
 * Install mockery
 
 ```
-go install github.com/vektra/mockery/v2
+$ go install github.com/vektra/mockery/v2@latest
+```
+
+* Install act
+
+```
+$ go install github.com/nektos/act@latest
 ```
 
 ## Reference

@@ -25,6 +25,10 @@ gen-mock:
 run: gen-openapi gen-protobuf
 	. scripts/env-local && go run cmd/ssup2ket-auth/main.go
 
-.PHONY: test
-test: gen-mock
+.PHONY: test-unit
+test-unit: gen-mock
 	go test -v ./...
+
+.PHONY: test-action
+test-action: gen-mock
+	act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
