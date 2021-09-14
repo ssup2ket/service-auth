@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 
@@ -19,9 +20,11 @@ type ServerHTTP struct {
 	httpServer *http.Server
 
 	domain *domain.Domain
+
+	tracer opentracing.Tracer
 }
 
-func New(url string, d *domain.Domain) (*ServerHTTP, error) {
+func New(url string, d *domain.Domain, t opentracing.Tracer) (*ServerHTTP, error) {
 	server := ServerHTTP{}
 	serverWrapper := ServerInterfaceWrapper{
 		Handler: &server,
@@ -30,6 +33,7 @@ func New(url string, d *domain.Domain) (*ServerHTTP, error) {
 	// Set middlewares and handlers
 	r := chi.NewRouter()
 	r.Use(hlog.NewHandler(log.Logger))
+	r.Use(mwOpenTracingTracerSetter(t))
 	r.Use(hlog.AccessHandler(mwAccessLogger))
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.RequestID)
@@ -68,6 +72,7 @@ func New(url string, d *domain.Domain) (*ServerHTTP, error) {
 
 	server.domain = d
 	server.router = r
+	server.tracer = t
 	return &server, nil
 }
 

@@ -42,3 +42,5 @@ $ go install github.com/nektos/act@latest
 ## Reference
 
 * UUID for DB - https://github.com/google/uuid/issues/20
+* OpenTracing tracer - https://github.com/jaegertracing/jaeger-client-go/blob/master/zipkin/README.md
+* OpenTracing middleware - https://github.com/go-chi/httptracer

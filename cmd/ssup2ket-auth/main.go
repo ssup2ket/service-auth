@@ -7,8 +7,12 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/uber/jaeger-client-go"
+	jaegercfg "github.com/uber/jaeger-client-go/config"
+	"github.com/uber/jaeger-client-go/zipkin"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/config"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain"
@@ -34,6 +38,30 @@ func main() {
 		log.Fatal().Msg("Wrong deploy env")
 	}
 
+	// Set jeager tracer config
+	jeagerCfg := jaegercfg.Configuration{
+		ServiceName: "auth",
+		Sampler: &jaegercfg.SamplerConfig{
+			Type:  jaeger.SamplerTypeConst,
+			Param: 1,
+		},
+		Reporter: &jaegercfg.ReporterConfig{
+			LogSpans: true,
+		},
+	}
+
+	// Create jeager tracer from configs
+	zipkinPropagator := zipkin.NewZipkinB3HTTPHeaderPropagator()
+	tracer, closer, err := jeagerCfg.NewTracer(
+		jaegercfg.Injector(opentracing.HTTPHeaders, zipkinPropagator),
+		jaegercfg.Extractor(opentracing.HTTPHeaders, zipkinPropagator),
+		jaegercfg.ZipkinSharedRPCSpan(true),
+	)
+	if err != nil {
+		log.Fatal().Msg("Failed to init opentracing tracer")
+	}
+	defer closer.Close()
+
 	// Print config and starting
 	log.Info().Str("config", fmt.Sprintf("%+v", *cfg)).Send()
 	log.Info().Msg("Starting ssup2ket auth service...")
@@ -45,7 +73,7 @@ func main() {
 	}
 
 	// Init and run HTTP server
-	httpServer, err := http_server.New(cfg.ServerURL, d)
+	httpServer, err := http_server.New(cfg.ServerURL, d, tracer)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create HTTP server")
 	}
