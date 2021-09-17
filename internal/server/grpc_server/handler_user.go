@@ -62,7 +62,7 @@ func (s *ServerGRPC) GetUser(ctx context.Context, req *UserIDRequest) (*UserInfo
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
-			return nil, getErrNoutFound(errors.ErrResouceUser)
+			return nil, getErrNotFound(errors.ErrResouceUser)
 		}
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user")
 		return nil, getErrServerError()
@@ -83,7 +83,7 @@ func (s *ServerGRPC) UpdateUser(ctx context.Context, req *UserUpdateRequest) (*E
 	if err := s.domain.User.UpdateUser(ctx, userUpdateToUserInfoModel(req), req.Password); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
-			return nil, getErrNoutFound(errors.ErrResouceUser)
+			return nil, getErrNotFound(errors.ErrResouceUser)
 		}
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user")
 		return nil, getErrBadRequest()
@@ -103,7 +103,7 @@ func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*Empty
 	if err := s.domain.User.DeleteUser(ctx, uuidmodel.FromStringOrNil(req.Id)); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
-			return nil, getErrNoutFound(errors.ErrResouceUser)
+			return nil, getErrNotFound(errors.ErrResouceUser)
 		}
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user")
 		return nil, getErrServerError()

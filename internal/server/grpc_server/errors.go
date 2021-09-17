@@ -15,7 +15,7 @@ func getErrUnauthorized() error {
 	return status.Error(codes.PermissionDenied, errors.CodeUnauthorized)
 }
 
-func getErrNoutFound(res errors.ErrResouce) error {
+func getErrNotFound(res errors.ErrResouce) error {
 	errCode := errors.CodeNotFound
 	switch res {
 	case errors.ErrResouceUser:

@@ -16,7 +16,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/authtoken"
 )
 
-func mwOpenTracingTracerSetter(t opentracing.Tracer) func(next http.Handler) http.Handler {
+func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -35,7 +35,7 @@ func mwOpenTracingTracerSetter(t opentracing.Tracer) func(next http.Handler) htt
 			span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, t, "auth-service", ext.RPCServerOption(spanCtx))
 			defer span.Finish()
 
-			// Set
+			// Set trace ID and span ID to logger
 			zerolog.Ctx(childCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
 				return c.Str("trace_id", span.Context().(jaeger.SpanContext).TraceID().String()).
 					Str("span_id", span.Context().(jaeger.SpanContext).SpanID().String())

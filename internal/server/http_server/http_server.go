@@ -33,7 +33,7 @@ func New(url string, d *domain.Domain, t opentracing.Tracer) (*ServerHTTP, error
 	// Set middlewares and handlers
 	r := chi.NewRouter()
 	r.Use(hlog.NewHandler(log.Logger))
-	r.Use(mwOpenTracingTracerSetter(t))
+	r.Use(mwOpenTracingSetter(t))
 	r.Use(hlog.AccessHandler(mwAccessLogger))
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(middleware.RequestID)

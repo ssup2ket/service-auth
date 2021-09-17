@@ -7,6 +7,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
 )
 
 func (s *ServerGRPC) CreateToken(ctx context.Context, req *TokenCreateRequest) (*TokenInfoResponse, error) {
@@ -19,6 +20,10 @@ func (s *ServerGRPC) CreateToken(ctx context.Context, req *TokenCreateRequest) (
 	// Create token
 	tokenInfo, err := s.domain.Token.CreateToken(ctx, req.LoginId, req.Password)
 	if err != nil {
+		if err == service.ErrRepoNotFound {
+			log.Ctx(ctx).Error().Err(err).Msg("ID doesn't exists")
+			return nil, getErrNotFound(errors.ErrResouceUser)
+		}
 		if err == service.ErrUnauthorized {
 			log.Ctx(ctx).Error().Err(err).Msg("Wrong ID/password")
 			return nil, getErrUnauthorized()

@@ -81,7 +81,7 @@ func main() {
 	httpServer.ListenAndServe()
 
 	// Init and run GRPC server
-	grpcServer, err := grpc_server.New(d)
+	grpcServer, err := grpc_server.New(d, tracer)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create GRPC server")
 	}

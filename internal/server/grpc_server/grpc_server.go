@@ -5,6 +5,7 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2"
 	grpc_recover "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
@@ -20,11 +21,12 @@ type ServerGRPC struct {
 	UnimplementedUserServer
 }
 
-func New(d *domain.Domain) (*ServerGRPC, error) {
+func New(d *domain.Domain, t opentracing.Tracer) (*ServerGRPC, error) {
 	server := ServerGRPC{
 		grpcServer: grpc.NewServer(
 			grpc_middleware.WithUnaryServerChain(
 				icLoggerSetterUnary(),
+				icOpenTracingSetterUnary(t),
 				icAccessLoggerUary(),
 				icAuthTokenValidaterAndSetterUary(),
 				icUserIDSetterUary(),

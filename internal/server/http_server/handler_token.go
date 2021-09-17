@@ -23,7 +23,11 @@ func (s *ServerHTTP) PostTokens(w http.ResponseWriter, r *http.Request) {
 	// Create token
 	tokenInfo, err := s.domain.Token.CreateToken(ctx, tokenCreate.LoginId, tokenCreate.Password)
 	if err != nil {
-		if err == service.ErrUnauthorized {
+		if err == service.ErrRepoNotFound {
+			log.Ctx(ctx).Error().Err(err).Msg("ID doesn't exists")
+			render.Render(w, r, getErrRendererUnauthorized())
+			return
+		} else if err == service.ErrUnauthorized {
 			log.Ctx(ctx).Error().Err(err).Msg("Wrong ID/password")
 			render.Render(w, r, getErrRendererUnauthorized())
 			return
