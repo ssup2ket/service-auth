@@ -10,6 +10,7 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	uuid "github.com/satori/go.uuid"
 	"github.com/uber/jaeger-client-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -19,7 +20,88 @@ import (
 
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/authtoken"
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/grpcmeta"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/requestid"
 )
+
+func icLoggerSetterUnary() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+		// Create logger form global logger and set the logger in the context
+		logger := log.With().Logger()
+
+		// Call next handler with logger
+		return handler(logger.WithContext(ctx), req)
+	}
+}
+
+func icAccessLoggerUary() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+		// Get request ID
+		requestID, ok := ctx.Value(requestid.RequestIDKey).(string)
+		if !ok {
+			log.Ctx(ctx).Error().Msg("Failed to get request ID from context")
+			return nil, getErrServerError()
+		}
+
+		// Get span
+		span := opentracing.SpanFromContext(ctx)
+		if span == nil {
+			log.Ctx(ctx).Error().Msg("Failed to get opentracing span from context")
+			return nil, getErrServerError()
+		}
+
+		// Call next handler and calculate duration
+		startTime := time.Now()
+		resp, err := handler(ctx, req)
+		duration := fmt.Sprintf("%f", time.Since(startTime).Seconds())
+
+		// Get response message size
+		respMsg, _ := resp.(proto.Message)
+		proto.Size(respMsg)
+
+		// Get client ip
+		clientPeer, _ := peer.FromContext(ctx)
+		clientIp := clientPeer.Addr.String()
+
+		// Logging
+		log.Ctx(ctx).Info().
+			Str("request_id", requestID).
+			Str("trace_id", span.Context().(jaeger.SpanContext).TraceID().String()).
+			Str("span_id", span.Context().(jaeger.SpanContext).SpanID().String()).
+			Str("method", info.FullMethod).Str("code", status.Code(err).String()).
+			Int("response_size", proto.Size(respMsg)).Str("client_ip", clientIp).
+			Str("duration", duration).Send()
+		return resp, err
+	}
+}
+
+func icRequestIdSetterUnary() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+		// Get request ID
+		md := grpcmeta.ExtractMetaFromContext(ctx)
+		requestID := ""
+		requestIDs := md["X-Request-Id"]
+		if len(requestIDs) != 1 {
+			requestID = uuid.NewV4().String()
+		} else {
+			requestID = requestIDs[0]
+		}
+
+		// Set request ID to new context
+		newCtx := context.WithValue(ctx, requestid.RequestIDKey, requestID)
+
+		// Set request ID to logger
+		zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
+			return c.Str("request_id", requestID)
+		})
+
+		// Set request ID to response meta
+		header := metadata.Pairs("X-Request-Id", requestID)
+		grpc.SetHeader(newCtx, header)
+
+		// Call next handler
+		return handler(newCtx, req)
+	}
+}
 
 func icOpenTracingSetterUnary(t opentracing.Tracer) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
@@ -38,48 +120,18 @@ func icOpenTracingSetterUnary(t opentracing.Tracer) grpc.UnaryServerInterceptor 
 		defer span.Finish()
 
 		// Set trace ID and span ID to logger
+		traceID := span.Context().(jaeger.SpanContext).TraceID().String()
+		spanID := span.Context().(jaeger.SpanContext).SpanID().String()
 		zerolog.Ctx(childCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
-			return c.Str("trace_id", span.Context().(jaeger.SpanContext).TraceID().String()).
-				Str("span_id", span.Context().(jaeger.SpanContext).SpanID().String())
+			return c.Str("trace_id", traceID).Str("span_id", spanID)
 		})
 
-		// Call next handler
-		return handler(ctx, req)
-	}
-}
-
-func icLoggerSetterUnary() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
-		// Create logger form global logger and set the logger in the context
-		logger := log.With().Logger()
-
-		// Call next handler with logger
-		return handler(logger.WithContext(ctx), req)
-	}
-}
-
-func icAccessLoggerUary() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
-		// Call next handler and calculate duration
-		startTime := time.Now()
-		resp, err := handler(ctx, req)
-		duration := fmt.Sprintf("%f", time.Since(startTime).Seconds())
-
-		// Get response message size
-		respMsg, _ := resp.(proto.Message)
-		proto.Size(respMsg)
-
-		// Get client ip
-		clientPeer, _ := peer.FromContext(ctx)
-		clientIp := clientPeer.Addr.String()
-
-		// Logging
-		log.Ctx(ctx).Info().Str("method", info.FullMethod).Str("code", status.Code(err).String()).
-			Int("response_size", proto.Size(respMsg)).Str("client_ip", clientIp).
-			Str("duration", duration).Send()
+		// Set trace ID and span ID to logger
+		header := metadata.Pairs("X-B3-TraceId", traceID, "X-B3-SpanId", spanID)
+		grpc.SetHeader(childCtx, header)
 
 		// Call next handler
-		return resp, err
+		return handler(childCtx, req)
 	}
 }
 

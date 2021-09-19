@@ -30,23 +30,27 @@ func New(url string, d *domain.Domain, t opentracing.Tracer) (*ServerHTTP, error
 		Handler: &server,
 	}
 
-	// Set middlewares and handlers
+	// Set middlewares
 	r := chi.NewRouter()
+	r.Use(middleware.Heartbeat("/ping"))
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.RealIP)
+
 	r.Use(hlog.NewHandler(log.Logger))
+	r.Use(mwRequestIDSetter())
 	r.Use(mwOpenTracingSetter(t))
 	r.Use(hlog.AccessHandler(mwAccessLogger))
-	r.Use(middleware.Heartbeat("/ping"))
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Recoverer)
+
+	// Set handlers
 	r.Route("/v1", func(r chi.Router) {
 		// Auth
 		r.Group(func(r chi.Router) {
-			r.Use(mwAuthTokenValidatorAndSetter)
+			// Set token validator
+			r.Use(mwAuthTokenValidatorAndSetter())
 
 			// User
 			r.Group(func(r chi.Router) {
-				r.Use(mwUserIDSetter)
+				r.Use(mwUserIDSetter())
 
 				r.Get("/users", serverWrapper.GetUsers)
 				r.Get("/users/{UserID}", serverWrapper.GetUsersUserID)

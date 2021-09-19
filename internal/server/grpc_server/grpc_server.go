@@ -25,12 +25,15 @@ func New(d *domain.Domain, t opentracing.Tracer) (*ServerGRPC, error) {
 	server := ServerGRPC{
 		grpcServer: grpc.NewServer(
 			grpc_middleware.WithUnaryServerChain(
+				grpc_recover.UnaryServerInterceptor(),
 				icLoggerSetterUnary(),
+
+				icRequestIdSetterUnary(),
 				icOpenTracingSetterUnary(t),
 				icAccessLoggerUary(),
+
 				icAuthTokenValidaterAndSetterUary(),
 				icUserIDSetterUary(),
-				grpc_recover.UnaryServerInterceptor(),
 			),
 		),
 		domain: d,

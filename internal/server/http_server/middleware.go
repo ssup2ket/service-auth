@@ -1,6 +1,7 @@
 package http_server
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"time"
@@ -11,10 +12,69 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	uuid "github.com/satori/go.uuid"
 	"github.com/uber/jaeger-client-go"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/authtoken"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/requestid"
 )
+
+func mwAccessLogger(r *http.Request, status, size int, duration time.Duration) {
+	ctx := r.Context()
+
+	// Get request ID
+	requestID, ok := ctx.Value(requestid.RequestIDKey).(string)
+	if !ok {
+		log.Ctx(ctx).Error().Msg("Failed to get request ID from context")
+		return
+	}
+
+	// Get span
+	span := opentracing.SpanFromContext(ctx)
+	if span == nil {
+		log.Ctx(ctx).Error().Msg("Failed to get opentracing span from context")
+		return
+	}
+
+	// Logging
+	zerolog.Ctx(ctx).Info().
+		Str("request_id", requestID).
+		Str("trace_id", span.Context().(jaeger.SpanContext).TraceID().String()).
+		Str("span_id", span.Context().(jaeger.SpanContext).SpanID().String()).
+		Str("method", r.Method).Str("url", r.URL.String()).Int("status", status).
+		Str("client_ip", r.RemoteAddr).Int("response_size", size).Dur("duration", duration).
+		Send()
+}
+
+func mwRequestIDSetter() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			// Get request ID
+			requestID := r.Header.Get("X-Request-Id")
+			if requestID == "" {
+				requestID = uuid.NewV4().String()
+			}
+
+			// Set request ID to new context
+			newCtx := context.WithValue(ctx, requestid.RequestIDKey, requestID)
+
+			// Set request ID to logger
+			zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
+				return c.Str("request_id", requestID)
+			})
+
+			// Set request ID to response header
+			w.Header().Set("X-Request-Id", requestID)
+
+			// Call next handler
+			next.ServeHTTP(w, r.WithContext(newCtx))
+		}
+
+		return http.HandlerFunc(fn)
+	}
+}
 
 func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -36,10 +96,15 @@ func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Hand
 			defer span.Finish()
 
 			// Set trace ID and span ID to logger
+			traceID := span.Context().(jaeger.SpanContext).TraceID().String()
+			spanID := span.Context().(jaeger.SpanContext).SpanID().String()
 			zerolog.Ctx(childCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
-				return c.Str("trace_id", span.Context().(jaeger.SpanContext).TraceID().String()).
-					Str("span_id", span.Context().(jaeger.SpanContext).SpanID().String())
+				return c.Str("trace_id", traceID).Str("span_id", spanID)
 			})
+
+			// Set trace ID and span ID to response header
+			w.Header().Set("X-B3-TraceId", traceID)
+			w.Header().Set("X-B3-SpanId", spanID)
 
 			// Call next handler with child context
 			next.ServeHTTP(w, r.WithContext(childCtx))
@@ -48,60 +113,56 @@ func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Hand
 	}
 }
 
-func mwAccessLogger(r *http.Request, status, size int, duration time.Duration) {
-	ctx := r.Context()
-	zerolog.Ctx(ctx).Info().
-		Str("method", r.Method).Str("url", r.URL.String()).Int("status", status).
-		Str("client_ip", r.RemoteAddr).Int("response_size", size).Dur("duration", duration).
-		Send()
-}
+func mwAuthTokenValidatorAndSetter() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
 
-func mwAuthTokenValidatorAndSetter(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+			// Get auth token
+			token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer"))
 
-		// Get auth token
-		token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer"))
+			// Validate auth token and get auth info
+			authInfo, err := authtoken.ValidateAuthToken(token)
+			if err != nil {
+				log.Ctx(ctx).Error().Err(err).Msg("Auth token isn't valid")
+				render.Render(w, r, getErrRendererUnauthorized())
+				return
+			}
 
-		// Validate auth token and get auth info
-		authInfo, err := authtoken.ValidateAuthToken(token)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("Auth token isn't valid")
-			render.Render(w, r, getErrRendererUnauthorized())
-			return
-		}
+			// Set auth info
+			zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
+				return c.Str("token_user_id", authInfo.UserID).Str("token_user_loginid", authInfo.UserLoginID)
+			})
 
-		// Set auth info
-		zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
-			return c.Str("token_user_id", authInfo.UserID).Str("token_user_loginid", authInfo.UserLoginID)
-		})
-
-		// Call next handler
-		next.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
-}
-
-func mwUserIDSetter(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		// Get user ID from request parameter
-		userID := chi.URLParam(r, "UserID")
-		if userID == "" {
+			// Call next handler
 			next.ServeHTTP(w, r)
-			return
 		}
 
-		// Set User ID to request context
-		zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
-			return c.Str("user_id", userID)
-		})
-
-		// Call next handler
-		next.ServeHTTP(w, r)
+		return http.HandlerFunc(fn)
 	}
+}
 
-	return http.HandlerFunc(fn)
+func mwUserIDSetter() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			// Get user ID from request parameter
+			userID := chi.URLParam(r, "UserID")
+			if userID == "" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			// Set User ID to request context
+			zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
+				return c.Str("user_id", userID)
+			})
+
+			// Call next handler
+			next.ServeHTTP(w, r)
+		}
+
+		return http.HandlerFunc(fn)
+	}
 }
