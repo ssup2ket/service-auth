@@ -1,6 +1,6 @@
 # golang 1.16 version
 .PHONY: all
-all: test run
+all: test-unit run
 
 # go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.6.0
 .PHONY: gen-openapi
@@ -20,6 +20,10 @@ gen-protobuf:
 gen-mock:
 	mockery --all --dir internal/domain/repo --output internal/domain/repo/mocks
 	mockery --all --dir internal/domain/service --output internal/domain/service/mocks
+
+.PHONY: init-local
+init-local:
+	docker run --name ssup2ket-auth-local-mysql -p 3306:3306/tcp -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=local -d mysql:8.0
 
 .PHONY: run
 run: gen-openapi gen-protobuf
