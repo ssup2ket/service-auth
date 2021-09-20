@@ -2,6 +2,7 @@ package errors
 
 // Error code
 const (
+	// Code
 	// Resource
 	codeResouceUser = "_USER"
 
@@ -17,6 +18,23 @@ const (
 	// Resource confilct
 	CodeConflict     = "CONFLICT"
 	CodeConflictUser = CodeConflict + codeResouceUser
+
+	// Message
+	// Resource
+	msgResourcesUser = "User "
+
+	// Common error
+	MsgBadRequest   = "Bad Request"
+	MsgUnauthorized = "Unauthroized"
+	MsgServerError  = "Internal server error"
+
+	// Resource not found
+	MsgNotFound     = "Not found"
+	MsgNotFoundUser = msgResourcesUser + MsgNotFound
+
+	// Resource conflict
+	MsgConflict     = "Conflit"
+	MsgConflictUser = msgResourcesUser + MsgConflict
 )
 
 // Error resource

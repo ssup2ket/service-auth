@@ -115,11 +115,11 @@ components:
       type: object
       required:
         - code
-        - requestId
+        - message
       properties:
         code:
           type: string
-        requestId:
+        message:
           type: string
   parameters:
     UserID:

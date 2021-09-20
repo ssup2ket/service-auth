@@ -23,7 +23,8 @@ func (e *errResponse) Render(w http.ResponseWriter, r *http.Request) error {
 func getErrRendererBadRequest() render.Renderer {
 	return &errResponse{
 		ErrorInfo: ErrorInfo{
-			Code: errors.CodeBadRequest,
+			Code:    errors.CodeBadRequest,
+			Message: errors.MsgBadRequest,
 		},
 		HTTPStatusCode: http.StatusBadRequest, // 400
 	}
@@ -32,7 +33,8 @@ func getErrRendererBadRequest() render.Renderer {
 func getErrRendererUnauthorized() render.Renderer {
 	return &errResponse{
 		ErrorInfo: ErrorInfo{
-			Code: errors.CodeUnauthorized,
+			Code:    errors.CodeUnauthorized,
+			Message: errors.MsgUnauthorized,
 		},
 		HTTPStatusCode: http.StatusUnauthorized, // 401
 	}
@@ -40,14 +42,17 @@ func getErrRendererUnauthorized() render.Renderer {
 
 func getErrRendererNotFound(res errors.ErrResouce) render.Renderer {
 	errCode := errors.CodeNotFound
+	errMsg := errors.MsgNotFound
 	switch res {
 	case errors.ErrResouceUser:
 		errCode = errors.CodeNotFoundUser
+		errMsg = errors.MsgNotFoundUser
 	}
 
 	return &errResponse{
 		ErrorInfo: ErrorInfo{
-			Code: errCode,
+			Code:    errCode,
+			Message: errMsg,
 		},
 		HTTPStatusCode: http.StatusNotFound, // 404
 	}
@@ -55,6 +60,7 @@ func getErrRendererNotFound(res errors.ErrResouce) render.Renderer {
 
 func getErrRendererConflict(res errors.ErrResouce) render.Renderer {
 	errCode := errors.CodeNotFound
+	errMsg := errors.MsgNotFound
 	switch res {
 	case errors.ErrResouceUser:
 		errCode = errors.CodeConflictUser
@@ -62,7 +68,8 @@ func getErrRendererConflict(res errors.ErrResouce) render.Renderer {
 
 	return &errResponse{
 		ErrorInfo: ErrorInfo{
-			Code: errCode,
+			Code:    errCode,
+			Message: errMsg,
 		},
 		HTTPStatusCode: http.StatusConflict, // 409
 	}
