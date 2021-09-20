@@ -1,4 +1,4 @@
-package authtoken
+package token
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ const (
 )
 
 // Structs
-type AuthTokenClaims struct {
+type TokenClaims struct {
 	jwt.StandardClaims
 	AuthClaims
 }
@@ -23,19 +23,19 @@ type AuthClaims struct {
 	UserLoginID string
 }
 
-type AuthTokenInfo struct {
+type TokenInfo struct {
 	Token     string
 	IssuedAt  time.Time
 	ExpiresAt time.Time
 }
 
-func CreateAuthToken(authInfo *AuthClaims) (*AuthTokenInfo, error) {
+func CreateToken(authInfo *AuthClaims) (*TokenInfo, error) {
 	// Calcuation issuance and expiration time
 	issuedAt := time.Now()
 	expiresAt := issuedAt.Add(time.Minute * 60)
 
 	// Create token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &AuthTokenClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &TokenClaims{
 		StandardClaims: jwt.StandardClaims{
 			IssuedAt:  issuedAt.Unix(),
 			ExpiresAt: expiresAt.Unix(),
@@ -51,16 +51,16 @@ func CreateAuthToken(authInfo *AuthClaims) (*AuthTokenInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &AuthTokenInfo{
+	return &TokenInfo{
 		Token:     signedToken,
 		IssuedAt:  issuedAt,
 		ExpiresAt: expiresAt,
 	}, nil
 }
 
-func ValidateAuthToken(signedToken string) (*AuthClaims, error) {
+func ValidateToken(signedToken string) (*AuthClaims, error) {
 	// Prase token
-	claims := AuthTokenClaims{}
+	claims := TokenClaims{}
 	token, err := jwt.ParseWithClaims(signedToken, &claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(tokenKey), nil
 	})

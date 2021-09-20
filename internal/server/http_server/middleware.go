@@ -15,15 +15,15 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/uber/jaeger-client-go"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/authtoken"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/requestid"
+	authtoken "github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/header"
 )
 
 func mwAccessLogger(r *http.Request, status, size int, duration time.Duration) {
 	ctx := r.Context()
 
 	// Get request ID
-	requestID, ok := ctx.Value(requestid.RequestIDKey).(string)
+	requestID, ok := ctx.Value(header.RequestIDKey).(string)
 	if !ok {
 		log.Ctx(ctx).Error().Msg("Failed to get request ID from context")
 		return
@@ -52,13 +52,13 @@ func mwRequestIDSetter() func(next http.Handler) http.Handler {
 			ctx := r.Context()
 
 			// Get request ID
-			requestID := r.Header.Get("X-Request-Id")
+			requestID := r.Header.Get(header.RequestIDHeader)
 			if requestID == "" {
 				requestID = uuid.NewV4().String()
 			}
 
 			// Set request ID to new context
-			newCtx := context.WithValue(ctx, requestid.RequestIDKey, requestID)
+			newCtx := context.WithValue(ctx, header.RequestIDKey, requestID)
 
 			// Set request ID to logger
 			zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
@@ -103,8 +103,8 @@ func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Hand
 			})
 
 			// Set trace ID and span ID to response header
-			w.Header().Set("X-B3-TraceId", traceID)
-			w.Header().Set("X-B3-SpanId", spanID)
+			w.Header().Set(header.TraceIDHeader, traceID)
+			w.Header().Set(header.SpanIDHeader, spanID)
 
 			// Call next handler with child context
 			next.ServeHTTP(w, r.WithContext(childCtx))
@@ -122,7 +122,7 @@ func mwAuthTokenValidatorAndSetter() func(next http.Handler) http.Handler {
 			token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer"))
 
 			// Validate auth token and get auth info
-			authInfo, err := authtoken.ValidateAuthToken(token)
+			authInfo, err := authtoken.ValidateToken(token)
 			if err != nil {
 				log.Ctx(ctx).Error().Err(err).Msg("Auth token isn't valid")
 				render.Render(w, r, getErrRendererUnauthorized())

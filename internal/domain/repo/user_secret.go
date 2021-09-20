@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuidmodel"
+	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
 )
 
 // User secret repo
@@ -15,9 +15,9 @@ type UserSecretRepo interface {
 	WithTx(tx *DBTx) UserSecretRepo
 
 	Create(ctx context.Context, userSecret *model.UserSecret) error
-	Get(ctx context.Context, userUUID uuidmodel.UUIDModel) (*model.UserSecret, error)
+	Get(ctx context.Context, userUUID modeluuid.ModelUUID) (*model.UserSecret, error)
 	Update(ctx context.Context, userSecret *model.UserSecret) error
-	Delete(ctx context.Context, userUUID uuidmodel.UUIDModel) error
+	Delete(ctx context.Context, userUUID modeluuid.ModelUUID) error
 }
 
 type UserSecretRepoImp struct {
@@ -48,7 +48,7 @@ func (u *UserSecretRepoImp) Create(ctx context.Context, userSecret *model.UserSe
 	return nil
 }
 
-func (u *UserSecretRepoImp) Get(ctx context.Context, userUUID uuidmodel.UUIDModel) (*model.UserSecret, error) {
+func (u *UserSecretRepoImp) Get(ctx context.Context, userUUID modeluuid.ModelUUID) (*model.UserSecret, error) {
 	user := model.UserSecret{}
 	result := u.db.First(&user, "id = ?", userUUID)
 	if result.Error != nil {
@@ -75,7 +75,7 @@ func (u *UserSecretRepoImp) Update(ctx context.Context, userSecret *model.UserSe
 	return nil
 }
 
-func (u *UserSecretRepoImp) Delete(ctx context.Context, userUUID uuidmodel.UUIDModel) error {
+func (u *UserSecretRepoImp) Delete(ctx context.Context, userUUID modeluuid.ModelUUID) error {
 	result := u.db.Delete(&model.UserSecret{}, "id = ?", userUUID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {

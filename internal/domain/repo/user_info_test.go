@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuidmodel"
+	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	userIDCorrect = uuidmodel.FromStringOrNil("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	userIDCorrect = modeluuid.FromStringOrNil("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 )
 
 func TestInit(t *testing.T) {

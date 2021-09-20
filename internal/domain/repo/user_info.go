@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/uuidmodel"
+	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
 )
 
 // User info repo
@@ -16,10 +16,10 @@ type UserInfoRepo interface {
 
 	List(ctx context.Context, offset int, limit int) ([]model.UserInfo, error)
 	Create(ctx context.Context, userInfo *model.UserInfo) error
-	Get(ctx context.Context, userUUID uuidmodel.UUIDModel) (*model.UserInfo, error)
+	Get(ctx context.Context, userUUID modeluuid.ModelUUID) (*model.UserInfo, error)
 	GetByLoginID(ctx context.Context, userLoginID string) (*model.UserInfo, error)
 	Update(ctx context.Context, userInfo *model.UserInfo) error
-	Delete(ctx context.Context, userUUID uuidmodel.UUIDModel) error
+	Delete(ctx context.Context, userUUID modeluuid.ModelUUID) error
 }
 
 type UserInfoRepoImp struct {
@@ -56,7 +56,7 @@ func (u *UserInfoRepoImp) Create(ctx context.Context, userInfo *model.UserInfo) 
 	return nil
 }
 
-func (u *UserInfoRepoImp) Get(ctx context.Context, userUUID uuidmodel.UUIDModel) (*model.UserInfo, error) {
+func (u *UserInfoRepoImp) Get(ctx context.Context, userUUID modeluuid.ModelUUID) (*model.UserInfo, error) {
 	userInfo := model.UserInfo{}
 	result := u.db.First(&userInfo, "id = ?", userUUID)
 	if result.Error != nil {
@@ -85,7 +85,7 @@ func (u *UserInfoRepoImp) Update(ctx context.Context, userInfo *model.UserInfo) 
 	return nil
 }
 
-func (u *UserInfoRepoImp) Delete(ctx context.Context, userUUID uuidmodel.UUIDModel) error {
+func (u *UserInfoRepoImp) Delete(ctx context.Context, userUUID modeluuid.ModelUUID) error {
 	result := u.db.Delete(&model.UserInfo{}, "id = ?", userUUID)
 	if result.Error != nil {
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to delete user info in primary DB")
