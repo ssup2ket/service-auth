@@ -18,9 +18,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
 	authtoken "github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
 	grpcmeta "github.com/ssup2ket/ssup2ket-auth-service/pkg/grpc/meta"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/header"
 )
 
 func icLoggerSetterUnary() grpc.UnaryServerInterceptor {
@@ -36,10 +36,10 @@ func icLoggerSetterUnary() grpc.UnaryServerInterceptor {
 func icAccessLoggerUary() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
 		// Get request ID
-		requestID, ok := ctx.Value(header.RequestIDKey).(string)
-		if !ok {
-			log.Ctx(ctx).Error().Msg("Failed to get request ID from context")
-			return nil, getErrServerError()
+		requestID, err := middleware.GetRequestIDFromCtx(ctx)
+		if err != nil {
+			log.Ctx(ctx).Error().Err(err).Msg("Failed to get request ID from context")
+			return
 		}
 
 		// Get span
@@ -79,7 +79,7 @@ func icRequestIdSetterUnary() grpc.UnaryServerInterceptor {
 		// Get request ID
 		md := grpcmeta.ExtractMetaFromContext(ctx)
 		requestID := ""
-		requestIDs := md[header.RequestIDHeader]
+		requestIDs := md[middleware.HeaderRequestID]
 		if len(requestIDs) != 1 {
 			requestID = uuid.NewV4().String()
 		} else {
@@ -87,7 +87,7 @@ func icRequestIdSetterUnary() grpc.UnaryServerInterceptor {
 		}
 
 		// Set request ID to new context
-		newCtx := context.WithValue(ctx, header.RequestIDKey, requestID)
+		newCtx := middleware.SetRequestIDToCtx(ctx, requestID)
 
 		// Set request ID to logger
 		zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
@@ -95,7 +95,7 @@ func icRequestIdSetterUnary() grpc.UnaryServerInterceptor {
 		})
 
 		// Set request ID to response meta
-		header := metadata.Pairs(header.RequestIDHeader, requestID)
+		header := metadata.Pairs(middleware.HeaderRequestID, requestID)
 		grpc.SetHeader(newCtx, header)
 
 		// Call next handler
@@ -119,15 +119,17 @@ func icOpenTracingSetterUnary(t opentracing.Tracer) grpc.UnaryServerInterceptor 
 		span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, t, "auth-service", ext.RPCServerOption(spanCtx))
 		defer span.Finish()
 
-		// Set trace ID and span ID to logger
+		// Get trace ID and span ID
 		traceID := span.Context().(jaeger.SpanContext).TraceID().String()
 		spanID := span.Context().(jaeger.SpanContext).SpanID().String()
+
+		// Set trace ID and span ID to logger
 		zerolog.Ctx(childCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
 			return c.Str("trace_id", traceID).Str("span_id", spanID)
 		})
 
-		// Set trace ID and span ID to logger
-		header := metadata.Pairs(header.TraceIDHeader, traceID, header.SpanIDHeader, spanID)
+		// Set trace ID and span ID to response header
+		header := metadata.Pairs(middleware.HeaderTraceID, traceID, middleware.HeaderSpanID, spanID)
 		grpc.SetHeader(childCtx, header)
 
 		// Call next handler
@@ -163,7 +165,11 @@ func icAuthTokenValidaterAndSetterUary() grpc.UnaryServerInterceptor {
 			return nil, getErrUnauthorized()
 		}
 
-		// Set auth info
+		// Set auth context to context
+		middleware.SetUserIDToCtx(ctx, authInfo.UserID)
+		middleware.SetUserLoginIDToCtx(ctx, authInfo.UserLoginID)
+
+		// Set auth info to logger
 		zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
 			return c.Str("token_user_id", authInfo.UserID).Str("token_user_loginid", authInfo.UserLoginID)
 		})

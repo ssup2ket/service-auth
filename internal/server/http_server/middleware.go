@@ -1,7 +1,6 @@
 package http_server
 
 import (
-	"context"
 	"net/http"
 	"strings"
 	"time"
@@ -15,17 +14,17 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/uber/jaeger-client-go"
 
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
 	authtoken "github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/header"
 )
 
 func mwAccessLogger(r *http.Request, status, size int, duration time.Duration) {
 	ctx := r.Context()
 
 	// Get request ID
-	requestID, ok := ctx.Value(header.RequestIDKey).(string)
-	if !ok {
-		log.Ctx(ctx).Error().Msg("Failed to get request ID from context")
+	requestID, err := middleware.GetRequestIDFromCtx(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get request ID from context")
 		return
 	}
 
@@ -52,13 +51,13 @@ func mwRequestIDSetter() func(next http.Handler) http.Handler {
 			ctx := r.Context()
 
 			// Get request ID
-			requestID := r.Header.Get(header.RequestIDHeader)
+			requestID := r.Header.Get(middleware.HeaderRequestID)
 			if requestID == "" {
 				requestID = uuid.NewV4().String()
 			}
 
 			// Set request ID to new context
-			newCtx := context.WithValue(ctx, header.RequestIDKey, requestID)
+			newCtx := middleware.SetRequestIDToCtx(ctx, requestID)
 
 			// Set request ID to logger
 			zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
@@ -66,7 +65,7 @@ func mwRequestIDSetter() func(next http.Handler) http.Handler {
 			})
 
 			// Set request ID to response header
-			w.Header().Set("X-Request-Id", requestID)
+			w.Header().Set(middleware.HeaderRequestID, requestID)
 
 			// Call next handler
 			next.ServeHTTP(w, r.WithContext(newCtx))
@@ -95,16 +94,18 @@ func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Hand
 			span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, t, "auth-service", ext.RPCServerOption(spanCtx))
 			defer span.Finish()
 
-			// Set trace ID and span ID to logger
+			// Get trace ID and span ID
 			traceID := span.Context().(jaeger.SpanContext).TraceID().String()
 			spanID := span.Context().(jaeger.SpanContext).SpanID().String()
+
+			// Set trace ID and span ID to logger
 			zerolog.Ctx(childCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
 				return c.Str("trace_id", traceID).Str("span_id", spanID)
 			})
 
 			// Set trace ID and span ID to response header
-			w.Header().Set(header.TraceIDHeader, traceID)
-			w.Header().Set(header.SpanIDHeader, spanID)
+			w.Header().Set(middleware.HeaderTraceID, traceID)
+			w.Header().Set(middleware.HeaderSpanID, spanID)
 
 			// Call next handler with child context
 			next.ServeHTTP(w, r.WithContext(childCtx))
@@ -129,7 +130,11 @@ func mwAuthTokenValidatorAndSetter() func(next http.Handler) http.Handler {
 				return
 			}
 
-			// Set auth info
+			// Set auth context to context
+			middleware.SetUserIDToCtx(ctx, authInfo.UserID)
+			middleware.SetUserLoginIDToCtx(ctx, authInfo.UserLoginID)
+
+			// Set auth info to logger
 			zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
 				return c.Str("token_user_id", authInfo.UserID).Str("token_user_loginid", authInfo.UserLoginID)
 			})
