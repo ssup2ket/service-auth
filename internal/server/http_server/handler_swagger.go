@@ -20,7 +20,7 @@ var swaggerHTML = `
         <script>
             window.onload = function () {
                 const ui = SwaggerUIBundle({
-                    url: "{{ .URL }}/auth/v1/swagger/spec",
+                    url: "{{ .URL }}/v1/swagger/spec",
                     dom_id: '#swagger-ui',
                     deepLinking: true,
                     presets: [

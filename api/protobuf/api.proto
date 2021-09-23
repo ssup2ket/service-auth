@@ -34,15 +34,17 @@ message UserIDRequest {
 message UserCreateRequest {
     string loginId = 1;
     string password = 2;
-    string phone = 3;
-    string email = 4;
+    string role = 3;
+    string phone = 4;
+    string email = 5;
 }
 
 message UserUpdateRequest {
     string id = 1;
     string password = 2;
-    string phone = 3;
-    string email = 4;
+    string role = 3;
+    string phone = 4;
+    string email = 5;
 }
 
 // User response
@@ -53,8 +55,9 @@ message UserListResponse {
 message UserInfoResponse {
     string id = 1;
     string loginId = 2;
-    string phone = 3;
-    string email = 4;
+    string role = 3;
+    string phone = 4;
+    string email = 5;
 }
 
 // Service

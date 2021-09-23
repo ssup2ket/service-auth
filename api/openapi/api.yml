@@ -43,12 +43,15 @@ components:
       required:
         - loginId
         - password
+        - role
         - phone
         - email
       properties:
         loginId:
           type: string
         password:
+          type: string
+        role:
           type: string
         phone:
           type: string
@@ -59,12 +62,15 @@ components:
       required:
         - id
         - password
+        - role
         - phone
         - email
       properties:
         id:
           type: string
         password:
+          type: string
+        role:
           type: string
         phone:
           type: string
@@ -75,12 +81,15 @@ components:
       required:
         - id
         - loginId
+        - role
         - phone
         - email
       properties:
         id:
           type: string
         loginId:
+          type: string
+        role:
           type: string
         phone:
           type: string

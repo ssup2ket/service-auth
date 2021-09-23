@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	gouuid "github.com/satori/go.uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 )
 
 func ValidateUserUUID(uuid string) error {
@@ -16,7 +17,7 @@ func ValidateUserUUID(uuid string) error {
 	return nil
 }
 
-func ValidateUserCreate(id, passwd, phone, email string) error {
+func ValidateUserCreate(id, passwd, role, phone, email string) error {
 	// Login ID
 	idMatched, err := regexp.MatchString("^[a-zA-Z0-9]{8,20}$", id)
 	if err != nil {
@@ -35,6 +36,13 @@ func ValidateUserCreate(id, passwd, phone, email string) error {
 		return fmt.Errorf("wrong password format")
 	}
 
+	// Role
+	if role != "" {
+		if !model.IsValidUserRole(role) {
+			return fmt.Errorf("wrong role")
+		}
+	}
+
 	// Phone
 	phoneMatched, err := regexp.MatchString("^[0-9]{3}[-]+[0-9]{4}[-]+[0-9]{4}$", phone)
 	if err != nil {
@@ -52,33 +60,46 @@ func ValidateUserCreate(id, passwd, phone, email string) error {
 	return nil
 }
 
-func ValidateUserUpdate(uuid, passwd, phone, email string) error {
+func ValidateUserUpdate(uuid, passwd, role, phone, email string) error {
 	// UUID
-	if _, err := gouuid.FromString(uuid); err != nil {
-		return fmt.Errorf("wrong uuid format")
+	if uuid != "" {
+		if _, err := gouuid.FromString(uuid); err != nil {
+			return fmt.Errorf("wrong uuid format")
+		}
 	}
 
 	// Password
-	passwdMatched, err := regexp.MatchString("^[a-zA-Z0-9]{8,20}$", passwd)
-	if err != nil {
-		return fmt.Errorf("wrong password regex")
+	if passwd != "" {
+		passwdMatched, err := regexp.MatchString("^[a-zA-Z0-9]{8,20}$", passwd)
+		if err != nil {
+			return fmt.Errorf("wrong password regex")
+		}
+		if !passwdMatched {
+			return fmt.Errorf("wrong password format")
+		}
 	}
-	if !passwdMatched {
-		return fmt.Errorf("wrong password format")
+
+	// Role
+	if role != "" {
+
 	}
 
 	// Phone
-	phoneMatched, err := regexp.MatchString("^[0-9]{3}[-]+[0-9]{4}[-]+[0-9]{4}$", phone)
-	if err != nil {
-		return fmt.Errorf("wrong phone regex")
-	}
-	if !phoneMatched {
-		return fmt.Errorf("wrong phone format")
+	if phone != "" {
+		phoneMatched, err := regexp.MatchString("^[0-9]{3}[-]+[0-9]{4}[-]+[0-9]{4}$", phone)
+		if err != nil {
+			return fmt.Errorf("wrong phone regex")
+		}
+		if !phoneMatched {
+			return fmt.Errorf("wrong phone format")
+		}
 	}
 
 	// Email
-	if _, err := mail.ParseAddress(email); err != nil {
-		return fmt.Errorf("wrong email format")
+	if email != "" {
+		if _, err := mail.ParseAddress(email); err != nil {
+			return fmt.Errorf("wrong email format")
+		}
 	}
 
 	return nil
