@@ -131,15 +131,9 @@ func (u *UserUpdateRequest) validate() error {
 
 // DTO <-> Model
 func userCreateToUserInfoModel(userCreate *UserCreateRequest) *model.UserInfo {
-	// Set default user role
-	role := model.UserRoleUser
-	if userCreate.Role != "" {
-		role = model.UserRole(userCreate.Role)
-	}
-
 	return &model.UserInfo{
 		LoginID: userCreate.LoginId,
-		Role:    role,
+		Role:    model.UserRole(userCreate.Role),
 		Phone:   userCreate.Phone,
 		Email:   userCreate.Email,
 	}
@@ -170,7 +164,6 @@ func UserModelListToUserInfoList(userModelList []model.UserInfo) *UserListRespon
 		tmp := UserInfoResponse{
 			Id:      userModel.ID.String(),
 			LoginId: userModel.LoginID,
-			Role:    string(userModel.Role),
 			Phone:   userModel.Phone,
 			Email:   userModel.Email,
 		}

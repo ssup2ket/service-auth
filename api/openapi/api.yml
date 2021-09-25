@@ -1,6 +1,6 @@
 openapi: 3.0.0
 servers:
-  - url: http://api.dkosv3.9rum.cc
+  - url: http://ssup2ket.com
     description: ssup2ket auth service
 info:
   description: ssup2ket auth service
@@ -52,7 +52,7 @@ components:
         password:
           type: string
         role:
-          type: string
+          $ref: '#/components/schemas/UserRole'
         phone:
           type: string
         email:
@@ -71,7 +71,7 @@ components:
         password:
           type: string
         role:
-          type: string
+          $ref: '#/components/schemas/UserRole'
         phone:
           type: string
         email:
@@ -90,7 +90,7 @@ components:
         loginId:
           type: string
         role:
-          type: string
+          $ref: '#/components/schemas/UserRole'
         phone:
           type: string
         email:
@@ -107,6 +107,9 @@ components:
             $ref: '#/components/schemas/UserInfo'
         metadata:
           $ref: '#/components/schemas/ListMeta'
+    UserRole:
+      type: string
+      enum: ['admin', 'user']
     ListMeta:
       type: object
       required:

@@ -152,24 +152,18 @@ func (u *UserID) Validate() error {
 }
 
 func (u *UserCreate) Bind(r *http.Request) error {
-	return request.ValidateUserCreate(u.LoginId, u.Password, u.Role, u.Phone, u.Email)
+	return request.ValidateUserCreate(u.LoginId, u.Password, string(u.Role), u.Phone, u.Email)
 }
 
 func (u *UserUpdate) Bind(r *http.Request) error {
-	return request.ValidateUserUpdate(u.Id, u.Password, u.Role, u.Phone, u.Email)
+	return request.ValidateUserUpdate(u.Id, u.Password, string(u.Role), u.Phone, u.Email)
 }
 
 // DTO <-> Model
 func userCreateToUserInfoModel(userCreate *UserCreate) *model.UserInfo {
-	// Set default user role
-	role := model.UserRoleUser
-	if userCreate.Role != "" {
-		role = model.UserRole(userCreate.Role)
-	}
-
 	return &model.UserInfo{
 		LoginID: userCreate.LoginId,
-		Role:    role,
+		Role:    model.UserRole(userCreate.Role),
 		Phone:   userCreate.Phone,
 		Email:   userCreate.Email,
 	}
@@ -188,7 +182,7 @@ func UserModelToUserInfo(userModel *model.UserInfo) *UserInfo {
 	return &UserInfo{
 		Id:      userModel.ID.String(),
 		LoginId: userModel.LoginID,
-		Role:    string(userModel.Role),
+		Role:    UserRole(userModel.Role),
 		Phone:   userModel.Phone,
 		Email:   userModel.Email,
 	}
@@ -200,7 +194,7 @@ func UserModelListToUserInfoList(userModelList []model.UserInfo) []UserInfo {
 		tmp := UserInfo{
 			Id:      userModel.ID.String(),
 			LoginId: userModel.LoginID,
-			Role:    string(userModel.Role),
+			Role:    UserRole(userModel.Role),
 			Phone:   userModel.Phone,
 			Email:   userModel.Email,
 		}

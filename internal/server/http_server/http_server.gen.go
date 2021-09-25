@@ -45,20 +45,20 @@ type TokenInfo struct {
 
 // UserCreate defines model for UserCreate.
 type UserCreate struct {
-	Email    string `json:"email"`
-	LoginId  string `json:"loginId"`
-	Password string `json:"password"`
-	Phone    string `json:"phone"`
-	Role     string `json:"role"`
+	Email    string   `json:"email"`
+	LoginId  string   `json:"loginId"`
+	Password string   `json:"password"`
+	Phone    string   `json:"phone"`
+	Role     UserRole `json:"role"`
 }
 
 // UserInfo defines model for UserInfo.
 type UserInfo struct {
-	Email   string `json:"email"`
-	Id      string `json:"id"`
-	LoginId string `json:"loginId"`
-	Phone   string `json:"phone"`
-	Role    string `json:"role"`
+	Email   string   `json:"email"`
+	Id      string   `json:"id"`
+	LoginId string   `json:"loginId"`
+	Phone   string   `json:"phone"`
+	Role    UserRole `json:"role"`
 }
 
 // UserInfoList defines model for UserInfoList.
@@ -67,13 +67,22 @@ type UserInfoList struct {
 	Users    []UserInfo `json:"users"`
 }
 
+// UserRole defines model for UserRole.
+type UserRole string
+
+// List of UserRole
+const (
+	UserRole_admin UserRole = "admin"
+	UserRole_user  UserRole = "user"
+)
+
 // UserUpdate defines model for UserUpdate.
 type UserUpdate struct {
-	Email    string `json:"email"`
-	Id       string `json:"id"`
-	Password string `json:"password"`
-	Phone    string `json:"phone"`
-	Role     string `json:"role"`
+	Email    string   `json:"email"`
+	Id       string   `json:"id"`
+	Password string   `json:"password"`
+	Phone    string   `json:"phone"`
+	Role     UserRole `json:"role"`
 }
 
 // Limit defines model for Limit.
@@ -351,21 +360,21 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the Swagger specification corresponding to the generated code
