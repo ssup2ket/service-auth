@@ -45,7 +45,8 @@ func (t *TokenServiceImp) CreateToken(ctx context.Context, loginID, passwd strin
 	}
 
 	// Create auth token
-	tokenInfo, err := token.CreateToken(&token.AuthClaims{UserID: userInfo.ID.String(), UserLoginID: userInfo.LoginID})
+	tokenInfo, err := token.CreateToken(&token.AuthClaims{UserID: userInfo.ID.String(),
+		UserLoginID: userInfo.LoginID, UserRole: userInfo.Role})
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user secret")
 		return nil, getReturnErr(err)

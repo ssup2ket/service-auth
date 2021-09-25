@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/casbin/casbin"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	opentracing "github.com/opentracing/opentracing-go"
@@ -131,23 +132,24 @@ func mwAuthTokenValidatorAndSetter() func(next http.Handler) http.Handler {
 			}
 
 			// Set auth context to context
-			middleware.SetUserIDToCtx(ctx, authInfo.UserID)
-			middleware.SetUserLoginIDToCtx(ctx, authInfo.UserLoginID)
+			newCtx := middleware.SetUserIDToCtx(ctx, authInfo.UserID)
+			newCtx = middleware.SetUserLoginIDToCtx(newCtx, authInfo.UserLoginID)
+			newCtx = middleware.SetUserRoleToCtx(newCtx, authInfo.UserRole)
 
 			// Set auth info to logger
-			zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
+			zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
 				return c.Str("token_user_id", authInfo.UserID).Str("token_user_loginid", authInfo.UserLoginID)
 			})
 
 			// Call next handler
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(newCtx))
 		}
 
 		return http.HandlerFunc(fn)
 	}
 }
 
-func mwUserIDSetter() func(next http.Handler) http.Handler {
+func mwUserIDLoggerSetter() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -166,6 +168,35 @@ func mwUserIDSetter() func(next http.Handler) http.Handler {
 
 			// Call next handler
 			next.ServeHTTP(w, r)
+		}
+
+		return http.HandlerFunc(fn)
+	}
+}
+
+func mwAuthorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			// Get role, method, path from request
+			role, err := middleware.GetUserRoleFromCtx(ctx)
+			if err != nil {
+				log.Ctx(ctx).Error().Msg("No user role in context")
+				render.Render(w, r, getErrRendererServerError())
+				return
+			}
+			method := r.Method
+			path := r.URL.Path
+
+			// Check authority
+			if e.Enforce(string(role), path, method) {
+				next.ServeHTTP(w, r)
+			} else {
+				log.Ctx(ctx).Error().Msg("This request isn't allowed")
+				render.Render(w, r, getErrRendererNotAllowed())
+				return
+			}
 		}
 
 		return http.HandlerFunc(fn)

@@ -166,20 +166,20 @@ func icAuthTokenValidaterAndSetterUary() grpc.UnaryServerInterceptor {
 		}
 
 		// Set auth context to context
-		middleware.SetUserIDToCtx(ctx, authInfo.UserID)
-		middleware.SetUserLoginIDToCtx(ctx, authInfo.UserLoginID)
+		newCtx := middleware.SetUserIDToCtx(ctx, authInfo.UserID)
+		newCtx = middleware.SetUserLoginIDToCtx(newCtx, authInfo.UserLoginID)
 
 		// Set auth info to logger
-		zerolog.Ctx(ctx).UpdateContext(func(c zerolog.Context) zerolog.Context {
+		zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
 			return c.Str("token_user_id", authInfo.UserID).Str("token_user_loginid", authInfo.UserLoginID)
 		})
 
 		// Call next handler
-		return handler(ctx, req)
+		return handler(newCtx, req)
 	}
 }
 
-func icUserIDSetterUary() grpc.UnaryServerInterceptor {
+func icUserIDLoggerSetterUary() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
 		// If not user service, skip this interceptor
 		if !strings.HasPrefix(info.FullMethod, "/User/") {

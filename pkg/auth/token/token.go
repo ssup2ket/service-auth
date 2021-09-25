@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 )
 
 const (
@@ -21,6 +23,7 @@ type TokenClaims struct {
 type AuthClaims struct {
 	UserID      string
 	UserLoginID string
+	UserRole    model.UserRole
 }
 
 type TokenInfo struct {
@@ -43,6 +46,7 @@ func CreateToken(authInfo *AuthClaims) (*TokenInfo, error) {
 		AuthClaims: AuthClaims{
 			UserID:      authInfo.UserID,
 			UserLoginID: authInfo.UserLoginID,
+			UserRole:    authInfo.UserRole,
 		},
 	})
 

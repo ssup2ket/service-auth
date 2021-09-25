@@ -7,6 +7,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/casbin/casbin"
 	"github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -38,6 +39,13 @@ func main() {
 		log.Fatal().Msg("Wrong deploy env")
 	}
 
+	// Print config and starting
+	log.Info().Str("config", fmt.Sprintf("%+v", *cfg)).Send()
+	log.Info().Msg("Starting ssup2ket auth service...")
+
+	// Init Casbin for RBAC
+	enforcerHTTP := casbin.NewEnforcer("configs/rbac_http_model.conf", "configs/rbac_http_policy.csv")
+
 	// Set jeager tracer config
 	jeagerCfg := jaegercfg.Configuration{
 		ServiceName: "auth",
@@ -62,10 +70,6 @@ func main() {
 	}
 	defer closer.Close()
 
-	// Print config and starting
-	log.Info().Str("config", fmt.Sprintf("%+v", *cfg)).Send()
-	log.Info().Msg("Starting ssup2ket auth service...")
-
 	// Init domain
 	d, err := domain.New(cfg)
 	if err != nil {
@@ -73,7 +77,7 @@ func main() {
 	}
 
 	// Init and run HTTP server
-	httpServer, err := http_server.New(cfg.ServerURL, d, tracer)
+	httpServer, err := http_server.New(d, cfg.ServerURL, enforcerHTTP, tracer)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create HTTP server")
 	}

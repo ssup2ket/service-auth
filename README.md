@@ -43,6 +43,7 @@ $ go install github.com/nektos/act@latest
 
 * UUID for DB - https://github.com/google/uuid/issues/20
 * Istio GRPC - https://stackoverflow.com/questions/62459006/how-to-route-multiple-grpc-services-based-on-path-in-istiokubernetes
+* Casbin RBAC - https://github.com/luk4z7/middleware-acl
 * OpenTracing tracer - https://github.com/jaegertracing/jaeger-client-go/blob/master/zipkin/README.md
 * OpenTracing middleware - https://github.com/go-chi/httptracer
 * OpenTracing intercepter - https://github.com/opentracing-contrib/go-grpc

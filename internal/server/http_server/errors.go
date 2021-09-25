@@ -58,6 +58,16 @@ func getErrRendererNotFound(res errors.ErrResouce) render.Renderer {
 	}
 }
 
+func getErrRendererNotAllowed() render.Renderer {
+	return &errResponse{
+		ErrorInfo: ErrorInfo{
+			Code:    errors.CodeNotAllowed,
+			Message: errors.MsgNotAllowed,
+		},
+		HTTPStatusCode: http.StatusMethodNotAllowed, // 405
+	}
+}
+
 func getErrRendererConflict(res errors.ErrResouce) render.Renderer {
 	errCode := errors.CodeNotFound
 	errMsg := errors.MsgNotFound

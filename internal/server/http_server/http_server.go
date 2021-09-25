@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/casbin/casbin"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	opentracing "github.com/opentracing/opentracing-go"
@@ -24,7 +25,7 @@ type ServerHTTP struct {
 	tracer opentracing.Tracer
 }
 
-func New(url string, d *domain.Domain, t opentracing.Tracer) (*ServerHTTP, error) {
+func New(d *domain.Domain, url string, e *casbin.Enforcer, t opentracing.Tracer) (*ServerHTTP, error) {
 	server := ServerHTTP{}
 	serverWrapper := ServerInterfaceWrapper{
 		Handler: &server,
@@ -45,12 +46,13 @@ func New(url string, d *domain.Domain, t opentracing.Tracer) (*ServerHTTP, error
 	r.Route("/v1", func(r chi.Router) {
 		// Auth
 		r.Group(func(r chi.Router) {
-			// Set token validator
+			// Set Auth middlewares
 			r.Use(mwAuthTokenValidatorAndSetter())
+			r.Use(mwAuthorizer(e))
 
 			// User
 			r.Group(func(r chi.Router) {
-				r.Use(mwUserIDSetter())
+				r.Use(mwUserIDLoggerSetter())
 
 				r.Get("/users", serverWrapper.GetUsers)
 				r.Get("/users/{UserID}", serverWrapper.GetUsersUserID)

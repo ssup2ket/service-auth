@@ -33,7 +33,7 @@ func New(d *domain.Domain, t opentracing.Tracer) (*ServerGRPC, error) {
 				icAccessLoggerUary(),
 
 				icAuthTokenValidaterAndSetterUary(),
-				icUserIDSetterUary(),
+				icUserIDLoggerSetterUary(),
 			),
 		),
 		domain: d,

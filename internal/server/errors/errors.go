@@ -10,6 +10,7 @@ const (
 	CodeBadRequest   = "BAD_REQEUEST"
 	CodeUnauthorized = "UNAUTHORIZED"
 	CodeServerError  = "INTERNAL_SERVER_ERROR"
+	CodeNotAllowed   = "NOT_ALLOWED"
 
 	// Resource not found
 	CodeNotFound     = "NOT_FOUND"
@@ -27,6 +28,7 @@ const (
 	MsgBadRequest   = "Bad Request"
 	MsgUnauthorized = "Unauthroized"
 	MsgServerError  = "Internal server error"
+	MsgNotAllowed   = "Not allowed"
 
 	// Resource not found
 	MsgNotFound     = "Not found"
