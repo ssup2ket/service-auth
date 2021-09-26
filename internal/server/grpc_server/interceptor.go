@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/casbin/casbin"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/rs/zerolog"
@@ -24,7 +25,7 @@ import (
 )
 
 func icLoggerSetterUnary() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		// Create logger form global logger and set the logger in the context
 		logger := log.With().Logger()
 
@@ -33,13 +34,76 @@ func icLoggerSetterUnary() grpc.UnaryServerInterceptor {
 	}
 }
 
-func icAccessLoggerUary() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+func icRequestIdSetterUnary() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		// Get request ID
+		md := grpcmeta.ExtractMetaFromContext(ctx)
+		requestID := ""
+		requestIDs := md[middleware.HeaderRequestID]
+		if len(requestIDs) != 1 {
+			requestID = uuid.NewV4().String()
+		} else {
+			requestID = requestIDs[0]
+		}
+
+		// Set request ID to new context
+		newCtx := middleware.SetRequestIDToCtx(ctx, requestID)
+
+		// Set request ID to logger
+		zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
+			return c.Str("request_id", requestID)
+		})
+
+		// Set request ID to response meta
+		header := metadata.Pairs(middleware.HeaderRequestID, requestID)
+		grpc.SetHeader(newCtx, header)
+
+		// Call next handler
+		return handler(newCtx, req)
+	}
+}
+
+func icOpenTracingSetterUnary(t opentracing.Tracer) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		// Get spancontext from request headers
+		md := grpcmeta.ExtractMetaFromContext(ctx)
+		spanCtx, err := t.Extract(opentracing.HTTPHeaders, grpcmeta.MetadataReaderWriter{MD: md})
+		if err != nil {
+			if err != opentracing.ErrSpanContextNotFound {
+				log.Ctx(ctx).Error().Err(err).Msg("Failed to get opentracing spancontext")
+				return nil, getErrServerError()
+			}
+		}
+
+		// Start-Finish span
+		span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, t, "auth-service", ext.RPCServerOption(spanCtx))
+		defer span.Finish()
+
+		// Get trace ID and span ID
+		traceID := span.Context().(jaeger.SpanContext).TraceID().String()
+		spanID := span.Context().(jaeger.SpanContext).SpanID().String()
+
+		// Set trace ID and span ID to logger
+		zerolog.Ctx(childCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
+			return c.Str("trace_id", traceID).Str("span_id", spanID)
+		})
+
+		// Set trace ID and span ID to response header
+		header := metadata.Pairs(middleware.HeaderTraceID, traceID, middleware.HeaderSpanID, spanID)
+		grpc.SetHeader(childCtx, header)
+
+		// Call next handler
+		return handler(childCtx, req)
+	}
+}
+
+func icAccessLoggerUnary() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		// Get request ID
 		requestID, err := middleware.GetRequestIDFromCtx(ctx)
 		if err != nil {
 			log.Ctx(ctx).Error().Err(err).Msg("Failed to get request ID from context")
-			return
+			return nil, getErrServerError()
 		}
 
 		// Get span
@@ -74,71 +138,8 @@ func icAccessLoggerUary() grpc.UnaryServerInterceptor {
 	}
 }
 
-func icRequestIdSetterUnary() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
-		// Get request ID
-		md := grpcmeta.ExtractMetaFromContext(ctx)
-		requestID := ""
-		requestIDs := md[middleware.HeaderRequestID]
-		if len(requestIDs) != 1 {
-			requestID = uuid.NewV4().String()
-		} else {
-			requestID = requestIDs[0]
-		}
-
-		// Set request ID to new context
-		newCtx := middleware.SetRequestIDToCtx(ctx, requestID)
-
-		// Set request ID to logger
-		zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
-			return c.Str("request_id", requestID)
-		})
-
-		// Set request ID to response meta
-		header := metadata.Pairs(middleware.HeaderRequestID, requestID)
-		grpc.SetHeader(newCtx, header)
-
-		// Call next handler
-		return handler(newCtx, req)
-	}
-}
-
-func icOpenTracingSetterUnary(t opentracing.Tracer) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
-		// Get spancontext from request headers
-		md := grpcmeta.ExtractMetaFromContext(ctx)
-		spanCtx, err := t.Extract(opentracing.HTTPHeaders, grpcmeta.MetadataReaderWriter{MD: md})
-		if err != nil {
-			if err != opentracing.ErrSpanContextNotFound {
-				log.Ctx(ctx).Error().Err(err).Msg("Failed to get opentracing spancontext")
-				return nil, getErrServerError()
-			}
-		}
-
-		// Start-Finish span
-		span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, t, "auth-service", ext.RPCServerOption(spanCtx))
-		defer span.Finish()
-
-		// Get trace ID and span ID
-		traceID := span.Context().(jaeger.SpanContext).TraceID().String()
-		spanID := span.Context().(jaeger.SpanContext).SpanID().String()
-
-		// Set trace ID and span ID to logger
-		zerolog.Ctx(childCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
-			return c.Str("trace_id", traceID).Str("span_id", spanID)
-		})
-
-		// Set trace ID and span ID to response header
-		header := metadata.Pairs(middleware.HeaderTraceID, traceID, middleware.HeaderSpanID, spanID)
-		grpc.SetHeader(childCtx, header)
-
-		// Call next handler
-		return handler(childCtx, req)
-	}
-}
-
-func icAuthTokenValidaterAndSetterUary() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+func icAuthTokenValidaterAndSetterUnary() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		// Pass token validation for some requests
 		if info.FullMethod == "/Token/CreateToken" || info.FullMethod == "/User/CreateUser" {
 			return handler(ctx, req)
@@ -147,19 +148,20 @@ func icAuthTokenValidaterAndSetterUary() grpc.UnaryServerInterceptor {
 		// Get request's meta data
 		md, okMeta := metadata.FromIncomingContext(ctx)
 		if !okMeta {
-			log.Ctx(ctx).Error().Err(err).Msg("Failed to get metadata for auth token")
+			log.Ctx(ctx).Error().Msg("Failed to get metadata for auth token")
 			return nil, getErrServerError()
 		}
 
 		// Get auth token
-		token, okToken := md["authorization"]
-		if !okToken {
+		tokens, okToken := md["authorization"]
+		if !okToken || len(tokens) != 1 {
 			log.Ctx(ctx).Error().Msg("Failed to get auth token")
 			return nil, getErrUnauthorized()
 		}
+		token := strings.TrimSpace(strings.TrimPrefix(tokens[0], "Bearer"))
 
 		// Validate auth token and get auth info
-		authInfo, err := authtoken.ValidateToken(token[0])
+		authInfo, err := authtoken.ValidateToken(token)
 		if err != nil {
 			log.Ctx(ctx).Error().Err(err).Msg("Auth token isn't valid")
 			return nil, getErrUnauthorized()
@@ -168,6 +170,7 @@ func icAuthTokenValidaterAndSetterUary() grpc.UnaryServerInterceptor {
 		// Set auth context to context
 		newCtx := middleware.SetUserIDToCtx(ctx, authInfo.UserID)
 		newCtx = middleware.SetUserLoginIDToCtx(newCtx, authInfo.UserLoginID)
+		newCtx = middleware.SetUserRoleToCtx(newCtx, authInfo.UserRole)
 
 		// Set auth info to logger
 		zerolog.Ctx(newCtx).UpdateContext(func(c zerolog.Context) zerolog.Context {
@@ -179,8 +182,43 @@ func icAuthTokenValidaterAndSetterUary() grpc.UnaryServerInterceptor {
 	}
 }
 
-func icUserIDLoggerSetterUary() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+func icAuthorizerUnary(e *casbin.Enforcer) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		// Pass token validation for some requests
+		if info.FullMethod == "/Token/CreateToken" || info.FullMethod == "/User/CreateUser" {
+			return handler(ctx, req)
+		}
+
+		// Get role from context
+		role, err := middleware.GetUserRoleFromCtx(ctx)
+		if err != nil {
+			log.Ctx(ctx).Error().Msg("No user role in context")
+			return nil, getErrServerError()
+		}
+
+		// Get object and action from method info
+		// Method Format : /[Service(Object)]/[Action][Service[Object]] ex) /Token/CreateToken
+		tokens := strings.Split(info.FullMethod, "/")
+		if len(tokens) != 3 {
+			log.Ctx(ctx).Error().Msg("Invalid method format")
+			return nil, getErrServerError()
+		}
+		object := strings.ToLower(tokens[1])
+		action := strings.TrimSuffix(strings.ToLower(tokens[2]), object)
+
+		// Check authority
+		if !e.Enforce(string(role), object, action) {
+			log.Ctx(ctx).Error().Msg("This request isn't allowed")
+			return nil, getErrUnauthorized()
+		}
+
+		// Call next handler
+		return handler(ctx, req)
+	}
+}
+
+func icUserIDLoggerSetterUnary() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		// If not user service, skip this interceptor
 		if !strings.HasPrefix(info.FullMethod, "/User/") {
 			return handler(ctx, req)

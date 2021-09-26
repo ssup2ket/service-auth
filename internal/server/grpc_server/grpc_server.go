@@ -3,6 +3,7 @@ package grpc_server
 import (
 	"net"
 
+	"github.com/casbin/casbin"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2"
 	grpc_recover "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	opentracing "github.com/opentracing/opentracing-go"
@@ -21,7 +22,7 @@ type ServerGRPC struct {
 	UnimplementedUserServer
 }
 
-func New(d *domain.Domain, t opentracing.Tracer) (*ServerGRPC, error) {
+func New(d *domain.Domain, e *casbin.Enforcer, t opentracing.Tracer) (*ServerGRPC, error) {
 	server := ServerGRPC{
 		grpcServer: grpc.NewServer(
 			grpc_middleware.WithUnaryServerChain(
@@ -30,10 +31,11 @@ func New(d *domain.Domain, t opentracing.Tracer) (*ServerGRPC, error) {
 
 				icRequestIdSetterUnary(),
 				icOpenTracingSetterUnary(t),
-				icAccessLoggerUary(),
+				icAccessLoggerUnary(),
 
-				icAuthTokenValidaterAndSetterUary(),
-				icUserIDLoggerSetterUary(),
+				icAuthTokenValidaterAndSetterUnary(),
+				icAuthorizerUnary(e),
+				icUserIDLoggerSetterUnary(),
 			),
 		),
 		domain: d,

@@ -45,6 +45,7 @@ func main() {
 
 	// Init Casbin for RBAC
 	enforcerHTTP := casbin.NewEnforcer("configs/rbac_http_model.conf", "configs/rbac_http_policy.csv")
+	enforcerGRPC := casbin.NewEnforcer("configs/rbac_grpc_model.conf", "configs/rbac_grpc_policy.csv")
 
 	// Set jeager tracer config
 	jeagerCfg := jaegercfg.Configuration{
@@ -85,7 +86,7 @@ func main() {
 	httpServer.ListenAndServe()
 
 	// Init and run GRPC server
-	grpcServer, err := grpc_server.New(d, tracer)
+	grpcServer, err := grpc_server.New(d, enforcerGRPC, tracer)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create GRPC server")
 	}

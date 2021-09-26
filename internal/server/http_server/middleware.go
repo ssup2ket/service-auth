@@ -19,33 +19,6 @@ import (
 	authtoken "github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
 )
 
-func mwAccessLogger(r *http.Request, status, size int, duration time.Duration) {
-	ctx := r.Context()
-
-	// Get request ID
-	requestID, err := middleware.GetRequestIDFromCtx(ctx)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("Failed to get request ID from context")
-		return
-	}
-
-	// Get span
-	span := opentracing.SpanFromContext(ctx)
-	if span == nil {
-		log.Ctx(ctx).Error().Msg("Failed to get opentracing span from context")
-		return
-	}
-
-	// Logging
-	zerolog.Ctx(ctx).Info().
-		Str("request_id", requestID).
-		Str("trace_id", span.Context().(jaeger.SpanContext).TraceID().String()).
-		Str("span_id", span.Context().(jaeger.SpanContext).SpanID().String()).
-		Str("method", r.Method).Str("url", r.URL.String()).Int("status", status).
-		Str("client_ip", r.RemoteAddr).Int("response_size", size).Dur("duration", duration).
-		Send()
-}
-
 func mwRequestIDSetter() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
@@ -115,6 +88,33 @@ func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Hand
 	}
 }
 
+func mwAccessLogger(r *http.Request, status, size int, duration time.Duration) {
+	ctx := r.Context()
+
+	// Get request ID
+	requestID, err := middleware.GetRequestIDFromCtx(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get request ID from context")
+		return
+	}
+
+	// Get span
+	span := opentracing.SpanFromContext(ctx)
+	if span == nil {
+		log.Ctx(ctx).Error().Msg("Failed to get opentracing span from context")
+		return
+	}
+
+	// Logging
+	zerolog.Ctx(ctx).Info().
+		Str("request_id", requestID).
+		Str("trace_id", span.Context().(jaeger.SpanContext).TraceID().String()).
+		Str("span_id", span.Context().(jaeger.SpanContext).SpanID().String()).
+		Str("method", r.Method).Str("url", r.URL.String()).Int("status", status).
+		Str("client_ip", r.RemoteAddr).Int("response_size", size).Dur("duration", duration).
+		Send()
+}
+
 func mwAuthTokenValidatorAndSetter() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
@@ -149,6 +149,36 @@ func mwAuthTokenValidatorAndSetter() func(next http.Handler) http.Handler {
 	}
 }
 
+func mwAuthorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+
+			// Get role, method, path from request
+			role, err := middleware.GetUserRoleFromCtx(ctx)
+			if err != nil {
+				log.Ctx(ctx).Error().Msg("No user role in context")
+				render.Render(w, r, getErrRendererServerError())
+				return
+			}
+			method := strings.ToLower(r.Method)
+			path := r.URL.Path
+
+			// Check authority
+			if !e.Enforce(string(role), path, method) {
+				log.Ctx(ctx).Error().Msg("This request isn't allowed")
+				render.Render(w, r, getErrRendererUnauthorized())
+				return
+			}
+
+			// Call next handler
+			next.ServeHTTP(w, r)
+		}
+
+		return http.HandlerFunc(fn)
+	}
+}
+
 func mwUserIDLoggerSetter() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
@@ -168,35 +198,6 @@ func mwUserIDLoggerSetter() func(next http.Handler) http.Handler {
 
 			// Call next handler
 			next.ServeHTTP(w, r)
-		}
-
-		return http.HandlerFunc(fn)
-	}
-}
-
-func mwAuthorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-
-			// Get role, method, path from request
-			role, err := middleware.GetUserRoleFromCtx(ctx)
-			if err != nil {
-				log.Ctx(ctx).Error().Msg("No user role in context")
-				render.Render(w, r, getErrRendererServerError())
-				return
-			}
-			method := r.Method
-			path := r.URL.Path
-
-			// Check authority
-			if e.Enforce(string(role), path, method) {
-				next.ServeHTTP(w, r)
-			} else {
-				log.Ctx(ctx).Error().Msg("This request isn't allowed")
-				render.Render(w, r, getErrRendererNotAllowed())
-				return
-			}
 		}
 
 		return http.HandlerFunc(fn)
