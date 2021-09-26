@@ -1,7 +1,7 @@
 export GO111MODULE=on
 
 # Server URL, deploy env
-export SERVER_URL=http://localhost
+export SERVER_URL=http://192.168.0.36/auth
 export DEPLOY_ENV=local
 
 # MySQL
