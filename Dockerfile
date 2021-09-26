@@ -6,7 +6,8 @@ RUN CGO_ENABLED=0 GO111MODULE=on go build -a -o ssup2ket-auth ./cmd/ssup2ket-aut
 
 # Make up image
 FROM alpine:3.13.1
+WORKDIR /root
 COPY --from=builder /workspace/ssup2ket-auth /usr/bin/ssup2ket-auth
-COPY --from=builder /workspace/configs .
+COPY --from=builder /workspace/configs configs
 
 CMD ["ssup2ket-auth"]

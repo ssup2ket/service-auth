@@ -29,6 +29,10 @@ init-local:
 run: gen-openapi gen-protobuf
 	. scripts/env-local && go run cmd/ssup2ket-auth/main.go
 
+.PHONY: build-image
+build-image:
+	docker build --tag ssup2/ssup2ket-auth:local .
+
 .PHONY: test-unit
 test-unit: gen-mock
 	go test -v ./...
