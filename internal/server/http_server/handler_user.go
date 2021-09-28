@@ -9,6 +9,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/request"
 	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
 )
@@ -100,7 +101,7 @@ func (s *ServerHTTP) PutUsersUserID(w http.ResponseWriter, r *http.Request, user
 
 	// Unmarshal request
 	if err := render.Bind(r, &userUpdate); err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("Wrong create user request")
+		log.Ctx(ctx).Error().Err(err).Msg("Wrong update user request")
 		render.Render(w, r, getErrRendererBadRequest())
 		return
 	}
@@ -135,6 +136,96 @@ func (s *ServerHTTP) DeleteUsersUserID(w http.ResponseWriter, r *http.Request, u
 	if err := userID.Validate(); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Wrong user ID")
 		render.Render(w, r, getErrRendererBadRequest())
+		return
+	}
+
+	// Delete user
+	if err := s.domain.User.DeleteUser(ctx, modeluuid.FromStringOrNil(string(userID))); err != nil {
+		if err == service.ErrRepoNotFound {
+			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
+			render.Render(w, r, getErrRendererNotFound(errors.ErrResouceUser))
+			return
+		}
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user")
+		render.Render(w, r, getErrRendererServerError())
+		return
+	}
+
+	render.JSON(w, r, nil)
+}
+
+// Get me
+func (s *ServerHTTP) GetUsersMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Get user ID
+	userID, err := middleware.GetUserIDFromCtx(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("No user ID in context")
+		render.Render(w, r, getErrRendererServerError())
+		return
+	}
+
+	// Get user
+	userInfo, err := s.domain.User.GetUser(ctx, modeluuid.FromStringOrNil(string(userID)))
+	if err != nil {
+		if err == service.ErrRepoNotFound {
+			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
+			render.Render(w, r, getErrRendererNotFound(errors.ErrResouceUser))
+			return
+		}
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user")
+		render.Render(w, r, getErrRendererServerError())
+		return
+	}
+
+	render.JSON(w, r, UserModelToUserInfo(userInfo))
+}
+
+// Update me
+func (s *ServerHTTP) PutUsersMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userUpdate := UserUpdate{}
+
+	// Unmarshal request
+	if err := render.Bind(r, &userUpdate); err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Wrong update user request")
+		render.Render(w, r, getErrRendererBadRequest())
+		return
+	}
+
+	// Get user ID
+	userID, err := middleware.GetUserIDFromCtx(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("No user ID in context")
+		render.Render(w, r, getErrRendererServerError())
+		return
+	}
+
+	// Update user
+	if err := s.domain.User.UpdateUser(ctx, userUpdateToUserInfoModel(string(userID), &userUpdate), userUpdate.Password); err != nil {
+		if err == service.ErrRepoNotFound {
+			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
+			render.Render(w, r, getErrRendererNotFound(errors.ErrResouceUser))
+			return
+		}
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user")
+		render.Render(w, r, getErrRendererServerError())
+		return
+	}
+
+	render.JSON(w, r, nil)
+}
+
+// Delete me
+func (s *ServerHTTP) DeleteUsersMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Get user ID
+	userID, err := middleware.GetUserIDFromCtx(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("No user ID in context")
+		render.Render(w, r, getErrRendererServerError())
 		return
 	}
 

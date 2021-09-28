@@ -4,6 +4,7 @@ package grpc_server
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -107,8 +108,8 @@ type UserClient interface {
 	ListUser(ctx context.Context, in *UserListRequest, opts ...grpc.CallOption) (*UserListResponse, error)
 	CreateUser(ctx context.Context, in *UserCreateRequest, opts ...grpc.CallOption) (*UserInfoResponse, error)
 	GetUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserInfoResponse, error)
-	UpdateUser(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*Empty, error)
-	DeleteUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*Empty, error)
+	UpdateUser(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	DeleteUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type userClient struct {
@@ -146,8 +147,8 @@ func (c *userClient) GetUser(ctx context.Context, in *UserIDRequest, opts ...grp
 	return out, nil
 }
 
-func (c *userClient) UpdateUser(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *userClient) UpdateUser(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/User/UpdateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -155,8 +156,8 @@ func (c *userClient) UpdateUser(ctx context.Context, in *UserUpdateRequest, opts
 	return out, nil
 }
 
-func (c *userClient) DeleteUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *userClient) DeleteUser(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/User/DeleteUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -171,8 +172,8 @@ type UserServer interface {
 	ListUser(context.Context, *UserListRequest) (*UserListResponse, error)
 	CreateUser(context.Context, *UserCreateRequest) (*UserInfoResponse, error)
 	GetUser(context.Context, *UserIDRequest) (*UserInfoResponse, error)
-	UpdateUser(context.Context, *UserUpdateRequest) (*Empty, error)
-	DeleteUser(context.Context, *UserIDRequest) (*Empty, error)
+	UpdateUser(context.Context, *UserUpdateRequest) (*empty.Empty, error)
+	DeleteUser(context.Context, *UserIDRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -189,10 +190,10 @@ func (UnimplementedUserServer) CreateUser(context.Context, *UserCreateRequest) (
 func (UnimplementedUserServer) GetUser(context.Context, *UserIDRequest) (*UserInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedUserServer) UpdateUser(context.Context, *UserUpdateRequest) (*Empty, error) {
+func (UnimplementedUserServer) UpdateUser(context.Context, *UserUpdateRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
-func (UnimplementedUserServer) DeleteUser(context.Context, *UserIDRequest) (*Empty, error) {
+func (UnimplementedUserServer) DeleteUser(context.Context, *UserIDRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
@@ -324,6 +325,164 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteUser",
 			Handler:    _User_DeleteUser_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api/protobuf/api.proto",
+}
+
+// UserMeClient is the client API for UserMe service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type UserMeClient interface {
+	GetUserMe(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*UserInfoResponse, error)
+	UpdateUserMe(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	DeleteUserMe(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error)
+}
+
+type userMeClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewUserMeClient(cc grpc.ClientConnInterface) UserMeClient {
+	return &userMeClient{cc}
+}
+
+func (c *userMeClient) GetUserMe(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*UserInfoResponse, error) {
+	out := new(UserInfoResponse)
+	err := c.cc.Invoke(ctx, "/UserMe/GetUserMe", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userMeClient) UpdateUserMe(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/UserMe/UpdateUserMe", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userMeClient) DeleteUserMe(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/UserMe/DeleteUserMe", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UserMeServer is the server API for UserMe service.
+// All implementations must embed UnimplementedUserMeServer
+// for forward compatibility
+type UserMeServer interface {
+	GetUserMe(context.Context, *empty.Empty) (*UserInfoResponse, error)
+	UpdateUserMe(context.Context, *UserUpdateRequest) (*empty.Empty, error)
+	DeleteUserMe(context.Context, *empty.Empty) (*empty.Empty, error)
+	mustEmbedUnimplementedUserMeServer()
+}
+
+// UnimplementedUserMeServer must be embedded to have forward compatible implementations.
+type UnimplementedUserMeServer struct {
+}
+
+func (UnimplementedUserMeServer) GetUserMe(context.Context, *empty.Empty) (*UserInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserMe not implemented")
+}
+func (UnimplementedUserMeServer) UpdateUserMe(context.Context, *UserUpdateRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserMe not implemented")
+}
+func (UnimplementedUserMeServer) DeleteUserMe(context.Context, *empty.Empty) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserMe not implemented")
+}
+func (UnimplementedUserMeServer) mustEmbedUnimplementedUserMeServer() {}
+
+// UnsafeUserMeServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UserMeServer will
+// result in compilation errors.
+type UnsafeUserMeServer interface {
+	mustEmbedUnimplementedUserMeServer()
+}
+
+func RegisterUserMeServer(s grpc.ServiceRegistrar, srv UserMeServer) {
+	s.RegisterService(&UserMe_ServiceDesc, srv)
+}
+
+func _UserMe_GetUserMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserMeServer).GetUserMe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UserMe/GetUserMe",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserMeServer).GetUserMe(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserMe_UpdateUserMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserUpdateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserMeServer).UpdateUserMe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UserMe/UpdateUserMe",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserMeServer).UpdateUserMe(ctx, req.(*UserUpdateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserMe_DeleteUserMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserMeServer).DeleteUserMe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UserMe/DeleteUserMe",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserMeServer).DeleteUserMe(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// UserMe_ServiceDesc is the grpc.ServiceDesc for UserMe service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var UserMe_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "UserMe",
+	HandlerType: (*UserMeServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetUserMe",
+			Handler:    _UserMe_GetUserMe_Handler,
+		},
+		{
+			MethodName: "UpdateUserMe",
+			Handler:    _UserMe_UpdateUserMe_Handler,
+		},
+		{
+			MethodName: "DeleteUserMe",
+			Handler:    _UserMe_DeleteUserMe_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

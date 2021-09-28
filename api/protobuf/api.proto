@@ -1,13 +1,11 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "internal/server/grpc_server";
 
 // Message
-message Empty {
-}
-
 // Token request
 message TokenCreateRequest {
     string loginId = 1;
@@ -39,7 +37,7 @@ message UserCreateRequest {
     string email = 5;
 }
 
-message UserUpdateRequest {
+message UserUpdateRequest { 
     string id = 1;
     string password = 2;
     string role = 3;
@@ -69,6 +67,12 @@ service User {
     rpc ListUser(UserListRequest) returns (UserListResponse) {}
     rpc CreateUser(UserCreateRequest) returns (UserInfoResponse) {}
     rpc GetUser(UserIDRequest) returns (UserInfoResponse) {}
-    rpc UpdateUser(UserUpdateRequest) returns (Empty) {}
-    rpc DeleteUser(UserIDRequest) returns (Empty) {}
+    rpc UpdateUser(UserUpdateRequest) returns (google.protobuf.Empty) {}
+    rpc DeleteUser(UserIDRequest) returns (google.protobuf.Empty) {}
+}
+
+service UserMe {
+    rpc GetUserMe(google.protobuf.Empty) returns (UserInfoResponse) {}
+    rpc UpdateUserMe(UserUpdateRequest) returns (google.protobuf.Empty) {}
+    rpc DeleteUserMe(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 }

@@ -3,11 +3,13 @@ package grpc_server
 import (
 	"context"
 
+	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/rs/zerolog/log"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/request"
 	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
 )
@@ -72,7 +74,7 @@ func (s *ServerGRPC) GetUser(ctx context.Context, req *UserIDRequest) (*UserInfo
 	return UserModelToUserInfo(userInfo), nil
 }
 
-func (s *ServerGRPC) UpdateUser(ctx context.Context, req *UserUpdateRequest) (*Empty, error) {
+func (s *ServerGRPC) UpdateUser(ctx context.Context, req *UserUpdateRequest) (*empty.Empty, error) {
 	// Validate request
 	if err := req.validate(); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Wrong update user request")
@@ -89,10 +91,10 @@ func (s *ServerGRPC) UpdateUser(ctx context.Context, req *UserUpdateRequest) (*E
 		return nil, getErrBadRequest()
 	}
 
-	return &Empty{}, nil
+	return &empty.Empty{}, nil
 }
 
-func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*Empty, error) {
+func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*empty.Empty, error) {
 	// Validate request
 	if err := req.validate(); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Wrong delete user request")
@@ -109,7 +111,73 @@ func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*Empty
 		return nil, getErrServerError()
 	}
 
-	return &Empty{}, nil
+	return &empty.Empty{}, nil
+}
+
+func (s *ServerGRPC) GetUserMe(ctx context.Context, req *empty.Empty) (*UserInfoResponse, error) {
+	// Get user ID
+	userID, err := middleware.GetUserIDFromCtx(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("No user ID in context")
+		return nil, getErrServerError()
+	}
+
+	// Get user
+	userInfo, err := s.domain.User.GetUser(ctx, modeluuid.FromStringOrNil(string(userID)))
+	if err != nil {
+		if err == service.ErrRepoNotFound {
+			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
+			return nil, getErrNotFound(errors.ErrResouceUser)
+		}
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user")
+		return nil, getErrServerError()
+	}
+
+	// Return user info
+	return UserModelToUserInfo(userInfo), nil
+}
+
+func (s *ServerGRPC) UpdateUserMe(ctx context.Context, req *UserUpdateRequest) (*empty.Empty, error) {
+	// Get and set user ID
+	userID, err := middleware.GetUserIDFromCtx(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("No user ID in context")
+		return nil, getErrServerError()
+	}
+	req.Id = userID
+
+	// Update user
+	if err := s.domain.User.UpdateUser(ctx, userUpdateToUserInfoModel(req), req.Password); err != nil {
+		if err == service.ErrRepoNotFound {
+			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
+			return nil, getErrNotFound(errors.ErrResouceUser)
+		}
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user")
+		return nil, getErrBadRequest()
+	}
+
+	return &empty.Empty{}, nil
+}
+
+func (s *ServerGRPC) DeleteUserMe(ctx context.Context, req *empty.Empty) (*empty.Empty, error) {
+	// Get user ID
+	userID, err := middleware.GetUserIDFromCtx(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("No user ID in context")
+		return nil, getErrServerError()
+	}
+
+	// Delete user
+	if err := s.domain.User.DeleteUser(ctx, modeluuid.FromStringOrNil(userID)); err != nil {
+		if err == service.ErrRepoNotFound {
+			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
+			return nil, getErrNotFound(errors.ErrResouceUser)
+		}
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user")
+		return nil, getErrServerError()
+	}
+
+	return &empty.Empty{}, nil
 }
 
 // Request validate

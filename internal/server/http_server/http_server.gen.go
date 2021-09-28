@@ -105,6 +105,9 @@ type GetUsersParams struct {
 // PostUsersJSONBody defines parameters for PostUsers.
 type PostUsersJSONBody UserCreate
 
+// PutUsersMeJSONBody defines parameters for PutUsersMe.
+type PutUsersMeJSONBody UserUpdate
+
 // PutUsersUserIDJSONBody defines parameters for PutUsersUserID.
 type PutUsersUserIDJSONBody UserUpdate
 
@@ -113,6 +116,9 @@ type PostTokensJSONRequestBody PostTokensJSONBody
 
 // PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody PostUsersJSONBody
+
+// PutUsersMeJSONRequestBody defines body for PutUsersMe for application/json ContentType.
+type PutUsersMeJSONRequestBody PutUsersMeJSONBody
 
 // PutUsersUserIDJSONRequestBody defines body for PutUsersUserID for application/json ContentType.
 type PutUsersUserIDJSONRequestBody PutUsersUserIDJSONBody
@@ -128,6 +134,15 @@ type ServerInterface interface {
 
 	// (POST /users)
 	PostUsers(w http.ResponseWriter, r *http.Request)
+
+	// (DELETE /users/me)
+	DeleteUsersMe(w http.ResponseWriter, r *http.Request)
+
+	// (GET /users/me)
+	GetUsersMe(w http.ResponseWriter, r *http.Request)
+
+	// (PUT /users/me)
+	PutUsersMe(w http.ResponseWriter, r *http.Request)
 
 	// (DELETE /users/{UserID})
 	DeleteUsersUserID(w http.ResponseWriter, r *http.Request, userID UserID)
@@ -210,6 +225,51 @@ func (siw *ServerInterfaceWrapper) PostUsers(w http.ResponseWriter, r *http.Requ
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostUsers(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// DeleteUsersMe operation middleware
+func (siw *ServerInterfaceWrapper) DeleteUsersMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteUsersMe(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetUsersMe operation middleware
+func (siw *ServerInterfaceWrapper) GetUsersMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUsersMe(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// PutUsersMe operation middleware
+func (siw *ServerInterfaceWrapper) PutUsersMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutUsersMe(w, r)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -344,6 +404,15 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/users", wrapper.PostUsers)
 	})
 	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/users/me", wrapper.DeleteUsersMe)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/users/me", wrapper.PutUsersMe)
+	})
+	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/users/{UserID}", wrapper.DeleteUsersUserID)
 	})
 	r.Group(func(r chi.Router) {
@@ -359,21 +428,22 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"Nt50Voviq9FV+08AAAD//7QzFDrnGQAA",
 }
 
 // GetSwagger returns the Swagger specification corresponding to the generated code

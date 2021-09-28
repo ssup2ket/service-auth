@@ -20,6 +20,7 @@ type ServerGRPC struct {
 
 	UnimplementedTokenServer
 	UnimplementedUserServer
+	UnimplementedUserMeServer
 }
 
 func New(d *domain.Domain, e *casbin.Enforcer, t opentracing.Tracer) (*ServerGRPC, error) {
