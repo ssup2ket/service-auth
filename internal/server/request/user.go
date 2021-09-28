@@ -81,7 +81,9 @@ func ValidateUserUpdate(uuid, passwd, role, phone, email string) error {
 
 	// Role
 	if role != "" {
-
+		if !model.IsValidUserRole(role) {
+			return fmt.Errorf("wrong role")
+		}
 	}
 
 	// Phone

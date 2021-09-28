@@ -60,14 +60,11 @@ components:
     UserUpdate:
       type: object
       required:
-        - id
         - password
         - role
         - phone
         - email
       properties:
-        id:
-          type: string
         password:
           type: string
         role:

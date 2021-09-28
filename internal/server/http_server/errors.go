@@ -64,7 +64,7 @@ func getErrRendererConflict(res errors.ErrResouce) render.Renderer {
 	switch res {
 	case errors.ErrResouceUser:
 		errCode = errors.CodeConflictUser
-		errMsg = errors.MsgNotFoundUser
+		errMsg = errors.MsgConflictUser
 	}
 
 	return &errResponse{

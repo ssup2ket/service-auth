@@ -72,7 +72,7 @@ func (s *ServerHTTP) GetUsersUserID(w http.ResponseWriter, r *http.Request, user
 
 	// Validate request
 	if err := userID.Validate(); err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("Wrong get user request")
+		log.Ctx(ctx).Error().Err(err).Msg("Wrong user ID")
 		render.Render(w, r, getErrRendererBadRequest())
 		return
 	}
@@ -96,7 +96,7 @@ func (s *ServerHTTP) GetUsersUserID(w http.ResponseWriter, r *http.Request, user
 // Update a user
 func (s *ServerHTTP) PutUsersUserID(w http.ResponseWriter, r *http.Request, userID UserID) {
 	ctx := r.Context()
-	userUpdate := UserUpdate{Id: string(userID)}
+	userUpdate := UserUpdate{}
 
 	// Unmarshal request
 	if err := render.Bind(r, &userUpdate); err != nil {
@@ -105,8 +105,15 @@ func (s *ServerHTTP) PutUsersUserID(w http.ResponseWriter, r *http.Request, user
 		return
 	}
 
+	// Validate request
+	if err := userID.Validate(); err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Wrong user ID")
+		render.Render(w, r, getErrRendererBadRequest())
+		return
+	}
+
 	// Update user
-	if err := s.domain.User.UpdateUser(ctx, userUpdateToUserInfoModel(&userUpdate), userUpdate.Password); err != nil {
+	if err := s.domain.User.UpdateUser(ctx, userUpdateToUserInfoModel(string(userID), &userUpdate), userUpdate.Password); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			render.Render(w, r, getErrRendererNotFound(errors.ErrResouceUser))
@@ -126,7 +133,7 @@ func (s *ServerHTTP) DeleteUsersUserID(w http.ResponseWriter, r *http.Request, u
 
 	// Validate request
 	if err := userID.Validate(); err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("Wrong get user request")
+		log.Ctx(ctx).Error().Err(err).Msg("Wrong user ID")
 		render.Render(w, r, getErrRendererBadRequest())
 		return
 	}
@@ -156,7 +163,7 @@ func (u *UserCreate) Bind(r *http.Request) error {
 }
 
 func (u *UserUpdate) Bind(r *http.Request) error {
-	return request.ValidateUserUpdate(u.Id, u.Password, string(u.Role), u.Phone, u.Email)
+	return request.ValidateUserUpdate("", u.Password, string(u.Role), u.Phone, u.Email)
 }
 
 // DTO <-> Model
@@ -169,9 +176,9 @@ func userCreateToUserInfoModel(userCreate *UserCreate) *model.UserInfo {
 	}
 }
 
-func userUpdateToUserInfoModel(userUpdate *UserUpdate) *model.UserInfo {
+func userUpdateToUserInfoModel(userID string, userUpdate *UserUpdate) *model.UserInfo {
 	return &model.UserInfo{
-		ID:    modeluuid.FromStringOrNil(userUpdate.Id),
+		ID:    modeluuid.FromStringOrNil(userID),
 		Role:  model.UserRole(userUpdate.Role),
 		Phone: userUpdate.Phone,
 		Email: userUpdate.Email,
