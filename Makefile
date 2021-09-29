@@ -23,7 +23,7 @@ gen-mock:
 
 .PHONY: init-local
 init-local:
-	docker run --name ssup2ket-auth-local-mysql -p 3306:3306/tcp -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=local -d mysql:8.0
+	docker run --network=host --name ssup2ket-auth-local-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=local_auth -d mysql:8.0
 
 .PHONY: run
 run: gen-openapi gen-protobuf

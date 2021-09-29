@@ -170,7 +170,7 @@ func (s *ServerHTTP) GetUsersMe(w http.ResponseWriter, r *http.Request) {
 	userInfo, err := s.domain.User.GetUser(ctx, modeluuid.FromStringOrNil(string(userID)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
-			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
+			log.Ctx(ctx).Error().Msg("User doesn't exist")
 			render.Render(w, r, getErrRendererNotFound(errors.ErrResouceUser))
 			return
 		}
