@@ -20,8 +20,8 @@ USER_PHONE2="333-3333-3333"
 USER_EMAIL="user$RANDOM_VALUE@test.com"
 
 # -- Test cases --
-# Create users
-## Admin
+## Create users
+# Admin
 echo "-- Create admin user start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X POST \
@@ -34,7 +34,7 @@ echo Response HTTP Code : $RESPONSE_HTTP_CODE
 echo Response Body : $RESPONSE_BODY
 echo "-- Create admin user end --"
 
-## User
+# User
 echo "-- Create user start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X POST \
@@ -47,8 +47,8 @@ echo Response HTTP Code : $RESPONSE_HTTP_CODE
 echo Response Body : $RESPONSE_BODY
 echo "-- Create user end --"
 
-# Create tokens
-## Admin
+## Create tokens
+# Admin
 echo "-- Create admin user token start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X POST \
@@ -66,7 +66,7 @@ else
 fi
 echo "-- Create admin user token End --"
 
-## User
+# User
 echo "-- Create user token start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X POST \
@@ -84,8 +84,8 @@ else
 fi
 echo "-- Create user token end --"
 
-# Update user me
-## Admin
+## Update user me
+# Admin
 echo "-- Update admin user start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X PUT \
@@ -100,7 +100,7 @@ if [ $RESPONSE_HTTP_CODE != "200" ]; then
 fi
 echo "-- Update admin user End --"
 
-## User
+# User
 echo "-- Update user start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X PUT \
@@ -115,14 +115,13 @@ if [ $RESPONSE_HTTP_CODE != "200" ]; then
 fi
 echo "-- Update user End --"
 
-# Get user me
-## Admin
+## Get user me
+# Admin
 echo "-- Get admin user me start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X GET \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
-  -d "{\"loginId\": \"$ADMIN_LOGIN_ID\", \"password\": \"$ADMIN_PASSWD\"}" \
   http://localhost/v1/users/me)
 RESPONSE_HTTP_CODE=$(tail -n1 <<< "$RESPONSE")
 RESPONSE_BODY=$(sed '$ d' <<< "$RESPONSE")
@@ -133,20 +132,19 @@ if [ $RESPONSE_HTTP_CODE != "200" ]; then
 else
   ADMIN_ID=$(jq -r .id <<< "$RESPONSE_BODY")
   ADMIN_RESPONSE_PHONE=$(jq -r .phone <<< "$RESPONSE_BODY")
-  if [$ADMIN_RESPONSE_PHONE != $ADMIN_PHONE2]; then
+  if [ $ADMIN_RESPONSE_PHONE != $ADMIN_PHONE2 ]; then
     echo "!! Admin user phone info is diff !!"
     EXIT_CODE=1
   fi
 fi
 echo "-- Get admin user me end --"
 
-## User
+# User
 echo "-- Get user me start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X GET \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $USER_TOKEN" \
-  -d "{\"loginId\": \"$USER_LOGIN_ID\", \"password\": \"$USER_PASSWD\"}" \
   http://localhost/v1/users/me)
 RESPONSE_HTTP_CODE=$(tail -n1 <<< "$RESPONSE")
 RESPONSE_BODY=$(sed '$ d' <<< "$RESPONSE")
@@ -157,15 +155,48 @@ if [ $RESPONSE_HTTP_CODE != "200" ]; then
 else
   USER_ID=$(jq -r .id <<< "$RESPONSE_BODY")
   USER_RESPONSE_PHONE=$(jq -r .phone <<< "$RESPONSE_BODY")
-  if [$USER_RESPONSE_PHONE != $USER_PHONE2]; then
+  if [ $USER_RESPONSE_PHONE != $USER_PHONE2 ]; then
     echo "!! User phone info is diff !!"
     EXIT_CODE=1
   fi
 fi
 echo "-- Get user me end --"
 
-# Delete user me
-## Admin
+## Get user with admin/user token
+# Get user with admin user token / Success
+echo "-- Get user with admin token start --"
+RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
+  -X GET \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  http://localhost/v1/users/$USER_ID)
+RESPONSE_HTTP_CODE=$(tail -n1 <<< "$RESPONSE")
+RESPONSE_BODY=$(sed '$ d' <<< "$RESPONSE")
+echo Response HTTP Code : $RESPONSE_HTTP_CODE
+echo Response Body : $RESPONSE_BODY
+if [ $RESPONSE_HTTP_CODE != "200" ]; then
+  EXIT_CODE=1
+fi
+echo "-- Get user with admin token end --"
+
+# Get admin user with user token / Fail
+echo "-- Get user with admin token start --"
+RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
+  -X GET \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $USER_TOKEN" \
+  http://localhost/v1/users/$ADMIN_ID)
+RESPONSE_HTTP_CODE=$(tail -n1 <<< "$RESPONSE")
+RESPONSE_BODY=$(sed '$ d' <<< "$RESPONSE")
+echo Response HTTP Code : $RESPONSE_HTTP_CODE
+echo Response Body : $RESPONSE_BODY
+if [ $RESPONSE_HTTP_CODE != "401" ]; then
+  EXIT_CODE=1
+fi
+echo "-- Get user with admin token end --"
+
+## Delete user me
+# Admin
 echo "-- Delete admin user me start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X DELETE \
@@ -179,7 +210,7 @@ if [ $RESPONSE_HTTP_CODE != "200" ]; then
 fi
 echo "-- Delete admin user me end --"
 
-## User
+# User
 echo "-- Delete user me start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X DELETE \
