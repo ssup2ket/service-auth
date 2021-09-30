@@ -9,6 +9,7 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain"
 )
@@ -42,8 +43,13 @@ func New(d *domain.Domain, e *casbin.Enforcer, t opentracing.Tracer) (*ServerGRP
 		domain: d,
 	}
 
+	// Regist service
 	RegisterTokenServer(server.grpcServer, &server)
 	RegisterUserServer(server.grpcServer, &server)
+	RegisterUserMeServer(server.grpcServer, &server)
+
+	// Set reflection
+	reflection.Register(server.grpcServer)
 
 	return &server, nil
 }
