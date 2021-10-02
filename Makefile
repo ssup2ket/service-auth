@@ -21,13 +21,13 @@ gen-mock:
 	mockery --all --dir internal/domain/repo --output internal/domain/repo/mocks
 	mockery --all --dir internal/domain/service --output internal/domain/service/mocks
 
-.PHONY: init-local
-init-local:
-	docker run --network=host --name ssup2ket-auth-local-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=local_auth -d mysql:8.0
-
 .PHONY: run
 run: gen-openapi gen-protobuf
 	. scripts/env-local && go run cmd/ssup2ket-auth/main.go
+
+.PHONY: init-local
+init-local:
+	docker run --network=host --name ssup2ket-auth-local-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=local_auth -d mysql:8.0
 
 .PHONY: build-image
 build-image:
@@ -36,6 +36,10 @@ build-image:
 .PHONY: test-unit
 test-unit: gen-mock
 	go test -v ./...
+
+.PHONY: test-integration
+test-integration:
+	scripts/test-http-server.sh && scripts/test-grpc-server.sh
 
 .PHONY: test-action
 test-action: gen-mock
