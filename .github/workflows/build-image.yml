@@ -2,7 +2,7 @@ name: build-image
 
 on:
   workflow_run:
-    workflows: [test]
+    workflows: [test-integration]
     branches: [master]
     types: [completed]
   release:
@@ -11,7 +11,7 @@ on:
 jobs:
       
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
     

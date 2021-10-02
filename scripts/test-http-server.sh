@@ -1,7 +1,7 @@
 #!/bin/bash
 # -- Variables --
 EXIT_CODE=0
-RANDOM_VALUE=$RANDOM
+RANDOM_VALUE=$(shuf -i 1000-99999 -n 1)
 
 ADMIN_ID=""
 ADMIN_TOKEN=""

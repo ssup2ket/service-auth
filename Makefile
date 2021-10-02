@@ -43,4 +43,5 @@ test-integration:
 
 .PHONY: test-action
 test-action: gen-mock
-	act -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
+	act push --workflows ./.github/workflows/test-unit.yml -P ubuntu-20.04=ghcr.io/catthehacker/ubuntu:act-20.04
+	act workflow_run --workflows ./.github/workflows/test-integration.yml -P ubuntu-20.04=ghcr.io/catthehacker/ubuntu:act-20.04
