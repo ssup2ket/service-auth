@@ -3,6 +3,8 @@ name: test-integration
 on:
   workflow_run:
     workflows: [test-unit]
+    branches: [master]
+    types: [completed]
 
 jobs:
 
