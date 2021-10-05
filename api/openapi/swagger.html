@@ -1,0 +1,29 @@
+<script src="./api.json.js"></script>
+
+<html>
+    <head>
+        <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css"/>
+        <title>ssup2ket auth service</title>
+    </head>
+    <body>
+        <div id="swagger-ui"></div>
+        <script>
+            window.onload = function () {
+                const ui = SwaggerUIBundle({
+                    spec: api_spec,
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIBundle.SwaggerUIStandalonePreset
+                    ],
+                    plugins: [
+                        SwaggerUIBundle.plugins.DownloadUrl
+                    ],
+                })
+                window.ui = ui
+            }
+        </script>
+    </body>
+</html>

@@ -1,5 +1,8 @@
 # ssup2ket-auth-service
 
+* [Swagger](https://ssup2ket.github.io/ssup2ket-auth-service/api/openapi/swagger.html)
+* ER Diagram
+
 ## Development Environment
 
 * Golang Version : 1.16
@@ -18,6 +21,12 @@ $ brew install protobuf
 
 ```
 $ go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.6.0
+```
+
+* Install yq
+
+```
+$ GO111MODULE=on go get github.com/mikefarah/yq/v4
 ```
 
 * Install gRPC binaries

@@ -3,9 +3,11 @@
 all: test-unit run
 
 # go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.6.0
+# GO111MODULE=on go get github.com/mikefarah/yq/v4
 .PHONY: gen-openapi
 gen-openapi:
 	oapi-codegen --generate types,chi-server,spec -o internal/server/http_server/http_server.gen.go --package http_server api/openapi/api.yml
+	echo "var api_spec =" > api/openapi/api.json.js &&  yq eval -o=j api/openapi/api.yml >> api/openapi/api.json.js 
 
 # Ubuntu : apt install protobuf-compiler
 # MacOS : brew install protobuf
