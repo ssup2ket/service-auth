@@ -1,7 +1,7 @@
 # ssup2ket-auth-service
 
 * [Swagger](https://ssup2ket.github.io/ssup2ket-auth-service/api/openapi/swagger.html)
-* ER Diagram
+* [ER Diagram](https://drive.google.com/file/d/17gR4NP3bFl21aqhpr3PnhRePQTzafZoY/view?usp=sharing)
 
 ## Development Environment
 
