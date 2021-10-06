@@ -10,18 +10,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo/mocks"
-	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
-)
-
-const (
-	userLoginIDCorrect = "test0000"
-	userPasswdCorrect  = "test0000"
-	userPhoneCorrect   = "000-0000-0000"
-	userEmailCorrect   = "test@test.com"
-)
-
-var (
-	userUUIDCorrect = modeluuid.FromStringOrNil("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
 )
 
 func TestInit(t *testing.T) {
@@ -48,28 +37,28 @@ func (u *userSuite) SetupTest() {
 
 func (u *userSuite) TestGetUserSuccess() {
 	// Set repo
-	u.userInfoRepo.On("Get", context.Background(), userUUIDCorrect).Return(&model.UserInfo{
-		ID:      userUUIDCorrect,
-		LoginID: userLoginIDCorrect,
-		Phone:   userPhoneCorrect,
-		Email:   userEmailCorrect,
+	u.userInfoRepo.On("Get", context.Background(), test.UserIDCorrect).Return(&model.UserInfo{
+		ID:      test.UserIDCorrect,
+		LoginID: test.UserLoginIDCorrect,
+		Phone:   test.UserPhoneCorrect,
+		Email:   test.UserEmailCorrect,
 	}, nil)
 
 	// Test
-	userInfo, err := u.userService.GetUser(context.Background(), userUUIDCorrect)
+	userInfo, err := u.userService.GetUser(context.Background(), test.UserIDCorrect)
 	require.Nil(u.T(), err, "Failed to get user info")
-	require.Equal(u.T(), userUUIDCorrect, userInfo.ID, "Not equal UUID")
-	require.Equal(u.T(), userLoginIDCorrect, userInfo.LoginID, "Not equal ID")
-	require.Equal(u.T(), userPhoneCorrect, userInfo.Phone, "Not equal Phone")
-	require.Equal(u.T(), userEmailCorrect, userInfo.Email, "Not equal Eamil")
+	require.Equal(u.T(), test.UserIDCorrect, userInfo.ID, "Not equal UUID")
+	require.Equal(u.T(), test.UserLoginIDCorrect, userInfo.LoginID, "Not equal ID")
+	require.Equal(u.T(), test.UserPhoneCorrect, userInfo.Phone, "Not equal Phone")
+	require.Equal(u.T(), test.UserEmailCorrect, userInfo.Email, "Not equal Eamil")
 }
 
 func (u *userSuite) TestGetUserRepoNotFound() {
 	// Set repo
 	repoError := repo.ErrNotFound
-	u.userInfoRepo.On("Get", context.Background(), userUUIDCorrect).Return(&model.UserInfo{}, repoError)
+	u.userInfoRepo.On("Get", context.Background(), test.UserIDCorrect).Return(&model.UserInfo{}, repoError)
 
 	// Test
-	_, err := u.userService.GetUser(context.Background(), userUUIDCorrect)
+	_, err := u.userService.GetUser(context.Background(), test.UserIDCorrect)
 	require.Equal(u.T(), ErrRepoNotFound, err)
 }

@@ -13,19 +13,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
-	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
-)
-
-const (
-	userLoginIDCorrect = "test0000"
-	userPasswdCorrect  = "test0000"
-	userRoleCorrect    = model.UserRoleAdmin
-	userPhoneCorrect   = "000-0000-0000"
-	userEmailCorrect   = "test@test.com"
-)
-
-var (
-	userIDCorrect = modeluuid.FromStringOrNil("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
 )
 
 func TestInit(t *testing.T) {
@@ -65,63 +53,63 @@ func (u *userInfoSuite) AfterTest(_, _ string) {
 func (u *userInfoSuite) TestCreate() {
 	u.sqlMock.ExpectBegin()
 	u.sqlMock.ExpectExec(regexp.QuoteMeta("INSERT INTO `user_infos` (`id`,`created_at`,`updated_at`,`deleted_at`,`login_id`,`role`,`phone`,`email`) VALUES (?,?,?,?,?,?,?,?)")).
-		WithArgs(userIDCorrect, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), userLoginIDCorrect, userRoleCorrect, userPhoneCorrect, userEmailCorrect).
+		WithArgs(test.UserIDCorrect, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	u.sqlMock.ExpectCommit()
 
 	err := u.repo.Create(context.Background(), &model.UserInfo{
-		ID:      userIDCorrect,
-		LoginID: userLoginIDCorrect,
-		Role:    userRoleCorrect,
-		Phone:   userPhoneCorrect,
-		Email:   userEmailCorrect,
+		ID:      test.UserIDCorrect,
+		LoginID: test.UserLoginIDCorrect,
+		Role:    test.UserRoleCorrect,
+		Phone:   test.UserPhoneCorrect,
+		Email:   test.UserEmailCorrect,
 	})
 	require.NoError(u.T(), err)
 }
 
 func (u *userInfoSuite) TestGet() {
 	u.sqlMock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_infos` WHERE id = ? AND `user_infos`.`deleted_at` IS NULL ORDER BY `user_infos`.`id` LIMIT 1")).
-		WithArgs(userIDCorrect).
+		WithArgs(test.UserIDCorrect).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "login_id", "role", "phone", "email"}).
-			AddRow(userIDCorrect, userLoginIDCorrect, userRoleCorrect, userPhoneCorrect, userEmailCorrect))
+			AddRow(test.UserIDCorrect, test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect))
 
-	userInfo, err := u.repo.Get(context.Background(), userIDCorrect)
+	userInfo, err := u.repo.Get(context.Background(), test.UserIDCorrect)
 	require.NoError(u.T(), err)
-	require.Equal(u.T(), userIDCorrect, userInfo.ID)
-	require.Equal(u.T(), userLoginIDCorrect, userInfo.LoginID)
-	require.Equal(u.T(), userRoleCorrect, userInfo.Role)
-	require.Equal(u.T(), userPhoneCorrect, userInfo.Phone)
-	require.Equal(u.T(), userEmailCorrect, userInfo.Email)
+	require.Equal(u.T(), test.UserIDCorrect, userInfo.ID)
+	require.Equal(u.T(), test.UserLoginIDCorrect, userInfo.LoginID)
+	require.Equal(u.T(), test.UserRoleCorrect, userInfo.Role)
+	require.Equal(u.T(), test.UserPhoneCorrect, userInfo.Phone)
+	require.Equal(u.T(), test.UserEmailCorrect, userInfo.Email)
 }
 
 func (u *userInfoSuite) TestCreateAndGet() {
 	u.sqlMock.ExpectBegin()
 	u.sqlMock.ExpectExec(regexp.QuoteMeta("INSERT INTO `user_infos` (`id`,`created_at`,`updated_at`,`deleted_at`,`login_id`,`role`,`phone`,`email`) VALUES (?,?,?,?,?,?,?,?)")).
-		WithArgs(userIDCorrect, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), userLoginIDCorrect, userRoleCorrect, userPhoneCorrect, userEmailCorrect).
+		WithArgs(test.UserIDCorrect, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	u.sqlMock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_infos` WHERE id = ? AND `user_infos`.`deleted_at` IS NULL ORDER BY `user_infos`.`id` LIMIT 1")).
-		WithArgs(userIDCorrect).
+		WithArgs(test.UserIDCorrect).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "login_id", "role", "phone", "email"}).
-			AddRow(userIDCorrect, userLoginIDCorrect, userRoleCorrect, userPhoneCorrect, userEmailCorrect))
+			AddRow(test.UserIDCorrect, test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect))
 	u.sqlMock.ExpectCommit()
 
 	tx := NewDBTx()
 	tx.Begin()
 	err := u.repo.WithTx(tx).Create(context.Background(), &model.UserInfo{
-		ID:      userIDCorrect,
-		LoginID: userLoginIDCorrect,
-		Role:    userRoleCorrect,
-		Phone:   userPhoneCorrect,
-		Email:   userEmailCorrect,
+		ID:      test.UserIDCorrect,
+		LoginID: test.UserLoginIDCorrect,
+		Role:    test.UserRoleCorrect,
+		Phone:   test.UserPhoneCorrect,
+		Email:   test.UserEmailCorrect,
 	})
 	require.NoError(u.T(), err)
 
-	userInfo, err := u.repo.WithTx(tx).Get(context.Background(), userIDCorrect)
+	userInfo, err := u.repo.WithTx(tx).Get(context.Background(), test.UserIDCorrect)
 	require.NoError(u.T(), err)
-	require.Equal(u.T(), userIDCorrect, userInfo.ID)
-	require.Equal(u.T(), userLoginIDCorrect, userInfo.LoginID)
-	require.Equal(u.T(), userRoleCorrect, userInfo.Role)
-	require.Equal(u.T(), userPhoneCorrect, userInfo.Phone)
-	require.Equal(u.T(), userEmailCorrect, userInfo.Email)
+	require.Equal(u.T(), test.UserIDCorrect, userInfo.ID)
+	require.Equal(u.T(), test.UserLoginIDCorrect, userInfo.LoginID)
+	require.Equal(u.T(), test.UserRoleCorrect, userInfo.Role)
+	require.Equal(u.T(), test.UserPhoneCorrect, userInfo.Phone)
+	require.Equal(u.T(), test.UserEmailCorrect, userInfo.Email)
 	tx.Commit()
 }
