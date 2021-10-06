@@ -1,7 +1,15 @@
 # ssup2ket-auth-service
 
+ssup2ket-auth-service is the service responsible for user management and authentication/authorization in the [ssup2ket](https://github.com/ssup2ket/ssup2ket) Project. ssup2ket-auth-service follows this [considerations](https://github.com/ssup2ket/ssup2ket#ssup2ket-service-considerations).
+
 * [Swagger](https://ssup2ket.github.io/ssup2ket-auth-service/api/openapi/swagger.html)
 * [ER Diagram](https://drive.google.com/file/d/17gR4NP3bFl21aqhpr3PnhRePQTzafZoY/view?usp=sharing)
+
+## Authentication/Authorization
+
+ssup2ket-auth-service uses simple authentication based on ID/Password. A user can get the JWT Token required for authentication/authorization by entering ID/Password. Passwords are encrypted and stored using the PBKDF2 algorithm.
+
+In JWT Token, User's ID(UUID), Login ID, Password and Role are stored. Other services of the ssup2ket Project need to implement authentication and RBAC-based authorization through JWT Token. Each User can have only one Role. There are two roles, admin and user.
 
 ## Development Environment
 
