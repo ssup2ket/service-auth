@@ -37,10 +37,8 @@ func ValidateUserCreate(id, passwd, role, phone, email string) error {
 	}
 
 	// Role
-	if role != "" {
-		if !model.IsValidUserRole(role) {
-			return fmt.Errorf("wrong role")
-		}
+	if !model.IsValidUserRole(role) {
+		return fmt.Errorf("wrong role")
 	}
 
 	// Phone
