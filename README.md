@@ -7,9 +7,21 @@ ssup2ket-auth-service is the service responsible for user management and authent
 
 ## Authentication/Authorization
 
-ssup2ket-auth-service uses simple authentication based on ID/Password. A user can get the JWT Token required for authentication/authorization by entering ID/Password. Passwords are encrypted and stored using the PBKDF2 algorithm.
+ssup2ket-auth-service uses simple authentication based on **ID/Password**. A user can get the **JWT** Token required for authentication/authorization by entering ID/Password. Passwords are encrypted and stored using the PBKDF2 algorithm.
 
-In JWT Token, User's ID(UUID), Login ID, Password and Role are stored. Other services of the ssup2ket Project need to implement authentication and RBAC-based authorization through JWT Token. Each User can have only one Role. There are two roles, admin and user.
+In JWT Token, **User's ID(UUID), Login ID, Password and Role** are stored. Other services of the ssup2ket Project need to implement authentication and RBAC-based authorization through JWT Token. Each User can have only one Role. There are two roles, admin and user.
+
+## Used main external packages and tools
+
+ssup2ket-auth-service uses following external packages and tools.
+
+* **HTTP Server, Middleware** - [chi](https://github.com/go-chi/chi), [HTTP](https://pkg.go.dev/net/http), [oapi-codegen](https://github.com/deepmap/oapi-codegen)
+* **GRPC Server, Intercepter** - [grpc](https://pkg.go.dev/google.golang.org/grpc), [protoc-gen-go](https://pkg.go.dev/github.com/golang/protobuf/protoc-gen-go)
+* **MySQL** - [GORM](https://gorm.io/index.html)
+* **Kafaka** - [kafka-go](https://github.com/segmentio/kafka-go)
+* **Authorziation** - [Casbin](https://casbin.org/)
+* **Logging, Tracking** - [zerolog](https://github.com/rs/zerolog), [Istio](https://istio.io/)
+* **CI/CD** - [Testify](https://github.com/stretchr/testify), [sqlmock](https://github.com/DATA-DOG/go-sqlmock), [Mockery](https://github.com/mockery/mockery), [Github Actions](https://github.com/features/actions), [K8s](https://kubernetes.io/), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/), [ArgoCD Image Updater](https://github.com/argoproj-labs/argocd-image-updater), [Kustomize](https://kustomize.io/)
 
 ## Development Environment
 
