@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/rs/zerolog/log"
 
@@ -11,6 +12,17 @@ import (
 	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
 )
 
+const (
+	AggregateUserType = "USER"
+)
+
+type userOutboxPayload struct {
+	ID      string `json:"id"`
+	LoginID string `json:"loginId"`
+	Role    string `json:"role"`
+}
+
+// User Service
 type UserService interface {
 	ListUser(ctx context.Context, offset int, limit int) ([]model.UserInfo, error)
 	CreateUser(ctx context.Context, userInfo *model.UserInfo, passwd string) (*model.UserInfo, error)
@@ -24,15 +36,17 @@ type UserServiceImp struct {
 	userInfoRepoSecondary   repo.UserInfoRepo
 	userSecretRepoPrimary   repo.UserSecretRepo
 	userSecretRepoSecondary repo.UserSecretRepo
+	userOutBoxRepoPrimary   repo.UserOutboxRepo
 }
 
 func NewUserServiceImp(userInfoPrimary repo.UserInfoRepo, userInfoSecondary repo.UserInfoRepo,
-	userSecretPrimary repo.UserSecretRepo, userSecretSecondary repo.UserSecretRepo) *UserServiceImp {
+	userSecretPrimary repo.UserSecretRepo, userSecretSecondary repo.UserSecretRepo, userOutBoxPrimary repo.UserOutboxRepo) *UserServiceImp {
 	return &UserServiceImp{
 		userInfoRepoPrimary:     userInfoPrimary,
 		userInfoRepoSecondary:   userInfoSecondary,
 		userSecretRepoPrimary:   userSecretPrimary,
 		userSecretRepoSecondary: userSecretSecondary,
+		userOutBoxRepoPrimary:   userOutBoxPrimary,
 	}
 }
 
@@ -71,10 +85,10 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	}()
 
 	// Generate UUID to share to userInfo and userSecret
-	uuid := modeluuid.NewV4()
+	userUUID := modeluuid.NewV4()
 
 	// Create user info
-	userInfo.ID = uuid
+	userInfo.ID = userUUID
 	if err = u.userInfoRepoPrimary.WithTx(tx).Create(ctx, userInfo); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create user info to DB")
 		return nil, getReturnErr(err)
@@ -87,12 +101,37 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 		return nil, err
 	}
 	userSecret := model.UserSecret{
-		ID:         uuid,
+		ID:         userUUID,
 		PasswdHash: hash,
 		PasswdSalt: salt,
 	}
 	if err = u.userSecretRepoPrimary.WithTx(tx).Create(ctx, &userSecret); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create user secret to DB")
+		return nil, getReturnErr(err)
+	}
+
+	// Get user outbox payload
+	userOutboxPayload := userOutboxPayload{
+		ID:      userInfo.ID.String(),
+		LoginID: userInfo.LoginID,
+		Role:    string(userInfo.Role),
+	}
+	userOutboxPayloadJSON, err := json.Marshal(userOutboxPayload)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to marshal user outbox payload")
+		return nil, getReturnErr(err)
+	}
+
+	// Insert created user info to outbox table to public a user create event
+	userOutbox := model.UserOutbox{
+		ID:            modeluuid.NewV4(),
+		AggregateType: AggregateUserType,
+		AggregateID:   userInfo.ID.String(),
+		Type:          "UserCreate",
+		Payload:       string(userOutboxPayloadJSON),
+	}
+	if err = u.userOutBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to insert created user to outbox table")
 		return nil, getReturnErr(err)
 	}
 
@@ -188,7 +227,7 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.Mode
 	}()
 
 	// Get user info
-	_, err = u.userInfoRepoPrimary.WithTx(tx).Get(ctx, userUUID)
+	userInfo, err := u.userInfoRepoPrimary.WithTx(tx).Get(ctx, userUUID)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user info from DB")
 		return getReturnErr(err)
@@ -203,6 +242,31 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.Mode
 	// Delete user secret
 	if err := u.userSecretRepoPrimary.WithTx(tx).Delete(ctx, userUUID); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to delete user secret from DB")
+		return getReturnErr(err)
+	}
+
+	// Get user outbox payload
+	userOutboxPayload := userOutboxPayload{
+		ID:      userInfo.ID.String(),
+		LoginID: userInfo.LoginID,
+		Role:    string(userInfo.Role),
+	}
+	userOutboxPayloadJSON, err := json.Marshal(userOutboxPayload)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to marshal user outbox payload")
+		return getReturnErr(err)
+	}
+
+	// Insert deleted user info to outbox table to public a user delete event
+	userOutbox := model.UserOutbox{
+		ID:            modeluuid.NewV4(),
+		AggregateType: AggregateUserType,
+		AggregateID:   userUUID.String(),
+		Type:          "UserDelete",
+		Payload:       string(userOutboxPayloadJSON),
+	}
+	if err = u.userOutBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to insert created user to outbox table")
 		return getReturnErr(err)
 	}
 

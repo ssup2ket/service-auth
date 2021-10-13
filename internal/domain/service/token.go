@@ -10,6 +10,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
 )
 
+// Token service
 type TokenService interface {
 	CreateToken(ctx context.Context, loginID, passwd string) (*token.TokenInfo, error)
 }

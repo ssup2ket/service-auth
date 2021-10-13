@@ -35,11 +35,12 @@ func New(c *config.Configs) (*Domain, error) {
 	userInfoRepoSecondaryMysql := repo.NewUserInfoRepoImp(secondaryMySQL)
 	userSecretRepoPrimaryMysql := repo.NewUserSecretRepoImp(primaryMySQL)
 	userSecretRepoSecondaryMysql := repo.NewUserSecretRepoImp(secondaryMySQL)
+	userOutboxRepoPrimaryMysql := repo.NewUserOutboxRepoImp(primaryMySQL)
 
 	// Init services
 	service.Init(&service.ServiceConfigs{})
 	userService := service.NewUserServiceImp(userInfoRepoPrimaryMysql, userInfoRepoSecondaryMysql,
-		userSecretRepoPrimaryMysql, userSecretRepoSecondaryMysql)
+		userSecretRepoPrimaryMysql, userSecretRepoSecondaryMysql, userOutboxRepoPrimaryMysql)
 	tokenService := service.NewTokenServiceImp(userInfoRepoSecondaryMysql, userSecretRepoSecondaryMysql)
 
 	domain.User = userService

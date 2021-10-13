@@ -52,6 +52,7 @@ func Init(c *config.Configs) error {
 	if err = primaryMySQL.AutoMigrate(
 		&model.UserInfo{},
 		&model.UserSecret{},
+		&model.UserOutbox{},
 	); err != nil {
 		log.Error().Err(err).Msg("Failed to init schemas")
 		return err

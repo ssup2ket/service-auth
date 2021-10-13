@@ -22,6 +22,7 @@ type userSuite struct {
 
 	userInfoRepo   mocks.UserInfoRepo
 	userSecretRepo mocks.UserSecretRepo
+	userOutboxRepo mocks.UserOutboxRepo
 
 	userService UserService
 }
@@ -30,9 +31,10 @@ func (u *userSuite) SetupTest() {
 	// Init repo
 	u.userInfoRepo = mocks.UserInfoRepo{}
 	u.userSecretRepo = mocks.UserSecretRepo{}
+	u.userOutboxRepo = mocks.UserOutboxRepo{}
 
 	// Init service
-	u.userService = NewUserServiceImp(&u.userInfoRepo, &u.userInfoRepo, &u.userSecretRepo, &u.userSecretRepo)
+	u.userService = NewUserServiceImp(&u.userInfoRepo, &u.userInfoRepo, &u.userSecretRepo, &u.userSecretRepo, &u.userOutboxRepo)
 }
 
 func (u *userSuite) TestGetUserSuccess() {

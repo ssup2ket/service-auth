@@ -42,7 +42,7 @@ func (u *UserSecretRepoImp) Create(ctx context.Context, userSecret *model.UserSe
 			log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to create user secret because of duplication")
 			return ErrConflict
 		}
-		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to create secret")
+		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to create user secret")
 		return ErrServerError
 	}
 	return nil
