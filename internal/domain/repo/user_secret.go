@@ -38,10 +38,6 @@ func (u *UserSecretRepoImp) WithTx(tx *DBTx) UserSecretRepo {
 func (u *UserSecretRepoImp) Create(ctx context.Context, userSecret *model.UserSecret) error {
 	result := u.db.Create(userSecret)
 	if result.Error != nil {
-		if result.Error == gorm.ErrInvalidData {
-			log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to create user secret because of duplication")
-			return ErrConflict
-		}
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to create user secret")
 		return ErrServerError
 	}
@@ -52,10 +48,6 @@ func (u *UserSecretRepoImp) Get(ctx context.Context, userUUID modeluuid.ModelUUI
 	user := model.UserSecret{}
 	result := u.db.First(&user, "id = ?", userUUID)
 	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in primary DB")
-			return nil, ErrNotFound
-		}
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user secret from primary DB")
 		return nil, ErrServerError
 	}
@@ -65,10 +57,6 @@ func (u *UserSecretRepoImp) Get(ctx context.Context, userUUID modeluuid.ModelUUI
 func (u *UserSecretRepoImp) Update(ctx context.Context, userSecret *model.UserSecret) error {
 	result := u.db.Updates(userSecret)
 	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in primary DB")
-			return ErrNotFound
-		}
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to update user secret in primary DB")
 		return ErrServerError
 	}
@@ -78,10 +66,6 @@ func (u *UserSecretRepoImp) Update(ctx context.Context, userSecret *model.UserSe
 func (u *UserSecretRepoImp) Delete(ctx context.Context, userUUID modeluuid.ModelUUID) error {
 	result := u.db.Delete(&model.UserSecret{}, "id = ?", userUUID)
 	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			log.Ctx(ctx).Error().Err(result.Error).Msg("User secret does not exist in primary DB")
-			return ErrNotFound
-		}
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to delete user secret in primary DB")
 		return ErrServerError
 	}

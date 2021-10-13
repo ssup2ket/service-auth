@@ -50,6 +50,10 @@ func (u *UserInfoRepoImp) List(ctx context.Context, offset int, limit int) ([]mo
 func (u *UserInfoRepoImp) Create(ctx context.Context, userInfo *model.UserInfo) error {
 	result := u.db.Create(userInfo)
 	if result.Error != nil {
+		if result.Error == gorm.ErrInvalidData {
+			log.Ctx(ctx).Error().Err(result.Error).Msg("User info does not exist in primary DB")
+			return ErrNotFound
+		}
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to create user")
 		return getReturnErr(result.Error)
 	}
@@ -70,6 +74,10 @@ func (u *UserInfoRepoImp) GetByLoginID(ctx context.Context, userLoginID string) 
 	userInfo := model.UserInfo{}
 	result := u.db.First(&userInfo, "login_id = ?", userLoginID)
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			log.Ctx(ctx).Error().Err(result.Error).Msg("User info does not exist in primary DB")
+			return nil, ErrNotFound
+		}
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user info from primary DB by user login ID")
 		return nil, getReturnErr(result.Error)
 	}
@@ -79,6 +87,10 @@ func (u *UserInfoRepoImp) GetByLoginID(ctx context.Context, userLoginID string) 
 func (u *UserInfoRepoImp) Update(ctx context.Context, userInfo *model.UserInfo) error {
 	result := u.db.Updates(userInfo)
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			log.Ctx(ctx).Error().Err(result.Error).Msg("User info does not exist in primary DB")
+			return ErrNotFound
+		}
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to update user info in primary DB")
 		return getReturnErr(result.Error)
 	}
@@ -88,6 +100,10 @@ func (u *UserInfoRepoImp) Update(ctx context.Context, userInfo *model.UserInfo) 
 func (u *UserInfoRepoImp) Delete(ctx context.Context, userUUID modeluuid.ModelUUID) error {
 	result := u.db.Delete(&model.UserInfo{}, "id = ?", userUUID)
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			log.Ctx(ctx).Error().Err(result.Error).Msg("User info does not exist in primary DB")
+			return ErrNotFound
+		}
 		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to delete user info in primary DB")
 		return getReturnErr(result.Error)
 	}
