@@ -48,7 +48,7 @@ func (u *UserSecretRepoImp) Get(ctx context.Context, userUUID modeluuid.ModelUUI
 	user := model.UserSecret{}
 	result := u.db.First(&user, "id = ?", userUUID)
 	if result.Error != nil {
-		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user secret from primary DB")
+		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to get user secret from DB")
 		return nil, ErrServerError
 	}
 	return &user, nil
@@ -57,7 +57,7 @@ func (u *UserSecretRepoImp) Get(ctx context.Context, userUUID modeluuid.ModelUUI
 func (u *UserSecretRepoImp) Update(ctx context.Context, userSecret *model.UserSecret) error {
 	result := u.db.Updates(userSecret)
 	if result.Error != nil {
-		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to update user secret in primary DB")
+		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to update user secret in DB")
 		return ErrServerError
 	}
 	return nil
@@ -66,7 +66,7 @@ func (u *UserSecretRepoImp) Update(ctx context.Context, userSecret *model.UserSe
 func (u *UserSecretRepoImp) Delete(ctx context.Context, userUUID modeluuid.ModelUUID) error {
 	result := u.db.Delete(&model.UserSecret{}, "id = ?", userUUID)
 	if result.Error != nil {
-		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to delete user secret in primary DB")
+		log.Ctx(ctx).Error().Err(result.Error).Msg("Failed to delete user secret in DB")
 		return ErrServerError
 	}
 	return nil

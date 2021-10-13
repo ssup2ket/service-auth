@@ -32,21 +32,21 @@ type UserService interface {
 }
 
 type UserServiceImp struct {
+	outBoxRepoPrimary       repo.OutboxRepo
 	userInfoRepoPrimary     repo.UserInfoRepo
 	userInfoRepoSecondary   repo.UserInfoRepo
 	userSecretRepoPrimary   repo.UserSecretRepo
 	userSecretRepoSecondary repo.UserSecretRepo
-	userOutBoxRepoPrimary   repo.UserOutboxRepo
 }
 
-func NewUserServiceImp(userInfoPrimary repo.UserInfoRepo, userInfoSecondary repo.UserInfoRepo,
-	userSecretPrimary repo.UserSecretRepo, userSecretSecondary repo.UserSecretRepo, userOutBoxPrimary repo.UserOutboxRepo) *UserServiceImp {
+func NewUserServiceImp(userOutBoxPrimary repo.OutboxRepo, userInfoPrimary repo.UserInfoRepo, userInfoSecondary repo.UserInfoRepo,
+	userSecretPrimary repo.UserSecretRepo, userSecretSecondary repo.UserSecretRepo) *UserServiceImp {
 	return &UserServiceImp{
+		outBoxRepoPrimary:       userOutBoxPrimary,
 		userInfoRepoPrimary:     userInfoPrimary,
 		userInfoRepoSecondary:   userInfoSecondary,
 		userSecretRepoPrimary:   userSecretPrimary,
 		userSecretRepoSecondary: userSecretSecondary,
-		userOutBoxRepoPrimary:   userOutBoxPrimary,
 	}
 }
 
@@ -123,14 +123,14 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	}
 
 	// Insert created user info to outbox table to public a user create event
-	userOutbox := model.UserOutbox{
+	userOutbox := model.Outbox{
 		ID:            modeluuid.NewV4(),
 		AggregateType: AggregateUserType,
 		AggregateID:   userInfo.ID.String(),
 		Type:          "UserCreate",
 		Payload:       string(userOutboxPayloadJSON),
 	}
-	if err = u.userOutBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
+	if err = u.outBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to insert created user to outbox table")
 		return nil, getReturnErr(err)
 	}
@@ -258,14 +258,14 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.Mode
 	}
 
 	// Insert deleted user info to outbox table to public a user delete event
-	userOutbox := model.UserOutbox{
+	userOutbox := model.Outbox{
 		ID:            modeluuid.NewV4(),
 		AggregateType: AggregateUserType,
 		AggregateID:   userUUID.String(),
 		Type:          "UserDelete",
 		Payload:       string(userOutboxPayloadJSON),
 	}
-	if err = u.userOutBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
+	if err = u.outBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to insert created user to outbox table")
 		return getReturnErr(err)
 	}

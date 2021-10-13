@@ -31,16 +31,16 @@ func New(c *config.Configs) (*Domain, error) {
 		return nil, fmt.Errorf("failed to init repo pkg")
 	}
 	primaryMySQL, secondaryMySQL := repo.GetDBConns()
+	outboxRepoPrimaryMysql := repo.NewOutboxRepoImp(primaryMySQL)
 	userInfoRepoPrimaryMysql := repo.NewUserInfoRepoImp(primaryMySQL)
 	userInfoRepoSecondaryMysql := repo.NewUserInfoRepoImp(secondaryMySQL)
 	userSecretRepoPrimaryMysql := repo.NewUserSecretRepoImp(primaryMySQL)
 	userSecretRepoSecondaryMysql := repo.NewUserSecretRepoImp(secondaryMySQL)
-	userOutboxRepoPrimaryMysql := repo.NewUserOutboxRepoImp(primaryMySQL)
 
 	// Init services
 	service.Init(&service.ServiceConfigs{})
-	userService := service.NewUserServiceImp(userInfoRepoPrimaryMysql, userInfoRepoSecondaryMysql,
-		userSecretRepoPrimaryMysql, userSecretRepoSecondaryMysql, userOutboxRepoPrimaryMysql)
+	userService := service.NewUserServiceImp(outboxRepoPrimaryMysql, userInfoRepoPrimaryMysql, userInfoRepoSecondaryMysql,
+		userSecretRepoPrimaryMysql, userSecretRepoSecondaryMysql)
 	tokenService := service.NewTokenServiceImp(userInfoRepoSecondaryMysql, userSecretRepoSecondaryMysql)
 
 	domain.User = userService
