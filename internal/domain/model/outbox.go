@@ -6,8 +6,8 @@ import (
 
 type Outbox struct {
 	ID            modeluuid.ModelUUID `gorm:"primaryKey;type:binary(16)"`
-	AggregateType string              `gorm:"size:255"`
-	AggregateID   string              `gorm:"size:255"`
+	AggregateType string              `gorm:"column:aggregatetype;size:255"`
+	AggregateID   string              `gorm:"column:aggregateid;size:255"`
 	Type          string              `gorm:"size:255"`
 	Payload       string              `gorm:"size:255"`
 }
