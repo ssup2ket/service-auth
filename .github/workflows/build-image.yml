@@ -30,7 +30,7 @@ jobs:
           TAGS="--tag ${DOCKER_IMAGE}:${VERSION} --tag ${DOCKER_IMAGE}:latest"
         else
           VERSION=${GITHUB_REF#refs/heads/}
-          TAGS="--tag ${DOCKER_IMAGE}:${VERSION} --tag ${DOCKER_IMAGE}:${GITHUB_SHA::8}"
+          TAGS="--tag ${DOCKER_IMAGE}:branch-${VERSION} --tag ${DOCKER_IMAGE}:commit-${GITHUB_SHA::8}"
         fi
 
         echo ::set-output name=docker_image::${DOCKER_IMAGE}
