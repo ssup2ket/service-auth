@@ -29,7 +29,7 @@ run: gen-openapi gen-protobuf
 
 .PHONY: init-local
 init-local:
-	docker run --network=host --name ssup2ket-auth-local-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=local_auth -d mysql:8.0
+	docker run --name ssup2ket-auth-local-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=local_auth -d mysql:8.0
 
 .PHONY: build-image
 build-image:

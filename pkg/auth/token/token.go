@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	tokenKey        = "ssup2ket"
+	tokenKey        = "cyQsIQ6RSE1CqTARl8pWeM7br9qp1Don57Pd18uDCwoBaiUPEXWe15pYMP4D9WKc"
 	tokenTimeoutMin = 60
 )
 
