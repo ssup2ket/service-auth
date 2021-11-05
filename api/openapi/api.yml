@@ -12,17 +12,28 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 components:
+  securitySchemes:
+    Login:
+      type: http
+      scheme: basic
   schemas:
-    TokenCreate:
+    TokenRefresh:
       type: object
       required:
-        - loginId
-        - password
+        - refreshToken
       properties:
-        loginId:
-          type: string
-        password:
+        refreshToken:
           type: string 
+    TokenInfos:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          $ref: '#/components/schemas/TokenInfo'
+        refreshToken:
+          $ref: '#/components/schemas/TokenInfo'
     TokenInfo:
       type: object
       required:
@@ -152,7 +163,38 @@ components:
         type: integer
         default: 50
 paths:
-  /tokens:
+  /tokens/login:
+    post:
+      tags:
+        - token
+      security:
+        - Login: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenInfos'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+  /tokens/refresh:
     post:
       tags:
         - token
@@ -160,7 +202,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TokenCreate' 
+              $ref: '#/components/schemas/TokenRefresh' 
       responses:
         '200':
           description: ''

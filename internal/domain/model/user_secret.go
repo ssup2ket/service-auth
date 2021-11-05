@@ -14,6 +14,8 @@ type UserSecret struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	PasswdHash []byte `gorm:"size:4096"`
-	PasswdSalt []byte `gorm:"size:20"`
+	PasswdHash       []byte `gorm:"size:4096"`
+	PasswdSalt       []byte `gorm:"size:20"`
+	RefreshTokenHash []byte `gorm:"size:4096"`
+	RefreshTokenSalt []byte `gorm:"size:20"`
 }

@@ -6,7 +6,8 @@ ERROR_CODE=""
 ERROR_MESSAGE=""
 
 ADMIN_ID=""
-ADMIN_TOKEN=""
+ADMIN_ACCESS_TOKEN=""
+ADMIN_REFRESH_TOKEN=""
 ADMIN_LOGIN_ID="admin$RANDOM_VALUE"
 ADMIN_PASSWD="admin$RANDOM_VALUE"
 ADMIN_PHONE="000-0000-0000"
@@ -14,7 +15,8 @@ ADMIN_PHONE2="111-1111-1111"
 ADMIN_EMAIL="admin$RANDOM_VALUE@test.com"
 
 USER_ID=""
-USER_TOKEN=""
+USER_ACCESS_TOKEN=""
+USER_REFRESH_TOKEN=""
 USER_LOGIN_ID="user$RANDOM_VALUE"
 USER_PASSWD="user$RANDOM_VALUE"
 USER_PHONE="222-2222-2222"
@@ -45,38 +47,63 @@ fi
 echo Response : $RESPONSE
 echo "-- Create user end --"
 
-## Create tokens
+## Login
 # Admin
-echo "-- Create admin user token start --"
+echo "-- Login admin user token start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -d "{\"loginId\": \"$ADMIN_LOGIN_ID\", \"password\": \"$ADMIN_PASSWD\"}" \
-  localhost:9090 Token/CreateToken)
+  -rpc-header username:"$ADMIN_LOGIN_ID" -rpc-header password:"$ADMIN_PASSWD" \
+  localhost:9090 Token/LoginToken)
 if [ $? != 0 ] ; then
   EXIT_CODE=1
 else
-  ADMIN_TOKEN=$(jq -r .token <<< "$RESPONSE")
+  ADMIN_ACCESS_TOKEN=$(jq -r .accessToken.token <<< "$RESPONSE")
+  ADMIN_REFRESH_TOKEN=$(jq -r .refreshToken.token <<< "$RESPONSE")
 fi
 echo Response : $RESPONSE
-echo "-- Create admin user token End --"
+echo "-- Login admin user token end --"
 
 # User
-echo "-- Create user token start --"
+echo "-- Login user token start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -d "{\"loginId\": \"$USER_LOGIN_ID\", \"password\": \"$USER_PASSWD\"}" \
-  localhost:9090 Token/CreateToken)
+  -rpc-header username:"$USER_LOGIN_ID" -rpc-header password:"$USER_LOGIN_ID" \
+  localhost:9090 Token/LoginToken)
 if [ $? != 0 ] ; then
   EXIT_CODE=1
 else
-  USER_TOKEN=$(jq -r .token <<< "$RESPONSE")
+  USER_ACCESS_TOKEN=$(jq -r .accessToken.token <<< "$RESPONSE")
+  USER_REFRESH_TOKEN=$(jq -r .refreshToken.token <<< "$RESPONSE")
 fi
 echo Response : $RESPONSE
-echo "-- Create user token end --"
+echo "-- Login user token end --"
+
+## Refresh access token
+# Admin
+echo "-- Refresh admin user access token start --"
+RESPONSE=$(grpcurl -plaintext -format-error \
+  -d "{\"refreshToken\": \"$ADMIN_REFRESH_TOKEN\"}" \
+  localhost:9090 Token/RefreshToken)
+if [ $? != 0 ] ; then
+  EXIT_CODE=1
+fi
+echo Response : $RESPONSE
+echo "-- Refresh admin user access token end --"
+
+# User
+echo "-- Refresh user access token start --"
+RESPONSE=$(grpcurl -plaintext -format-error \
+  -d "{\"refreshToken\": \"$USER_REFRESH_TOKEN\"}" \
+  localhost:9090 Token/RefreshToken)
+if [ $? != 0 ] ; then
+  EXIT_CODE=1
+fi
+echo Response : $RESPONSE
+echo "-- Refresh user access token end --"
 
 ## Update user me
 # Admin
 echo "-- Update admin user start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -H "authorization: Bearer $ADMIN_TOKEN" \
+  -H "authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -d "{\"phone\": \"$ADMIN_PHONE2\"}" \
   localhost:9090 UserMe/UpdateUserMe)
 if [ $? != 0 ] ; then
@@ -87,7 +114,7 @@ echo "-- Update admin user End --"
 # User
 echo "-- Update user start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -H "authorization: Bearer $USER_TOKEN" \
+  -H "authorization: Bearer $USER_ACCESS_TOKEN" \
   -d "{\"phone\": \"$USER_PHONE2\"}" \
   localhost:9090 UserMe/UpdateUserMe)
 if [ $? != 0 ] ; then
@@ -99,7 +126,7 @@ echo "-- Update user End --"
 # Admin
 echo "-- Get admin user me start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -H "authorization: Bearer $ADMIN_TOKEN" \
+  -H "authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   localhost:9090 UserMe/GetUserMe)
 if [ $? != 0 ] ; then
   EXIT_CODE=1
@@ -117,7 +144,7 @@ echo "-- Get admin user me end --"
 # User
 echo "-- Get user me start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -H "authorization: Bearer $USER_TOKEN" \
+  -H "authorization: Bearer $USER_ACCESS_TOKEN" \
   localhost:9090 UserMe/GetUserMe)
 if [ $? != 0 ] ; then
   EXIT_CODE=1
@@ -136,7 +163,7 @@ echo "-- Get user me end --"
 # Get user with admin user token / Success
 echo "-- Get user with admin token start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -H "authorization: Bearer $ADMIN_TOKEN" \
+  -H "authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -d "{\"id\": \"$USER_ID\"}" \
   localhost:9090 User/GetUser)
 if [ $? != 0 ] ; then
@@ -148,7 +175,7 @@ echo "-- Get user with admin token end --"
 # Get admin user with user token / Fail
 echo "-- Get user with admin token start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -H "authorization: Bearer $USER_TOKEN" \
+  -H "authorization: Bearer $USER_ACCESS_TOKEN" \
   -d "{\"id\": \"$ADMIN_ID\"}" \
   localhost:9090 User/GetUser)
 if [ $? == 0 ] ; then
@@ -161,7 +188,7 @@ echo "-- Get user with admin token end --"
 # Admin
 echo "-- Delete admin user me start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -H "authorization: Bearer $ADMIN_TOKEN" \
+  -H "authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   localhost:9090 UserMe/DeleteUserMe)
 if [ $? != 0 ] ; then
   EXIT_CODE=1
@@ -171,7 +198,7 @@ echo "-- Delete admin user me end --"
 # User
 echo "-- Delete user me start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -H "authorization: Bearer $USER_TOKEN" \
+  -H "authorization: Bearer $USER_ACCESS_TOKEN" \
   localhost:9090 UserMe/DeleteUserMe)
 if [ $? != 0 ] ; then
   EXIT_CODE=1

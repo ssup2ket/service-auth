@@ -11,12 +11,22 @@ const (
 	userLoginIDCorrect = "test0000"
 )
 
-func TestCreateDeleteAuthToken(t *testing.T) {
-	tokenInfo, err := CreateToken(&AuthClaims{UserID: userIDCorrect, UserLoginID: userLoginIDCorrect})
-	require.NoError(t, err, "Failed to create auth token")
+func TestCreateAccessToken(t *testing.T) {
+	tokenInfo, err := CreateAccessToken(&AuthClaims{UserID: userIDCorrect, UserLoginID: userLoginIDCorrect})
+	require.NoError(t, err, "Failed to create access token")
 
-	validatedToken, err := ValidateToken(tokenInfo.Token)
-	require.NoError(t, err, "Failed to validate auth token")
-	require.Equal(t, validatedToken.UserID, userIDCorrect)
-	require.Equal(t, validatedToken.UserLoginID, userLoginIDCorrect)
+	validatedAccessToken, err := ValidateAccessToken(tokenInfo.Token)
+	require.NoError(t, err, "Failed to validate access token")
+	require.Equal(t, validatedAccessToken.UserID, userIDCorrect)
+	require.Equal(t, validatedAccessToken.UserLoginID, userLoginIDCorrect)
+}
+
+func TestCreateRefreshToken(t *testing.T) {
+	tokenInfo, err := CreateRefreshToken(&AuthClaims{UserID: userIDCorrect, UserLoginID: userLoginIDCorrect})
+	require.NoError(t, err, "Failed to create refresh token")
+
+	validatedAccessToken, err := ValidateRefreshToken(tokenInfo.Token)
+	require.NoError(t, err, "Failed to validate refresh token")
+	require.Equal(t, validatedAccessToken.UserID, userIDCorrect)
+	require.Equal(t, validatedAccessToken.UserLoginID, userLoginIDCorrect)
 }

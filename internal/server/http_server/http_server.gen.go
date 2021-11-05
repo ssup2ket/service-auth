@@ -6,6 +6,7 @@ package http_server
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -15,6 +16,10 @@ import (
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi/v5"
+)
+
+const (
+	LoginScopes = "Login.Scopes"
 )
 
 // ErrorInfo defines model for ErrorInfo.
@@ -30,17 +35,22 @@ type ListMeta struct {
 	Total  int `json:"total"`
 }
 
-// TokenCreate defines model for TokenCreate.
-type TokenCreate struct {
-	LoginId  string `json:"loginId"`
-	Password string `json:"password"`
-}
-
 // TokenInfo defines model for TokenInfo.
 type TokenInfo struct {
 	ExpiresAt time.Time `json:"expiresAt"`
 	IssuedAt  time.Time `json:"issuedAt"`
 	Token     string    `json:"token"`
+}
+
+// TokenInfos defines model for TokenInfos.
+type TokenInfos struct {
+	AccessToken  TokenInfo `json:"accessToken"`
+	RefreshToken TokenInfo `json:"refreshToken"`
+}
+
+// TokenRefresh defines model for TokenRefresh.
+type TokenRefresh struct {
+	RefreshToken string `json:"refreshToken"`
 }
 
 // UserCreate defines model for UserCreate.
@@ -93,8 +103,8 @@ type Offset int
 // UserID defines model for UserID.
 type UserID string
 
-// PostTokensJSONBody defines parameters for PostTokens.
-type PostTokensJSONBody TokenCreate
+// PostTokensRefreshJSONBody defines parameters for PostTokensRefresh.
+type PostTokensRefreshJSONBody TokenRefresh
 
 // GetUsersParams defines parameters for GetUsers.
 type GetUsersParams struct {
@@ -111,8 +121,8 @@ type PutUsersMeJSONBody UserUpdate
 // PutUsersUserIDJSONBody defines parameters for PutUsersUserID.
 type PutUsersUserIDJSONBody UserUpdate
 
-// PostTokensJSONRequestBody defines body for PostTokens for application/json ContentType.
-type PostTokensJSONRequestBody PostTokensJSONBody
+// PostTokensRefreshJSONRequestBody defines body for PostTokensRefresh for application/json ContentType.
+type PostTokensRefreshJSONRequestBody PostTokensRefreshJSONBody
 
 // PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody PostUsersJSONBody
@@ -126,8 +136,11 @@ type PutUsersUserIDJSONRequestBody PutUsersUserIDJSONBody
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
-	// (POST /tokens)
-	PostTokens(w http.ResponseWriter, r *http.Request)
+	// (POST /tokens/login)
+	PostTokensLogin(w http.ResponseWriter, r *http.Request)
+
+	// (POST /tokens/refresh)
+	PostTokensRefresh(w http.ResponseWriter, r *http.Request)
 
 	// (GET /users)
 	GetUsers(w http.ResponseWriter, r *http.Request, params GetUsersParams)
@@ -162,12 +175,29 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
 
-// PostTokens operation middleware
-func (siw *ServerInterfaceWrapper) PostTokens(w http.ResponseWriter, r *http.Request) {
+// PostTokensLogin operation middleware
+func (siw *ServerInterfaceWrapper) PostTokensLogin(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, LoginScopes, []string{""})
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostTokensLogin(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// PostTokensRefresh operation middleware
+func (siw *ServerInterfaceWrapper) PostTokensRefresh(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostTokens(w, r)
+		siw.Handler.PostTokensRefresh(w, r)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -395,7 +425,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/tokens", wrapper.PostTokens)
+		r.Post(options.BaseURL+"/tokens/login", wrapper.PostTokensLogin)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/tokens/refresh", wrapper.PostTokensRefresh)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users", wrapper.GetUsers)
@@ -428,22 +461,24 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"/wIAAP//t6e7794gAAA=",
 }
 
 // GetSwagger returns the Swagger specification corresponding to the generated code

@@ -8,7 +8,7 @@ import (
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/password"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/hashing"
 	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
 )
 
@@ -39,8 +39,8 @@ type UserServiceImp struct {
 	userSecretRepoSecondary repo.UserSecretRepo
 }
 
-func NewUserServiceImp(userOutBoxPrimary repo.OutboxRepo, userInfoPrimary repo.UserInfoRepo, userInfoSecondary repo.UserInfoRepo,
-	userSecretPrimary repo.UserSecretRepo, userSecretSecondary repo.UserSecretRepo) *UserServiceImp {
+func NewUserServiceImp(userOutBoxPrimary repo.OutboxRepo, userInfoPrimary, userInfoSecondary repo.UserInfoRepo,
+	userSecretPrimary, userSecretSecondary repo.UserSecretRepo) *UserServiceImp {
 	return &UserServiceImp{
 		outBoxRepoPrimary:       userOutBoxPrimary,
 		userInfoRepoPrimary:     userInfoPrimary,
@@ -95,7 +95,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	}
 
 	// Create user secret
-	hash, salt, err := password.GetPasswordHashAndSalt(passwd)
+	hash, salt, err := hashing.GetStrHashAndSalt(passwd)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create password hash and salt")
 		return nil, err
@@ -186,7 +186,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 	}
 
 	// Update user secret
-	hash, salt, err := password.GetPasswordHashAndSalt(passwd)
+	hash, salt, err := hashing.GetStrHashAndSalt(passwd)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create password hash and salt")
 		return getReturnErr(err)

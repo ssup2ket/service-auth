@@ -7,12 +7,21 @@ option go_package = "internal/server/grpc_server";
 
 // Message
 // Token request
-message TokenCreateRequest {
+message TokenLoginRequest {
     string loginId = 1;
     string password = 2;
 }
 
+message TokenRefreshRequest {
+    string refreshToken = 1;
+}
+
 // Token response
+message TokenInfosResponse {
+    TokenInfoResponse accessToken = 1;
+    TokenInfoResponse refreshToken = 2;
+}
+
 message TokenInfoResponse {
     string token = 1;
     google.protobuf.Timestamp issuedAt = 2;
@@ -60,7 +69,8 @@ message UserInfoResponse {
 
 // Service
 service Token {
-    rpc CreateToken(TokenCreateRequest) returns (TokenInfoResponse) {}
+    rpc LoginToken(TokenLoginRequest) returns (TokenInfosResponse) {}
+    rpc RefreshToken(TokenRefreshRequest) returns (TokenInfoResponse) {}
 }
 
 service User {

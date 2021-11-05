@@ -115,18 +115,18 @@ func mwAccessLogger(r *http.Request, status, size int, duration time.Duration) {
 		Send()
 }
 
-func mwAuthTokenValidatorAndSetter() func(next http.Handler) http.Handler {
+func mwAccessTokenValidatorAndSetter() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
-			// Get auth token
-			token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer"))
+			// Get access token
+			accToken := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer"))
 
-			// Validate auth token and get auth info
-			authInfo, err := authtoken.ValidateToken(token)
+			// Validate access token and get auth info
+			authInfo, err := authtoken.ValidateAccessToken(accToken)
 			if err != nil {
-				log.Ctx(ctx).Error().Err(err).Msg("Auth token isn't valid")
+				log.Ctx(ctx).Error().Err(err).Msg("Access token isn't valid")
 				render.Render(w, r, getErrRendererUnauthorized())
 				return
 			}

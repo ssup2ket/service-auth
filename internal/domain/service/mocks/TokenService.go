@@ -15,8 +15,8 @@ type TokenService struct {
 	mock.Mock
 }
 
-// CreateToken provides a mock function with given fields: ctx, loginID, passwd
-func (_m *TokenService) CreateToken(ctx context.Context, loginID string, passwd string) (*token.TokenInfo, error) {
+// CreateTokens provides a mock function with given fields: ctx, loginID, passwd
+func (_m *TokenService) CreateTokens(ctx context.Context, loginID string, passwd string) (*token.TokenInfo, *token.TokenInfo, error) {
 	ret := _m.Called(ctx, loginID, passwd)
 
 	var r0 *token.TokenInfo
@@ -28,9 +28,41 @@ func (_m *TokenService) CreateToken(ctx context.Context, loginID string, passwd 
 		}
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+	var r1 *token.TokenInfo
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) *token.TokenInfo); ok {
 		r1 = rf(ctx, loginID, passwd)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*token.TokenInfo)
+		}
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func(context.Context, string, string) error); ok {
+		r2 = rf(ctx, loginID, passwd)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
+// RefreshToken provides a mock function with given fields: ctx, refreshToken
+func (_m *TokenService) RefreshToken(ctx context.Context, refreshToken string) (*token.TokenInfo, error) {
+	ret := _m.Called(ctx, refreshToken)
+
+	var r0 *token.TokenInfo
+	if rf, ok := ret.Get(0).(func(context.Context, string) *token.TokenInfo); ok {
+		r0 = rf(ctx, refreshToken)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*token.TokenInfo)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, refreshToken)
 	} else {
 		r1 = ret.Error(1)
 	}

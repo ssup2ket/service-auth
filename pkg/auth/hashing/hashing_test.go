@@ -1,4 +1,4 @@
-package password
+package hashing
 
 import (
 	"testing"
@@ -8,8 +8,8 @@ import (
 
 func TestValidatePasswd(t *testing.T) {
 	passwd := "passwd"
-	hash, salt, err := GetPasswordHashAndSalt(passwd)
+	hash, salt, err := GetStrHashAndSalt(passwd)
 
 	require.Nil(t, err, "Failed to get password hash and salt")
-	require.Equal(t, true, ValidatePasswd(passwd, hash, salt), "Failed to vaildate password")
+	require.Equal(t, true, ValidateStr(passwd, hash, salt), "Failed to vaildate password")
 }

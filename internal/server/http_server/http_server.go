@@ -47,7 +47,7 @@ func New(d *domain.Domain, url string, e *casbin.Enforcer, t opentracing.Tracer)
 		// Auth
 		r.Group(func(r chi.Router) {
 			// Set Auth middlewares
-			r.Use(mwAuthTokenValidatorAndSetter())
+			r.Use(mwAccessTokenValidatorAndSetter())
 			r.Use(mwAuthorizer(e))
 
 			// User
@@ -67,7 +67,8 @@ func New(d *domain.Domain, url string, e *casbin.Enforcer, t opentracing.Tracer)
 		// Noauth
 		r.Group(func(r chi.Router) {
 			// Token
-			r.Post("/tokens", serverWrapper.PostTokens)
+			r.Post("/tokens/login", serverWrapper.PostTokensLogin)
+			r.Post("/tokens/refresh", serverWrapper.PostTokensRefresh)
 
 			// User
 			r.Post("/users", serverWrapper.PostUsers)

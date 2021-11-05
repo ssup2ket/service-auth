@@ -1,4 +1,4 @@
-package password
+package hashing
 
 import (
 	"bytes"
@@ -8,12 +8,12 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
-func GetPasswordHashAndSalt(passwd string) (hash, salt []byte, err error) {
+func GetStrHashAndSalt(str string) (hash, salt []byte, err error) {
 	salt, err = GetSalt(20)
 	if err != nil {
 		return nil, nil, err
 	}
-	hash = GetPasswdHash(passwd, salt)
+	hash = GetStrHash(str, salt)
 	return
 }
 
@@ -26,10 +26,10 @@ func GetSalt(size int) ([]byte, error) {
 	return b, nil
 }
 
-func GetPasswdHash(passwd string, salt []byte) []byte {
+func GetStrHash(passwd string, salt []byte) []byte {
 	return pbkdf2.Key([]byte(passwd), salt, 4096, sha256.Size, sha256.New)
 }
 
-func ValidatePasswd(passwd string, hash, salt []byte) bool {
-	return bytes.Equal(GetPasswdHash(passwd, salt), hash)
+func ValidateStr(passwd string, hash, salt []byte) bool {
+	return bytes.Equal(GetStrHash(passwd, salt), hash)
 }

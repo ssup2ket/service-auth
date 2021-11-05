@@ -20,19 +20,36 @@ var api_spec =
     }
   },
   "components": {
+    "securitySchemes": {
+      "Login": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    },
     "schemas": {
-      "TokenCreate": {
+      "TokenRefresh": {
         "type": "object",
         "required": [
-          "loginId",
-          "password"
+          "refreshToken"
         ],
         "properties": {
-          "loginId": {
+          "refreshToken": {
             "type": "string"
+          }
+        }
+      },
+      "TokenInfos": {
+        "type": "object",
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ],
+        "properties": {
+          "accessToken": {
+            "$ref": "#/components/schemas/TokenInfo"
           },
-          "password": {
-            "type": "string"
+          "refreshToken": {
+            "$ref": "#/components/schemas/TokenInfo"
           }
         }
       },
@@ -224,7 +241,61 @@ var api_spec =
     }
   },
   "paths": {
-    "/tokens": {
+    "/tokens/login": {
+      "post": {
+        "tags": [
+          "token"
+        ],
+        "security": [
+          {
+            "Login": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenInfos"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorInfo"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tokens/refresh": {
       "post": {
         "tags": [
           "token"
@@ -233,7 +304,7 @@ var api_spec =
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TokenCreate"
+                "$ref": "#/components/schemas/TokenRefresh"
               }
             }
           }

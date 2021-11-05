@@ -138,32 +138,32 @@ func icAccessLoggerUnary() grpc.UnaryServerInterceptor {
 	}
 }
 
-func icAuthTokenValidaterAndSetterUnary() grpc.UnaryServerInterceptor {
+func icAccessTokenValidaterAndSetterUnary() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		// Pass token validation for some requests
-		if info.FullMethod == "/Token/CreateToken" || info.FullMethod == "/User/CreateUser" {
+		if info.FullMethod == "/Token/LoginToken" || info.FullMethod == "/Token/RefreshToken" || info.FullMethod == "/User/CreateUser" {
 			return handler(ctx, req)
 		}
 
 		// Get request's meta data
 		md, okMeta := metadata.FromIncomingContext(ctx)
 		if !okMeta {
-			log.Ctx(ctx).Error().Msg("Failed to get metadata for auth token")
+			log.Ctx(ctx).Error().Msg("Failed to get metadata for access token")
 			return nil, getErrServerError()
 		}
 
-		// Get auth token
+		// Get access token
 		tokens, okToken := md["authorization"]
 		if !okToken || len(tokens) != 1 {
-			log.Ctx(ctx).Error().Msg("Failed to get auth token")
+			log.Ctx(ctx).Error().Msg("Failed to get access token")
 			return nil, getErrUnauthorized()
 		}
 		token := strings.TrimSpace(strings.TrimPrefix(tokens[0], "Bearer"))
 
-		// Validate auth token and get auth info
-		authInfo, err := authtoken.ValidateToken(token)
+		// Validate access token and get auth info
+		authInfo, err := authtoken.ValidateAccessToken(token)
 		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("Auth token isn't valid")
+			log.Ctx(ctx).Error().Err(err).Msg("Access token isn't valid")
 			return nil, getErrUnauthorized()
 		}
 
@@ -185,7 +185,7 @@ func icAuthTokenValidaterAndSetterUnary() grpc.UnaryServerInterceptor {
 func icAuthorizerUnary(e *casbin.Enforcer) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		// Pass token validation for some requests
-		if info.FullMethod == "/Token/CreateToken" || info.FullMethod == "/User/CreateUser" {
+		if info.FullMethod == "/Token/LoginToken" || info.FullMethod == "/Token/RefreshToken" || info.FullMethod == "/User/CreateUser" {
 			return handler(ctx, req)
 		}
 

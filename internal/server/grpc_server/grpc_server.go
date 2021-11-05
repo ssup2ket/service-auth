@@ -35,7 +35,7 @@ func New(d *domain.Domain, e *casbin.Enforcer, t opentracing.Tracer) (*ServerGRP
 				icOpenTracingSetterUnary(t),
 				icAccessLoggerUnary(),
 
-				icAuthTokenValidaterAndSetterUnary(),
+				icAccessTokenValidaterAndSetterUnary(),
 				icAuthorizerUnary(e),
 				icUserIDLoggerSetterUnary(),
 			),
