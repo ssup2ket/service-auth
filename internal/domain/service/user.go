@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	AggregateUserType = "USER"
+	AggregateUserType = "User"
 )
 
 type userOutboxPayload struct {
