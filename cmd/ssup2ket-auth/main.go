@@ -60,7 +60,7 @@ func main() {
 		},
 	}
 
-	// Create jeager tracer from configs
+	// Create jeager tracer from configs and set global tracer
 	zipkinPropagator := zipkin.NewZipkinB3HTTPHeaderPropagator()
 	tracer, closer, err := jeagerCfg.NewTracer(
 		jaegercfg.Injector(opentracing.HTTPHeaders, zipkinPropagator),
@@ -71,6 +71,7 @@ func main() {
 		log.Fatal().Msg("Failed to init opentracing tracer")
 	}
 	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 
 	// Init domain
 	d, err := domain.New(cfg)
@@ -79,7 +80,7 @@ func main() {
 	}
 
 	// Init and run HTTP server
-	httpServer, err := http_server.New(d, cfg.ServerURL, enforcerHTTP, tracer)
+	httpServer, err := http_server.New(d, cfg.ServerURL, enforcerHTTP)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create HTTP server")
 	}
@@ -87,7 +88,7 @@ func main() {
 	httpServer.ListenAndServe()
 
 	// Init and run GRPC server
-	grpcServer, err := grpc_server.New(d, enforcerGRPC, tracer)
+	grpcServer, err := grpc_server.New(d, enforcerGRPC)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create GRPC server")
 	}

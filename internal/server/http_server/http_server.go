@@ -8,7 +8,6 @@ import (
 	"github.com/casbin/casbin"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 
@@ -21,11 +20,9 @@ type ServerHTTP struct {
 	httpServer *http.Server
 
 	domain *domain.Domain
-
-	tracer opentracing.Tracer
 }
 
-func New(d *domain.Domain, url string, e *casbin.Enforcer, t opentracing.Tracer) (*ServerHTTP, error) {
+func New(d *domain.Domain, url string, e *casbin.Enforcer) (*ServerHTTP, error) {
 	server := ServerHTTP{}
 	serverWrapper := ServerInterfaceWrapper{
 		Handler: &server,
@@ -39,7 +36,7 @@ func New(d *domain.Domain, url string, e *casbin.Enforcer, t opentracing.Tracer)
 
 	r.Use(hlog.NewHandler(log.Logger))
 	r.Use(mwRequestIDSetter())
-	r.Use(mwOpenTracingSetter(t))
+	r.Use(mwOpenTracingSetter())
 	r.Use(hlog.AccessHandler(mwAccessLogger))
 
 	// Set handlers
@@ -82,7 +79,6 @@ func New(d *domain.Domain, url string, e *casbin.Enforcer, t opentracing.Tracer)
 
 	server.domain = d
 	server.router = r
-	server.tracer = t
 	return &server, nil
 }
 

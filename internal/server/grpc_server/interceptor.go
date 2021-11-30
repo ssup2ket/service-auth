@@ -63,11 +63,14 @@ func icRequestIdSetterUnary() grpc.UnaryServerInterceptor {
 	}
 }
 
-func icOpenTracingSetterUnary(t opentracing.Tracer) grpc.UnaryServerInterceptor {
+func icOpenTracingSetterUnary() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		// Get tracer
+		tracer := opentracing.GlobalTracer()
+
 		// Get spancontext from request headers
 		md := grpcmeta.ExtractMetaFromContext(ctx)
-		spanCtx, err := t.Extract(opentracing.HTTPHeaders, grpcmeta.MetadataReaderWriter{MD: md})
+		spanCtx, err := tracer.Extract(opentracing.HTTPHeaders, grpcmeta.MetadataReaderWriter{MD: md})
 		if err != nil {
 			if err != opentracing.ErrSpanContextNotFound {
 				log.Ctx(ctx).Error().Err(err).Msg("Failed to get opentracing spancontext")
@@ -75,8 +78,8 @@ func icOpenTracingSetterUnary(t opentracing.Tracer) grpc.UnaryServerInterceptor 
 			}
 		}
 
-		// Start-Finish span
-		span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, t, "auth-service", ext.RPCServerOption(spanCtx))
+		// Start entry span
+		span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, tracer, "entry-grpc", ext.RPCServerOption(spanCtx))
 		defer span.Finish()
 
 		// Get trace ID and span ID

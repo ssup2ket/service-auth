@@ -49,13 +49,16 @@ func mwRequestIDSetter() func(next http.Handler) http.Handler {
 	}
 }
 
-func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Handler {
+func mwOpenTracingSetter() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
+			// Get tracer
+			tracer := opentracing.GlobalTracer()
+
 			// Get spancontext from request headers
-			spanCtx, err := t.Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(r.Header))
+			spanCtx, err := tracer.Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(r.Header))
 			if err != nil {
 				if err != opentracing.ErrSpanContextNotFound {
 					log.Ctx(ctx).Error().Err(err).Msg("Failed to get opentracing spancontext")
@@ -64,8 +67,8 @@ func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Hand
 				}
 			}
 
-			// Start-Finish span
-			span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, t, "auth-service", ext.RPCServerOption(spanCtx))
+			// Start entry span
+			span, childCtx := opentracing.StartSpanFromContextWithTracer(ctx, tracer, "entry-http", ext.RPCServerOption(spanCtx))
 			defer span.Finish()
 
 			// Get trace ID and span ID
