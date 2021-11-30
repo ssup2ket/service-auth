@@ -49,13 +49,14 @@ func main() {
 
 	// Set jeager tracer config
 	jeagerCfg := jaegercfg.Configuration{
-		ServiceName: "auth",
+		ServiceName: "ssup2ket-auth-" + string(cfg.DeployEnv),
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans: true,
+			LogSpans:          false,
+			CollectorEndpoint: cfg.JaegerJaegerCollectorEndpoint,
 		},
 	}
 

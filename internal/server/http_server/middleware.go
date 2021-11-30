@@ -77,10 +77,6 @@ func mwOpenTracingSetter(t opentracing.Tracer) func(next http.Handler) http.Hand
 				return c.Str("trace_id", traceID).Str("span_id", spanID)
 			})
 
-			// Set trace ID and span ID to response header
-			w.Header().Set(middleware.HeaderTraceID, traceID)
-			w.Header().Set(middleware.HeaderSpanID, spanID)
-
 			// Call next handler with child context
 			next.ServeHTTP(w, r.WithContext(childCtx))
 		}

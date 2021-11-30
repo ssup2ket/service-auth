@@ -24,6 +24,9 @@ const (
 	EnvMySQLSecondaryUser     = "MYSQL_SECONDARY_USER"
 	EnvMySQLSecondaryPassword = "MYSQL_SECONDARY_PASSWORD"
 	EnvMySQLSeconaaryDatabase = "MYSQL_SECONDARY_DATABASE"
+
+	// Jaeger
+	EnvJaegerCollectorEndpoint = "JAEGER_COLLECTOR_ENDPOINT"
 )
 
 type Configs struct {
@@ -47,6 +50,9 @@ type Configs struct {
 	MySQLSecondaryUser     string
 	MySQLSecondaryPassword string
 	MySQLSecondaryDatabase string
+
+	// Jaeger
+	JaegerJaegerCollectorEndpoint string
 }
 
 func GetConfigs() *Configs {
@@ -66,6 +72,8 @@ func GetConfigs() *Configs {
 		MySQLSecondaryUser:     os.Getenv(EnvMySQLPrimaryUser),
 		MySQLSecondaryPassword: os.Getenv(EnvMySQLPrimaryPassword),
 		MySQLSecondaryDatabase: os.Getenv(EnvMySQLPrimaryDatabase),
+
+		JaegerJaegerCollectorEndpoint: os.Getenv(EnvJaegerCollectorEndpoint),
 	}
 }
 
