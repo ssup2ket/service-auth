@@ -138,7 +138,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 		ID:            modeluuid.NewV4(),
 		AggregateType: AggregateUserType,
 		AggregateID:   userInfo.ID.String(),
-		Type:          "UserCreate",
+		EventType:     "UserCreate",
 		Payload:       string(userOutboxPayloadJSON),
 		SpanContext:   spanContext,
 	}
@@ -283,7 +283,7 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.Mode
 		ID:            modeluuid.NewV4(),
 		AggregateType: AggregateUserType,
 		AggregateID:   userUUID.String(),
-		Type:          "UserDelete",
+		EventType:     "UserDelete",
 		Payload:       string(userOutboxPayloadJSON),
 		SpanContext:   spanContext,
 	}
