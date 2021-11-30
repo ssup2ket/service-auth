@@ -135,12 +135,12 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 
 	// Insert created user info to outbox table to public a user create event
 	userOutbox := model.Outbox{
-		ID:                 modeluuid.NewV4(),
-		AggregateType:      AggregateUserType,
-		AggregateID:        userInfo.ID.String(),
-		Type:               "UserCreate",
-		Payload:            string(userOutboxPayloadJSON),
-		TracingSpanContext: spanContext,
+		ID:            modeluuid.NewV4(),
+		AggregateType: AggregateUserType,
+		AggregateID:   userInfo.ID.String(),
+		Type:          "UserCreate",
+		Payload:       string(userOutboxPayloadJSON),
+		SpanContext:   spanContext,
 	}
 	if err = u.outBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to insert created user to outbox table")
@@ -280,12 +280,12 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.Mode
 
 	// Insert deleted user info to outbox table to public a user delete event
 	userOutbox := model.Outbox{
-		ID:                 modeluuid.NewV4(),
-		AggregateType:      AggregateUserType,
-		AggregateID:        userUUID.String(),
-		Type:               "UserDelete",
-		Payload:            string(userOutboxPayloadJSON),
-		TracingSpanContext: spanContext,
+		ID:            modeluuid.NewV4(),
+		AggregateType: AggregateUserType,
+		AggregateID:   userUUID.String(),
+		Type:          "UserDelete",
+		Payload:       string(userOutboxPayloadJSON),
+		SpanContext:   spanContext,
 	}
 	if err = u.outBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to insert created user to outbox table")
