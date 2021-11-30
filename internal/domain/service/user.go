@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/log"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/hashing"
 	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/tracing"
 )
 
 const (
@@ -122,13 +124,23 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 		return nil, getReturnErr(err)
 	}
 
+	// Get span context as JSON
+	tracer := opentracing.GlobalTracer()
+	span := opentracing.SpanFromContext(ctx)
+	spanContext, err := tracing.GetSpanContextAsJSON(tracer, span)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user outbox spancontext")
+		return nil, getReturnErr(err)
+	}
+
 	// Insert created user info to outbox table to public a user create event
 	userOutbox := model.Outbox{
-		ID:            modeluuid.NewV4(),
-		AggregateType: AggregateUserType,
-		AggregateID:   userInfo.ID.String(),
-		Type:          "UserCreate",
-		Payload:       string(userOutboxPayloadJSON),
+		ID:                 modeluuid.NewV4(),
+		AggregateType:      AggregateUserType,
+		AggregateID:        userInfo.ID.String(),
+		Type:               "UserCreate",
+		Payload:            string(userOutboxPayloadJSON),
+		TracingSpanContext: spanContext,
 	}
 	if err = u.outBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to insert created user to outbox table")
@@ -257,13 +269,23 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.Mode
 		return getReturnErr(err)
 	}
 
+	// Get span context as JSON
+	tracer := opentracing.GlobalTracer()
+	span := opentracing.SpanFromContext(ctx)
+	spanContext, err := tracing.GetSpanContextAsJSON(tracer, span)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user outbox spancontext")
+		return getReturnErr(err)
+	}
+
 	// Insert deleted user info to outbox table to public a user delete event
 	userOutbox := model.Outbox{
-		ID:            modeluuid.NewV4(),
-		AggregateType: AggregateUserType,
-		AggregateID:   userUUID.String(),
-		Type:          "UserDelete",
-		Payload:       string(userOutboxPayloadJSON),
+		ID:                 modeluuid.NewV4(),
+		AggregateType:      AggregateUserType,
+		AggregateID:        userUUID.String(),
+		Type:               "UserDelete",
+		Payload:            string(userOutboxPayloadJSON),
+		TracingSpanContext: spanContext,
 	}
 	if err = u.outBoxRepoPrimary.WithTx(tx).Create(ctx, &userOutbox); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to insert created user to outbox table")

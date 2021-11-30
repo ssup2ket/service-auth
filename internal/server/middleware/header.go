@@ -11,8 +11,6 @@ const (
 	CtxKeyRequestID ctxKeyRequestID = 0
 
 	HeaderRequestID = "X-Request-ID"
-	HeaderTraceID   = "X-B3-TraceId"
-	HeaderSpanID    = "X-B3-SpanId"
 )
 
 func SetRequestIDToCtx(ctx context.Context, requestID string) context.Context {

@@ -91,10 +91,6 @@ func icOpenTracingSetterUnary() grpc.UnaryServerInterceptor {
 			return c.Str("trace_id", traceID).Str("span_id", spanID)
 		})
 
-		// Set trace ID and span ID to response header
-		header := metadata.Pairs(middleware.HeaderTraceID, traceID, middleware.HeaderSpanID, spanID)
-		grpc.SetHeader(childCtx, header)
-
 		// Call next handler
 		return handler(childCtx, req)
 	}

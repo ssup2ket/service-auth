@@ -65,6 +65,8 @@ func main() {
 	tracer, closer, err := jeagerCfg.NewTracer(
 		jaegercfg.Injector(opentracing.HTTPHeaders, zipkinPropagator),
 		jaegercfg.Extractor(opentracing.HTTPHeaders, zipkinPropagator),
+		jaegercfg.Injector(opentracing.TextMap, zipkinPropagator),
+		jaegercfg.Extractor(opentracing.TextMap, zipkinPropagator),
 		jaegercfg.ZipkinSharedRPCSpan(true),
 	)
 	if err != nil {
