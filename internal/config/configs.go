@@ -83,5 +83,6 @@ type DeployEnv string
 const (
 	DeployEnvLocal DeployEnv = "local"
 	DeployEnvDev   DeployEnv = "dev"
+	DeployEnvStage DeployEnv = "stage"
 	DeployEnvProd  DeployEnv = "prod"
 )
