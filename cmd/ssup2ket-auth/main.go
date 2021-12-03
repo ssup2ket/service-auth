@@ -31,9 +31,8 @@ func main() {
 	if cfg.DeployEnv == config.DeployEnvLocal {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	} else if cfg.DeployEnv == config.DeployEnvDev {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	} else if cfg.DeployEnv == config.DeployEnvProd {
+	} else if cfg.DeployEnv == config.DeployEnvDev || cfg.DeployEnv == config.DeployEnvStage ||
+		cfg.DeployEnv == config.DeployEnvProd {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	} else {
 		log.Fatal().Msg("Wrong deploy env")

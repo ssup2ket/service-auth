@@ -22,7 +22,8 @@ ssup2ket-auth-service uses following external packages and tools.
 * **Kafaka** - [kafka-go](https://github.com/segmentio/kafka-go)
 * **Authorziation** - [Casbin](https://casbin.org/)
 * **Logging, Tracking** - [zerolog](https://github.com/rs/zerolog), [Istio](https://istio.io/)
-* **CI/CD** - [Testify](https://github.com/stretchr/testify), [sqlmock](https://github.com/DATA-DOG/go-sqlmock), [Mockery](https://github.com/mockery/mockery), [Github Actions](https://github.com/features/actions), [K8s](https://kubernetes.io/), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/), [ArgoCD Image Updater](https://github.com/argoproj-labs/argocd-image-updater), [Kustomize](https://kustomize.io/)
+* **Continuous Integration** - [Testify](https://github.com/stretchr/testify), [sqlmock](https://github.com/DATA-DOG/go-sqlmock), [Mockery](https://github.com/mockery/mockery), [Github Actions](https://github.com/features/actions)
+* **Continuous Deployment** - [K8s](https://kubernetes.io/), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/), [ArgoCD Image Updater](https://github.com/argoproj-labs/argocd-image-updater), [Kustomize](https://kustomize.io/)
 
 ## Development Environment
 
