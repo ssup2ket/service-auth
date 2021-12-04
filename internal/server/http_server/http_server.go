@@ -30,7 +30,7 @@ func New(d *domain.Domain, url string, e *casbin.Enforcer) (*ServerHTTP, error) 
 
 	// Set middlewares
 	r := chi.NewRouter()
-	r.Use(middleware.Heartbeat("/ping"))
+	r.Use(middleware.Heartbeat("/healthz"))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 
