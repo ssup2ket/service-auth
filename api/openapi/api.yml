@@ -16,6 +16,10 @@ components:
     Login:
       type: http
       scheme: basic
+    AccessToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     TokenRefresh:
       type: object
@@ -235,6 +239,8 @@ paths:
         - $ref: '#/components/parameters/Limit'
       tags:
         - user
+      security:
+        - AccessToken: []
       responses:
         '200':
           description: ''
@@ -269,6 +275,8 @@ paths:
     post:
       tags:
         - user
+      security:
+        - AccessToken: []
       requestBody:
         content:
           application/json:
@@ -305,6 +313,8 @@ paths:
     get:
       tags:
         - user
+      security:
+        - AccessToken: []
       responses:
         '200':
           description: ''
@@ -339,6 +349,8 @@ paths:
     put:
       tags:
         - user
+      security:
+        - AccessToken: []
       requestBody:
         content:
           application/json:
@@ -374,6 +386,8 @@ paths:
     delete:
       tags:
         - user
+      security:
+        - AccessToken: []
       responses:
         '200':
           description: ''
@@ -399,6 +413,8 @@ paths:
     get:
       tags:
         - user
+      security:
+        - AccessToken: []
       responses:
         '200':
           description: ''
@@ -433,6 +449,8 @@ paths:
     put:
       tags:
         - user
+      security:
+        - AccessToken: []
       requestBody:
         content:
           application/json:
@@ -468,6 +486,8 @@ paths:
     delete:
       tags:
         - user
+      security:
+        - AccessToken: []
       responses:
         '200':
           description: ''

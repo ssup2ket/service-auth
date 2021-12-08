@@ -24,6 +24,11 @@ var api_spec =
       "Login": {
         "type": "http",
         "scheme": "basic"
+      },
+      "AccessToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
@@ -366,6 +371,11 @@ var api_spec =
         "tags": [
           "user"
         ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -422,6 +432,11 @@ var api_spec =
       "post": {
         "tags": [
           "user"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
         ],
         "requestBody": {
           "content": {
@@ -486,6 +501,11 @@ var api_spec =
         "tags": [
           "user"
         ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -542,6 +562,11 @@ var api_spec =
       "put": {
         "tags": [
           "user"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
         ],
         "requestBody": {
           "content": {
@@ -601,6 +626,11 @@ var api_spec =
       "delete": {
         "tags": [
           "user"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
         ],
         "responses": {
           "200": {
@@ -644,6 +674,11 @@ var api_spec =
         "tags": [
           "user"
         ],
+        "security": [
+          {
+            "AccessToken": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -700,6 +735,11 @@ var api_spec =
       "put": {
         "tags": [
           "user"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
         ],
         "requestBody": {
           "content": {
@@ -759,6 +799,11 @@ var api_spec =
       "delete": {
         "tags": [
           "user"
+        ],
+        "security": [
+          {
+            "AccessToken": []
+          }
         ],
         "responses": {
           "200": {
