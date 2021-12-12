@@ -5,17 +5,17 @@ export SERVER_URL=http://localhost
 export DEPLOY_ENV=local
 
 # MySQL
+export MYSQL_DATABASE=local_auth
+
 export MYSQL_PRIMARY_IP=127.0.0.1
 export MYSQL_PRIMARY_PORT=3306
 export MYSQL_PRIMARY_USER=root
 export MYSQL_PRIMARY_PASSWORD=root
-export MYSQL_PRIMARY_DATABASE=local_auth
 
 export MYSQL_SECONDARY_IP=127.0.0.1
 export MYSQL_SECONDARY_PORT=3306
 export MYSQL_SECONDARY_USER=root
 export MYSQL_SECONDARY_PASSWORD=root
-export MYSQL_SECONDARY_DATABASE=local_auth
 
 # Jaeger
 export JAEGER_COLLECTOR_ENDPOINT=""

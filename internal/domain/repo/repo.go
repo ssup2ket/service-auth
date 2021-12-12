@@ -32,7 +32,7 @@ func Init(c *config.Configs) error {
 
 	// Connect to primary MySQL
 	primaryDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		c.MySQLPrimaryUser, c.MySQLPrimaryPassword, c.MySQLPrimaryIP, c.MySQLPrimaryPort, c.MySQLPrimaryDatabase)
+		c.MySQLPrimaryUser, c.MySQLPrimaryPassword, c.MySQLPrimaryIP, c.MySQLPrimaryPort, c.MySQLDatabase)
 	primaryMySQL, err = gorm.Open(mysql.Open(primaryDSN), gormConfig)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to connect to primary MySQL")
@@ -41,7 +41,7 @@ func Init(c *config.Configs) error {
 
 	// Connect to secondary MySQL
 	secondaryDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		c.MySQLSecondaryUser, c.MySQLSecondaryPassword, c.MySQLSecondaryIP, c.MySQLSecondaryPort, c.MySQLSecondaryDatabase)
+		c.MySQLSecondaryUser, c.MySQLSecondaryPassword, c.MySQLSecondaryIP, c.MySQLSecondaryPort, c.MySQLDatabase)
 	secondaryMySQL, err = gorm.Open(mysql.Open(secondaryDSN), gormConfig)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to connect to secondary MySQL")

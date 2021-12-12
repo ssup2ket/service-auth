@@ -13,17 +13,17 @@ const (
 	EnvDeployEnv = "DEPLOY_ENV"
 
 	// MySQL
+	EnvMySQLDatabase = "MYSQL_DATABASE"
+
 	EnvMySQLPrimaryIP       = "MYSQL_PRIMARY_IP"
 	EnvMySQLPrimaryPort     = "MYSQL_PRIMARY_PORT"
 	EnvMySQLPrimaryUser     = "MYSQL_PRIMARY_USER"
 	EnvMySQLPrimaryPassword = "MYSQL_PRIMARY_PASSWORD"
-	EnvMySQLPrimaryDatabase = "MYSQL_PRIMARY_DATABASE"
 
 	EnvMySQLSecondaryIP       = "MYSQL_SECONDARY_IP"
 	EnvMySQLSecondaryPort     = "MYSQL_SECONDARY_PORT"
 	EnvMySQLSecondaryUser     = "MYSQL_SECONDARY_USER"
 	EnvMySQLSecondaryPassword = "MYSQL_SECONDARY_PASSWORD"
-	EnvMySQLSeconaaryDatabase = "MYSQL_SECONDARY_DATABASE"
 
 	// Jaeger
 	EnvJaegerCollectorEndpoint = "JAEGER_COLLECTOR_ENDPOINT"
@@ -37,19 +37,19 @@ type Configs struct {
 	DeployEnv DeployEnv
 
 	// MySQL
+	MySQLDatabase string
+
 	// Primary
 	MySQLPrimaryIP       string
 	MySQLPrimaryPort     string
 	MySQLPrimaryUser     string
 	MySQLPrimaryPassword string
-	MySQLPrimaryDatabase string
 
 	// Secondary
 	MySQLSecondaryIP       string
 	MySQLSecondaryPort     string
 	MySQLSecondaryUser     string
 	MySQLSecondaryPassword string
-	MySQLSecondaryDatabase string
 
 	// Jaeger
 	JaegerJaegerCollectorEndpoint string
@@ -61,17 +61,17 @@ func GetConfigs() *Configs {
 
 		DeployEnv: DeployEnv(os.Getenv(EnvDeployEnv)),
 
+		MySQLDatabase: os.Getenv(EnvMySQLDatabase),
+
 		MySQLPrimaryIP:       os.Getenv(EnvMySQLPrimaryIP),
 		MySQLPrimaryPort:     os.Getenv(EnvMySQLPrimaryPort),
 		MySQLPrimaryUser:     os.Getenv(EnvMySQLPrimaryUser),
 		MySQLPrimaryPassword: os.Getenv(EnvMySQLPrimaryPassword),
-		MySQLPrimaryDatabase: os.Getenv(EnvMySQLPrimaryDatabase),
 
 		MySQLSecondaryIP:       os.Getenv(EnvMySQLPrimaryIP),
 		MySQLSecondaryPort:     os.Getenv(EnvMySQLPrimaryPort),
 		MySQLSecondaryUser:     os.Getenv(EnvMySQLPrimaryUser),
 		MySQLSecondaryPassword: os.Getenv(EnvMySQLPrimaryPassword),
-		MySQLSecondaryDatabase: os.Getenv(EnvMySQLPrimaryDatabase),
 
 		JaegerJaegerCollectorEndpoint: os.Getenv(EnvJaegerCollectorEndpoint),
 	}
