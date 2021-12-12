@@ -52,7 +52,7 @@ type Configs struct {
 	MySQLSecondaryPassword string
 
 	// Jaeger
-	JaegerJaegerCollectorEndpoint string
+	JaegerCollectorEndpoint string
 }
 
 func GetConfigs() *Configs {
@@ -68,12 +68,12 @@ func GetConfigs() *Configs {
 		MySQLPrimaryUser:     os.Getenv(EnvMySQLPrimaryUser),
 		MySQLPrimaryPassword: os.Getenv(EnvMySQLPrimaryPassword),
 
-		MySQLSecondaryIP:       os.Getenv(EnvMySQLPrimaryIP),
-		MySQLSecondaryPort:     os.Getenv(EnvMySQLPrimaryPort),
-		MySQLSecondaryUser:     os.Getenv(EnvMySQLPrimaryUser),
-		MySQLSecondaryPassword: os.Getenv(EnvMySQLPrimaryPassword),
+		MySQLSecondaryIP:       os.Getenv(EnvMySQLSecondaryIP),
+		MySQLSecondaryPort:     os.Getenv(EnvMySQLSecondaryPort),
+		MySQLSecondaryUser:     os.Getenv(EnvMySQLSecondaryUser),
+		MySQLSecondaryPassword: os.Getenv(EnvMySQLSecondaryPassword),
 
-		JaegerJaegerCollectorEndpoint: os.Getenv(EnvJaegerCollectorEndpoint),
+		JaegerCollectorEndpoint: os.Getenv(EnvJaegerCollectorEndpoint),
 	}
 }
 

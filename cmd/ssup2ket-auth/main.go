@@ -55,7 +55,7 @@ func main() {
 		},
 		Reporter: &jaegercfg.ReporterConfig{
 			LogSpans:          false,
-			CollectorEndpoint: cfg.JaegerJaegerCollectorEndpoint,
+			CollectorEndpoint: cfg.JaegerCollectorEndpoint,
 		},
 	}
 
