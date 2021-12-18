@@ -15,7 +15,9 @@ import (
 )
 
 const (
-	AggregateUserType = "User"
+	AggregateTypeUser    = "User"
+	EventTypeUserCreated = "UserCreated"
+	EventTypeUserDeleted = "UserDeleted"
 )
 
 type userOutboxPayload struct {
@@ -136,9 +138,9 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	// Insert created user info to outbox table to public a user create event
 	userOutbox := model.Outbox{
 		ID:            modeluuid.NewV4(),
-		AggregateType: AggregateUserType,
+		AggregateType: AggregateTypeUser,
 		AggregateID:   userInfo.ID.String(),
-		EventType:     "UserCreate",
+		EventType:     EventTypeUserCreated,
 		Payload:       string(userOutboxPayloadJSON),
 		SpanContext:   spanContext,
 	}
@@ -281,9 +283,9 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.Mode
 	// Insert deleted user info to outbox table to public a user delete event
 	userOutbox := model.Outbox{
 		ID:            modeluuid.NewV4(),
-		AggregateType: AggregateUserType,
+		AggregateType: AggregateTypeUser,
 		AggregateID:   userUUID.String(),
-		EventType:     "UserDelete",
+		EventType:     EventTypeUserDeleted,
 		Payload:       string(userOutboxPayloadJSON),
 		SpanContext:   spanContext,
 	}
