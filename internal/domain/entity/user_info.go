@@ -1,11 +1,11 @@
-package model
+package entity
 
 import (
 	"time"
 
 	"gorm.io/gorm"
 
-	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
 )
 
 type UserRole string
@@ -25,7 +25,7 @@ func IsValidUserRole(role string) bool {
 }
 
 type UserInfo struct {
-	ID        modeluuid.ModelUUID `gorm:"primaryKey;type:binary(16)"`
+	ID        uuid.EntityUUID `gorm:"primaryKey;type:binary(16)"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

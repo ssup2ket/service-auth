@@ -12,7 +12,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
 )
 
@@ -57,7 +57,7 @@ func (u *userInfoSuite) TestCreate() {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	u.sqlMock.ExpectCommit()
 
-	err := u.repo.Create(context.Background(), &model.UserInfo{
+	err := u.repo.Create(context.Background(), &entity.UserInfo{
 		ID:      test.UserIDCorrect,
 		LoginID: test.UserLoginIDCorrect,
 		Role:    test.UserRoleCorrect,
@@ -95,7 +95,7 @@ func (u *userInfoSuite) TestCreateAndGet() {
 
 	tx := NewDBTx()
 	tx.Begin()
-	err := u.repo.WithTx(tx).Create(context.Background(), &model.UserInfo{
+	err := u.repo.WithTx(tx).Create(context.Background(), &entity.UserInfo{
 		ID:      test.UserIDCorrect,
 		LoginID: test.UserLoginIDCorrect,
 		Role:    test.UserRoleCorrect,

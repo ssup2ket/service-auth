@@ -1,13 +1,13 @@
-package model
+package entity
 
 import (
 	"time"
 
-	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
 )
 
 type Outbox struct {
-	ID        modeluuid.ModelUUID `gorm:"primaryKey;type:binary(16)"`
+	ID        uuid.EntityUUID `gorm:"primaryKey;type:binary(16)"`
 	CreatedAt time.Time
 
 	AggregateType string `gorm:"column:aggregatetype;size:255"`

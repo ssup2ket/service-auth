@@ -6,12 +6,12 @@ import (
 	"github.com/go-chi/render"
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/request"
-	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
 )
 
 // List users
@@ -79,7 +79,7 @@ func (s *ServerHTTP) GetUsersUserID(w http.ResponseWriter, r *http.Request, user
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, modeluuid.FromStringOrNil(string(userID)))
+	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(userID)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
@@ -140,7 +140,7 @@ func (s *ServerHTTP) DeleteUsersUserID(w http.ResponseWriter, r *http.Request, u
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, modeluuid.FromStringOrNil(string(userID))); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(string(userID))); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			render.Render(w, r, getErrRendererNotFound(errors.ErrResouceUser))
@@ -167,7 +167,7 @@ func (s *ServerHTTP) GetUsersMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, modeluuid.FromStringOrNil(string(userID)))
+	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(userID)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Msg("User doesn't exist")
@@ -230,7 +230,7 @@ func (s *ServerHTTP) DeleteUsersMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, modeluuid.FromStringOrNil(string(userID))); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(string(userID))); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			render.Render(w, r, getErrRendererNotFound(errors.ErrResouceUser))
@@ -258,25 +258,25 @@ func (u *UserUpdate) Bind(r *http.Request) error {
 }
 
 // DTO <-> Model
-func userCreateToUserInfoModel(userCreate *UserCreate) *model.UserInfo {
-	return &model.UserInfo{
+func userCreateToUserInfoModel(userCreate *UserCreate) *entity.UserInfo {
+	return &entity.UserInfo{
 		LoginID: userCreate.LoginId,
-		Role:    model.UserRole(userCreate.Role),
+		Role:    entity.UserRole(userCreate.Role),
 		Phone:   userCreate.Phone,
 		Email:   userCreate.Email,
 	}
 }
 
-func userUpdateToUserInfoModel(userID string, userUpdate *UserUpdate) *model.UserInfo {
-	return &model.UserInfo{
-		ID:    modeluuid.FromStringOrNil(userID),
-		Role:  model.UserRole(userUpdate.Role),
+func userUpdateToUserInfoModel(userID string, userUpdate *UserUpdate) *entity.UserInfo {
+	return &entity.UserInfo{
+		ID:    uuid.FromStringOrNil(userID),
+		Role:  entity.UserRole(userUpdate.Role),
 		Phone: userUpdate.Phone,
 		Email: userUpdate.Email,
 	}
 }
 
-func UserModelToUserInfo(userModel *model.UserInfo) *UserInfo {
+func UserModelToUserInfo(userModel *entity.UserInfo) *UserInfo {
 	return &UserInfo{
 		Id:      userModel.ID.String(),
 		LoginId: userModel.LoginID,
@@ -286,7 +286,7 @@ func UserModelToUserInfo(userModel *model.UserInfo) *UserInfo {
 	}
 }
 
-func UserModelListToUserInfoList(userModelList []model.UserInfo) []UserInfo {
+func UserModelListToUserInfoList(userModelList []entity.UserInfo) []UserInfo {
 	userInfos := []UserInfo{}
 	for _, userModel := range userModelList {
 		tmp := UserInfo{

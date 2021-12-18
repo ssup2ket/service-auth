@@ -6,12 +6,12 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/request"
-	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
 )
 
 func (s *ServerGRPC) ListUser(ctx context.Context, req *UserListRequest) (*UserListResponse, error) {
@@ -60,7 +60,7 @@ func (s *ServerGRPC) GetUser(ctx context.Context, req *UserIDRequest) (*UserInfo
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, modeluuid.FromStringOrNil(string(req.Id)))
+	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(req.Id)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
@@ -102,7 +102,7 @@ func (s *ServerGRPC) DeleteUser(ctx context.Context, req *UserIDRequest) (*empty
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, modeluuid.FromStringOrNil(req.Id)); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(req.Id)); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			return nil, getErrNotFound(errors.ErrResouceUser)
@@ -123,7 +123,7 @@ func (s *ServerGRPC) GetUserMe(ctx context.Context, req *empty.Empty) (*UserInfo
 	}
 
 	// Get user
-	userInfo, err := s.domain.User.GetUser(ctx, modeluuid.FromStringOrNil(string(userID)))
+	userInfo, err := s.domain.User.GetUser(ctx, uuid.FromStringOrNil(string(userID)))
 	if err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
@@ -168,7 +168,7 @@ func (s *ServerGRPC) DeleteUserMe(ctx context.Context, req *empty.Empty) (*empty
 	}
 
 	// Delete user
-	if err := s.domain.User.DeleteUser(ctx, modeluuid.FromStringOrNil(userID)); err != nil {
+	if err := s.domain.User.DeleteUser(ctx, uuid.FromStringOrNil(userID)); err != nil {
 		if err == service.ErrRepoNotFound {
 			log.Ctx(ctx).Error().Err(err).Msg("User doesn't exist")
 			return nil, getErrNotFound(errors.ErrResouceUser)
@@ -198,25 +198,25 @@ func (u *UserUpdateRequest) validate() error {
 }
 
 // DTO <-> Model
-func userCreateToUserInfoModel(userCreate *UserCreateRequest) *model.UserInfo {
-	return &model.UserInfo{
+func userCreateToUserInfoModel(userCreate *UserCreateRequest) *entity.UserInfo {
+	return &entity.UserInfo{
 		LoginID: userCreate.LoginId,
-		Role:    model.UserRole(userCreate.Role),
+		Role:    entity.UserRole(userCreate.Role),
 		Phone:   userCreate.Phone,
 		Email:   userCreate.Email,
 	}
 }
 
-func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *model.UserInfo {
-	return &model.UserInfo{
-		ID:    modeluuid.FromStringOrNil(userUpdate.Id),
-		Role:  model.UserRole(userUpdate.Role),
+func userUpdateToUserInfoModel(userUpdate *UserUpdateRequest) *entity.UserInfo {
+	return &entity.UserInfo{
+		ID:    uuid.FromStringOrNil(userUpdate.Id),
+		Role:  entity.UserRole(userUpdate.Role),
 		Phone: userUpdate.Phone,
 		Email: userUpdate.Email,
 	}
 }
 
-func UserModelToUserInfo(userModel *model.UserInfo) *UserInfoResponse {
+func UserModelToUserInfo(userModel *entity.UserInfo) *UserInfoResponse {
 	return &UserInfoResponse{
 		Id:      userModel.ID.String(),
 		LoginId: userModel.LoginID,
@@ -226,7 +226,7 @@ func UserModelToUserInfo(userModel *model.UserInfo) *UserInfoResponse {
 	}
 }
 
-func UserModelListToUserInfoList(userModelList []model.UserInfo) *UserListResponse {
+func UserModelListToUserInfoList(userModelList []entity.UserInfo) *UserListResponse {
 	userInfos := []*UserInfoResponse{}
 	for _, userModel := range userModelList {
 		tmp := UserInfoResponse{

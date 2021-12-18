@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 )
 
 type ctxKeyUserID int
@@ -25,7 +25,7 @@ func SetUserLoginIDToCtx(ctx context.Context, userID string) context.Context {
 	return context.WithValue(ctx, CtxKeyUserLoginID, userID)
 }
 
-func SetUserRoleToCtx(ctx context.Context, userRole model.UserRole) context.Context {
+func SetUserRoleToCtx(ctx context.Context, userRole entity.UserRole) context.Context {
 	return context.WithValue(ctx, CtxKeyUserRole, userRole)
 }
 
@@ -45,8 +45,8 @@ func GetUserLoginIDFromCtx(ctx context.Context) (string, error) {
 	return userLoginID, nil
 }
 
-func GetUserRoleFromCtx(ctx context.Context) (model.UserRole, error) {
-	userRole, ok := ctx.Value(CtxKeyUserRole).(model.UserRole)
+func GetUserRoleFromCtx(ctx context.Context) (entity.UserRole, error) {
+	userRole, ok := ctx.Value(CtxKeyUserRole).(entity.UserRole)
 	if !ok {
 		return "", fmt.Errorf("no user role in context")
 	}

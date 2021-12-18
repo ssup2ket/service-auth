@@ -5,11 +5,11 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/hashing"
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
 )
 
 // Token service
@@ -70,7 +70,7 @@ func (t *TokenServiceImp) CreateTokens(ctx context.Context, loginID, passwd stri
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create refresh token's hash and salt")
 		return nil, nil, getReturnErr(err)
 	}
-	t.userSecretRepoPrimary.Update(ctx, &model.UserSecret{
+	t.userSecretRepoPrimary.Update(ctx, &entity.UserSecret{
 		ID:               userInfo.ID,
 		RefreshTokenHash: hash,
 		RefreshTokenSalt: salt,

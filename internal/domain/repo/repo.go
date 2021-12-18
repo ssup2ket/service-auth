@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/config"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 )
 
 // Pkg variables
@@ -50,9 +50,9 @@ func Init(c *config.Configs) error {
 
 	// Init schemas
 	if err = primaryMySQL.AutoMigrate(
-		&model.UserInfo{},
-		&model.UserSecret{},
-		&model.Outbox{},
+		&entity.UserInfo{},
+		&entity.UserSecret{},
+		&entity.Outbox{},
 	); err != nil {
 		log.Error().Err(err).Msg("Failed to init schemas")
 		return err

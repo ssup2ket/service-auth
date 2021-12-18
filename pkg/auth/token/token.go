@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 )
 
 const (
@@ -25,7 +25,7 @@ type TokenClaims struct {
 type AuthClaims struct {
 	UserID      string
 	UserLoginID string
-	UserRole    model.UserRole
+	UserRole    entity.UserRole
 }
 
 type TokenInfo struct {

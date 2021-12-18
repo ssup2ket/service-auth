@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	gouuid "github.com/satori/go.uuid"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 )
 
 func ValidateUserUUID(uuid string) error {
@@ -37,7 +37,7 @@ func ValidateUserCreate(id, passwd, role, phone, email string) error {
 	}
 
 	// Role
-	if !model.IsValidUserRole(role) {
+	if !entity.IsValidUserRole(role) {
 		return fmt.Errorf("wrong role")
 	}
 
@@ -79,7 +79,7 @@ func ValidateUserUpdate(uuid, passwd, role, phone, email string) error {
 
 	// Role
 	if role != "" {
-		if !model.IsValidUserRole(role) {
+		if !entity.IsValidUserRole(role) {
 			return fmt.Errorf("wrong role")
 		}
 	}

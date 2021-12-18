@@ -7,10 +7,10 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/hashing"
-	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
 	"github.com/ssup2ket/ssup2ket-auth-service/pkg/tracing"
 )
 
@@ -28,11 +28,11 @@ type userOutboxPayload struct {
 
 // User Service
 type UserService interface {
-	ListUser(ctx context.Context, offset int, limit int) ([]model.UserInfo, error)
-	CreateUser(ctx context.Context, userInfo *model.UserInfo, passwd string) (*model.UserInfo, error)
-	GetUser(ctx context.Context, userUUID modeluuid.ModelUUID) (*model.UserInfo, error)
-	UpdateUser(ctx context.Context, userInfo *model.UserInfo, passwd string) error
-	DeleteUser(ctx context.Context, userUUID modeluuid.ModelUUID) error
+	ListUser(ctx context.Context, offset int, limit int) ([]entity.UserInfo, error)
+	CreateUser(ctx context.Context, userInfo *entity.UserInfo, passwd string) (*entity.UserInfo, error)
+	GetUser(ctx context.Context, userUUID uuid.EntityUUID) (*entity.UserInfo, error)
+	UpdateUser(ctx context.Context, userInfo *entity.UserInfo, passwd string) error
+	DeleteUser(ctx context.Context, userUUID uuid.EntityUUID) error
 }
 
 type UserServiceImp struct {
@@ -54,7 +54,7 @@ func NewUserServiceImp(userOutBoxPrimary repo.OutboxRepo, userInfoPrimary, userI
 	}
 }
 
-func (u *UserServiceImp) ListUser(ctx context.Context, offset int, limit int) ([]model.UserInfo, error) {
+func (u *UserServiceImp) ListUser(ctx context.Context, offset int, limit int) ([]entity.UserInfo, error) {
 	var err error
 
 	// Set default limit
@@ -71,7 +71,7 @@ func (u *UserServiceImp) ListUser(ctx context.Context, offset int, limit int) ([
 	return users, nil
 }
 
-func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInfo, passwd string) (*model.UserInfo, error) {
+func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *entity.UserInfo, passwd string) (*entity.UserInfo, error) {
 	var err error
 
 	// Begin transaction
@@ -89,7 +89,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	}()
 
 	// Generate UUID to share to userInfo and userSecret
-	userUUID := modeluuid.NewV4()
+	userUUID := uuid.NewV4()
 
 	// Create user info
 	userInfo.ID = userUUID
@@ -104,7 +104,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create password hash and salt")
 		return nil, err
 	}
-	userSecret := model.UserSecret{
+	userSecret := entity.UserSecret{
 		ID:         userUUID,
 		PasswdHash: hash,
 		PasswdSalt: salt,
@@ -136,8 +136,8 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	}
 
 	// Insert created user info to outbox table to public a user create event
-	userOutbox := model.Outbox{
-		ID:            modeluuid.NewV4(),
+	userOutbox := entity.Outbox{
+		ID:            uuid.NewV4(),
 		AggregateType: AggregateTypeUser,
 		AggregateID:   userInfo.ID.String(),
 		EventType:     EventTypeUserCreated,
@@ -157,7 +157,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *model.UserInf
 	return userInfo, nil
 }
 
-func (u *UserServiceImp) GetUser(ctx context.Context, userUUID modeluuid.ModelUUID) (*model.UserInfo, error) {
+func (u *UserServiceImp) GetUser(ctx context.Context, userUUID uuid.EntityUUID) (*entity.UserInfo, error) {
 	var err error
 
 	// Get user info
@@ -169,7 +169,7 @@ func (u *UserServiceImp) GetUser(ctx context.Context, userUUID modeluuid.ModelUU
 	return userInfo, nil
 }
 
-func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInfo, passwd string) error {
+func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *entity.UserInfo, passwd string) error {
 	var err error
 
 	// Begin transaction
@@ -205,7 +205,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to create password hash and salt")
 		return getReturnErr(err)
 	}
-	userSecret := model.UserSecret{
+	userSecret := entity.UserSecret{
 		ID:         userInfo.ID,
 		PasswdHash: hash,
 		PasswdSalt: salt,
@@ -223,7 +223,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *model.UserInf
 	return nil
 }
 
-func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.ModelUUID) error {
+func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID uuid.EntityUUID) error {
 	var err error
 
 	// Begin transaction
@@ -281,8 +281,8 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID modeluuid.Mode
 	}
 
 	// Insert deleted user info to outbox table to public a user delete event
-	userOutbox := model.Outbox{
-		ID:            modeluuid.NewV4(),
+	userOutbox := entity.Outbox{
+		ID:            uuid.NewV4(),
 		AggregateType: AggregateTypeUser,
 		AggregateID:   userUUID.String(),
 		EventType:     EventTypeUserDeleted,

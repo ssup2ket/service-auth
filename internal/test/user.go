@@ -1,13 +1,13 @@
 package test
 
 import (
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
-	modeluuid "github.com/ssup2ket/ssup2ket-auth-service/pkg/model/uuid"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
+	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
 )
 
 const (
 	UserLoginIDCorrect = "test0000"
-	UserRoleCorrect    = model.UserRoleAdmin
+	UserRoleCorrect    = entity.UserRoleAdmin
 	UserPasswdCorrect  = "test0000"
 	UserPhoneCorrect   = "000-0000-0000"
 	UserEmailCorrect   = "test@test.com"
@@ -23,5 +23,5 @@ const (
 )
 
 var (
-	UserIDCorrect = modeluuid.FromStringOrNil("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+	UserIDCorrect = uuid.FromStringOrNil("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 )

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/model"
+	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo/mocks"
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
@@ -39,7 +39,7 @@ func (u *userSuite) SetupTest() {
 
 func (u *userSuite) TestGetUserSuccess() {
 	// Set repo
-	u.userInfoRepo.On("Get", context.Background(), test.UserIDCorrect).Return(&model.UserInfo{
+	u.userInfoRepo.On("Get", context.Background(), test.UserIDCorrect).Return(&entity.UserInfo{
 		ID:      test.UserIDCorrect,
 		LoginID: test.UserLoginIDCorrect,
 		Phone:   test.UserPhoneCorrect,
@@ -58,7 +58,7 @@ func (u *userSuite) TestGetUserSuccess() {
 func (u *userSuite) TestGetUserRepoNotFound() {
 	// Set repo
 	repoError := repo.ErrNotFound
-	u.userInfoRepo.On("Get", context.Background(), test.UserIDCorrect).Return(&model.UserInfo{}, repoError)
+	u.userInfoRepo.On("Get", context.Background(), test.UserIDCorrect).Return(&entity.UserInfo{}, repoError)
 
 	// Test
 	_, err := u.userService.GetUser(context.Background(), test.UserIDCorrect)
