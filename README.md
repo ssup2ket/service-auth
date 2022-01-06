@@ -19,7 +19,7 @@ ssup2ket-auth-service uses following external packages and tools.
 * **HTTP Server, Middleware** - [chi](https://github.com/go-chi/chi), [HTTP](https://pkg.go.dev/net/http), [oapi-codegen](https://github.com/deepmap/oapi-codegen)
 * **GRPC Server, Intercepter** - [grpc](https://pkg.go.dev/google.golang.org/grpc), [protoc-gen-go](https://pkg.go.dev/github.com/golang/protobuf/protoc-gen-go)
 * **MySQL** - [GORM](https://gorm.io/index.html)
-* **Kafaka** - [kafka-go](https://github.com/segmentio/kafka-go), [Debezium Outbox](https://debezium.io/documentation/reference/1.8/transformations/outbox-event-router.html)
+* **Kafka** - [kafka-go](https://github.com/segmentio/kafka-go), [Debezium Outbox](https://debezium.io/documentation/reference/1.8/transformations/outbox-event-router.html)
 * **Authorziation** - [Casbin](https://casbin.org/)
 * **Logging, Tracking** - [zerolog](https://github.com/rs/zerolog), [Istio](https://istio.io/), [OpenTracing](https://opentracing.io/), [Jaeger](https://www.jaegertracing.io/)
 * **Continuous Integration** - [Testify](https://github.com/stretchr/testify), [sqlmock](https://github.com/DATA-DOG/go-sqlmock), [Mockery](https://github.com/mockery/mockery), [Github Actions](https://github.com/features/actions)
