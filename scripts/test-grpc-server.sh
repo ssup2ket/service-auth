@@ -51,7 +51,7 @@ echo "-- Create user end --"
 # Admin
 echo "-- Login admin user token start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -rpc-header username:"$ADMIN_LOGIN_ID" -rpc-header password:"$ADMIN_PASSWD" \
+  -H "username:$ADMIN_LOGIN_ID" -H "password:$ADMIN_PASSWD" \
   localhost:9090 Token/LoginToken)
 if [ $? != 0 ] ; then
   EXIT_CODE=1
@@ -65,7 +65,7 @@ echo "-- Login admin user token end --"
 # User
 echo "-- Login user token start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
-  -rpc-header username:"$USER_LOGIN_ID" -rpc-header password:"$USER_LOGIN_ID" \
+  -H "username:$USER_LOGIN_ID" -H "password:$USER_PASSWD" \
   localhost:9090 Token/LoginToken)
 if [ $? != 0 ] ; then
   EXIT_CODE=1
