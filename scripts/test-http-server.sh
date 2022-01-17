@@ -217,7 +217,7 @@ fi
 echo "-- Get user with admin token end --"
 
 # Get admin user with user token / Fail
-echo "-- Get user with admin token start --"
+echo "-- Get user with user token start --"
 RESPONSE=$(curl --no-progress-meter --write-out '%{http_code}' \
   -X GET \
   -H "Content-Type: application/json" \
@@ -230,7 +230,7 @@ echo Response Body : $RESPONSE_BODY
 if [ $RESPONSE_HTTP_CODE != "401" ]; then
   EXIT_CODE=1
 fi
-echo "-- Get user with admin token end --"
+echo "-- Get user with user token end --"
 
 ## Delete user me
 # Admin

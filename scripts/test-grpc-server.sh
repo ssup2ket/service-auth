@@ -109,6 +109,7 @@ RESPONSE=$(grpcurl -plaintext -format-error \
 if [ $? != 0 ] ; then
   EXIT_CODE=1
 fi
+echo Response : $RESPONSE
 echo "-- Update admin user End --"
 
 # User
@@ -120,6 +121,7 @@ RESPONSE=$(grpcurl -plaintext -format-error \
 if [ $? != 0 ] ; then
   EXIT_CODE=1
 fi
+echo Response : $RESPONSE
 echo "-- Update user End --"
 
 ## Get user me
@@ -173,7 +175,7 @@ echo Response : $RESPONSE
 echo "-- Get user with admin token end --"
 
 # Get admin user with user token / Fail
-echo "-- Get user with admin token start --"
+echo "-- Get user with user token start --"
 RESPONSE=$(grpcurl -plaintext -format-error \
   -H "authorization: Bearer $USER_ACCESS_TOKEN" \
   -d "{\"id\": \"$ADMIN_ID\"}" \
@@ -182,7 +184,7 @@ if [ $? == 0 ] ; then
   EXIT_CODE=1
 fi
 echo Response : $RESPONSE
-echo "-- Get user with admin token end --"
+echo "-- Get user with user token end --"
 
 ## Delete user me
 # Admin
@@ -193,6 +195,7 @@ RESPONSE=$(grpcurl -plaintext -format-error \
 if [ $? != 0 ] ; then
   EXIT_CODE=1
 fi
+echo Response : $RESPONSE
 echo "-- Delete admin user me end --"
 
 # User
@@ -203,6 +206,7 @@ RESPONSE=$(grpcurl -plaintext -format-error \
 if [ $? != 0 ] ; then
   EXIT_CODE=1
 fi
+echo Response : $RESPONSE
 echo "-- Delete user me end --"
 
 # -- Exit --
