@@ -182,6 +182,12 @@ RESPONSE=$(grpcurl -plaintext -format-error \
   localhost:9090 User/GetUser)
 if [ $? == 0 ] ; then
   EXIT_CODE=1
+else 
+  CODE=$(jq -r .code <<< "$RESPONSE")
+  if [ $CODE != "7" ] ; then
+    echo "-- Wrong code --"
+    EXIT_CODE=1
+  fi
 fi
 echo Response : $RESPONSE
 echo "-- Get user with user token end --"
