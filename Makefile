@@ -37,7 +37,8 @@ build-image:
 
 .PHONY: test-unit
 test-unit: gen-mock
-	go test -v ./...
+	go test -v -coverprofile=cover.out ./...
+	go tool cover -html=cover.out -o=cover.html
 
 .PHONY: test-integration
 test-integration:
