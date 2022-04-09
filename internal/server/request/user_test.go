@@ -16,73 +16,84 @@ func TestInit(t *testing.T) {
 	suite.Run(t, new(userSuite))
 }
 
-// UserCreate
-func (h *userSuite) TestBindUserCreateCorrect() {
-	err := ValidateUserCreate(test.UserLoginIDCorrect, test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailCorrect)
-	require.NoError(h.T(), err)
+// UserUUID
+func (u *userSuite) TestBindUserUUIDCorrect() {
+	err := ValidateUserUUID(test.UserIDCorrect.String())
+	require.NoError(u.T(), err)
 }
 
-func (h *userSuite) TestBindUserCreateIDWrong() {
-	wrongIDs := []string{test.UserLoginIDShort, test.UserLoginIDLong}
-	for _, wrongID := range wrongIDs {
+func (u *userSuite) TestBindUserUUIDWrong() {
+	err := ValidateUserUUID(test.UserIDWrongFormat)
+	require.Error(u.T(), err)
+}
+
+// UserCreate
+func (u *userSuite) TestBindUserCreateCorrect() {
+	err := ValidateUserCreate(test.UserLoginIDCorrect, test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailCorrect)
+	require.NoError(u.T(), err)
+}
+
+func (u *userSuite) TestBindUserCreateLoginIDWrong() {
+	wrongLoginIDs := []string{test.UserLoginIDShort, test.UserLoginIDLong}
+	for _, wrongID := range wrongLoginIDs {
 		err := ValidateUserCreate(wrongID, test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailCorrect)
-		require.Error(h.T(), err)
+		require.Error(u.T(), err)
 	}
 }
 
-func (h *userSuite) TestBindUserCreatePasswdWrong() {
+func (u *userSuite) TestBindUserCreatePasswdWrong() {
 	wrongPasswds := []string{test.UserPasswdShort, test.UserPasswdLong}
 	for _, wrongPasswd := range wrongPasswds {
 		err := ValidateUserCreate(test.UserLoginIDCorrect, wrongPasswd, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailCorrect)
-		require.Error(h.T(), err)
+		require.Error(u.T(), err)
 	}
 }
 
-func (h *userSuite) TestBindUserCreateRoleWrong() {
+func (u *userSuite) TestBindUserCreateRoleWrong() {
 	err := ValidateUserCreate(test.UserLoginIDCorrect, test.UserPasswdCorrect, test.UserRoleWrong, test.UserPhoneWrongFormat, test.UserEmailCorrect)
-	require.Error(h.T(), err)
+	require.Error(u.T(), err)
 }
 
-func (h *userSuite) TestBindUserCreatePhoneWrong() {
+func (u *userSuite) TestBindUserCreatePhoneWrong() {
 	err := ValidateUserCreate(test.UserLoginIDCorrect, test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneWrongFormat, test.UserEmailCorrect)
-	require.Error(h.T(), err)
+	require.Error(u.T(), err)
 }
 
-func (h *userSuite) TestBindUserCreateEmailWrong() {
+func (u *userSuite) TestBindUserCreateEmailWrong() {
 	err := ValidateUserCreate(test.UserLoginIDCorrect, test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailWrongFormat)
-	require.Error(h.T(), err)
+	require.Error(u.T(), err)
 }
 
 // UserUpdate
-func (h *userSuite) TestBindUserUpdateCorrect() {
+func (u *userSuite) TestBindUserUpdateCorrect() {
 	err := ValidateUserUpdate(test.UserIDCorrect.String(), test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailCorrect)
-	require.NoError(h.T(), err)
+	require.NoError(u.T(), err)
 }
 
-func (h *userSuite) TestBindUserUpdateUUIDWrong() {
+func (u *userSuite) TestBindUserUpdateUUIDWrong() {
 	err := ValidateUserUpdate(test.UserIDWrongFormat, test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailCorrect)
-	require.Error(h.T(), err)
+	require.Error(u.T(), err)
 }
 
-func (h *userSuite) TestBindUserUpdatePasswdWrong() {
+func (u *userSuite) TestBindUserUpdatePasswdWrong() {
 	wrongPasswds := []string{test.UserPasswdShort, test.UserPasswdLong}
 	for _, wrongPasswd := range wrongPasswds {
 		err := ValidateUserUpdate(test.UserIDCorrect.String(), wrongPasswd, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailCorrect)
-		require.Error(h.T(), err)
+		require.Error(u.T(), err)
 	}
 }
 
-func (h *userSuite) TestBindUserUpdateRoleWrong() {
+func (u *userSuite) TestBindUserUpdateRoleWrong() {
 	err := ValidateUserUpdate(test.UserIDCorrect.String(), test.UserPasswdCorrect, test.UserRoleWrong, test.UserPhoneWrongFormat, test.UserEmailCorrect)
-	require.Error(h.T(), err)
+	require.Error(u.T(), err)
 }
 
-func (h *userSuite) TestBindUserUpdatePhoneWrong() {
+func (u *userSuite) TestBindUserUpdatePhoneWrong() {
 	err := ValidateUserUpdate(test.UserIDCorrect.String(), test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneWrongFormat, test.UserEmailCorrect)
-	require.Error(h.T(), err)
+	require.Error(u.T(), err)
 }
 
-func (h *userSuite) TestBindUserUpdateEmailWrong() {
+func (u *userSuite) TestBindUserUpdateEmailWrong() {
 	err := ValidateUserUpdate(test.UserIDCorrect.String(), test.UserPasswdCorrect, string(test.UserRoleCorrect), test.UserPhoneCorrect, test.UserEmailWrongFormat)
-	require.Error(h.T(), err)
+	require.Error(u.T(), err)
 }

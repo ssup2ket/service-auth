@@ -16,7 +16,7 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
 )
 
-func TestInit(t *testing.T) {
+func TestUserInfo(t *testing.T) {
 	suite.Run(t, new(userInfoSuite))
 }
 
