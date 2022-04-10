@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -50,7 +51,7 @@ func (u *userInfoSuite) AfterTest(_, _ string) {
 	require.NoError(u.T(), u.sqlMock.ExpectationsWereMet())
 }
 
-func (u *userInfoSuite) TestList() {
+func (u *userInfoSuite) TestListSuccess() {
 	u.sqlMock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_infos` WHERE `user_infos`.`deleted_at` IS NULL LIMIT 10")).
 		WillReturnRows(
 			sqlmock.NewRows([]string{"id", "login_id", "role", "phone", "email"}).
@@ -72,7 +73,15 @@ func (u *userInfoSuite) TestList() {
 	require.Equal(u.T(), test.UserEmailCorrect, userInfos[1].Email)
 }
 
-func (u *userInfoSuite) TestCreate() {
+func (u *userInfoSuite) TestListError() {
+	u.sqlMock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_infos` WHERE `user_infos`.`deleted_at` IS NULL LIMIT 10")).
+		WillReturnError(fmt.Errorf("error"))
+
+	_, err := u.repo.List(context.Background(), 0, 10)
+	require.Error(u.T(), err)
+}
+
+func (u *userInfoSuite) TestCreateSuccess() {
 	u.sqlMock.ExpectBegin()
 	u.sqlMock.ExpectExec(regexp.QuoteMeta("INSERT INTO `user_infos` (`id`,`created_at`,`updated_at`,`deleted_at`,`login_id`,`role`,`phone`,`email`) VALUES (?,?,?,?,?,?,?,?)")).
 		WithArgs(test.UserIDCorrect, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect).
@@ -89,7 +98,24 @@ func (u *userInfoSuite) TestCreate() {
 	require.NoError(u.T(), err)
 }
 
-func (u *userInfoSuite) TestGet() {
+func (u *userInfoSuite) TestCreateError() {
+	u.sqlMock.ExpectBegin()
+	u.sqlMock.ExpectExec(regexp.QuoteMeta("INSERT INTO `user_infos` (`id`,`created_at`,`updated_at`,`deleted_at`,`login_id`,`role`,`phone`,`email`) VALUES (?,?,?,?,?,?,?,?)")).
+		WithArgs(test.UserIDCorrect, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect).
+		WillReturnError(fmt.Errorf("error"))
+	u.sqlMock.ExpectRollback()
+
+	err := u.repo.Create(context.Background(), &entity.UserInfo{
+		ID:      test.UserIDCorrect,
+		LoginID: test.UserLoginIDCorrect,
+		Role:    test.UserRoleCorrect,
+		Phone:   test.UserPhoneCorrect,
+		Email:   test.UserEmailCorrect,
+	})
+	require.Error(u.T(), err)
+}
+
+func (u *userInfoSuite) TestGetSuccess() {
 	u.sqlMock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_infos` WHERE id = ? AND `user_infos`.`deleted_at` IS NULL ORDER BY `user_infos`.`id` LIMIT 1")).
 		WithArgs(test.UserIDCorrect).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "login_id", "role", "phone", "email"}).
@@ -104,7 +130,16 @@ func (u *userInfoSuite) TestGet() {
 	require.Equal(u.T(), test.UserEmailCorrect, userInfo.Email)
 }
 
-func (u *userInfoSuite) TestGetByLoginID() {
+func (u *userInfoSuite) TestGetError() {
+	u.sqlMock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_infos` WHERE id = ? AND `user_infos`.`deleted_at` IS NULL ORDER BY `user_infos`.`id` LIMIT 1")).
+		WithArgs(test.UserIDCorrect).
+		WillReturnError(fmt.Errorf("error"))
+
+	_, err := u.repo.Get(context.Background(), test.UserIDCorrect)
+	require.Error(u.T(), err)
+}
+
+func (u *userInfoSuite) TestGetByLoginIDSuccess() {
 	u.sqlMock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_infos` WHERE login_id = ? AND `user_infos`.`deleted_at` IS NULL ORDER BY `user_infos`.`id` LIMIT 1")).
 		WithArgs(test.UserLoginIDCorrect).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "login_id", "role", "phone", "email"}).
@@ -119,7 +154,16 @@ func (u *userInfoSuite) TestGetByLoginID() {
 	require.Equal(u.T(), test.UserEmailCorrect, userInfo.Email)
 }
 
-func (u *userInfoSuite) TestCreateAndGetWithTx() {
+func (u *userInfoSuite) TestGetByLoginIDError() {
+	u.sqlMock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `user_infos` WHERE login_id = ? AND `user_infos`.`deleted_at` IS NULL ORDER BY `user_infos`.`id` LIMIT 1")).
+		WithArgs(test.UserLoginIDCorrect).
+		WillReturnError(fmt.Errorf("error"))
+
+	_, err := u.repo.GetByLoginID(context.Background(), test.UserLoginIDCorrect)
+	require.Error(u.T(), err)
+}
+
+func (u *userInfoSuite) TestCreateAndGetWithTxSuccess() {
 	u.sqlMock.ExpectBegin()
 	u.sqlMock.ExpectExec(regexp.QuoteMeta("INSERT INTO `user_infos` (`id`,`created_at`,`updated_at`,`deleted_at`,`login_id`,`role`,`phone`,`email`) VALUES (?,?,?,?,?,?,?,?)")).
 		WithArgs(test.UserIDCorrect, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect).
@@ -151,7 +195,7 @@ func (u *userInfoSuite) TestCreateAndGetWithTx() {
 	tx.Commit()
 }
 
-func (u *userInfoSuite) TestUpdate() {
+func (u *userInfoSuite) TestUpdateSuccess() {
 	u.sqlMock.ExpectBegin()
 	u.sqlMock.ExpectExec(regexp.QuoteMeta("UPDATE `user_infos` SET `updated_at`=?,`login_id`=?,`role`=?,`phone`=?,`email`=? WHERE `id` = ?")).
 		WithArgs(sqlmock.AnyArg(), test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect, test.UserIDCorrect).
@@ -168,7 +212,24 @@ func (u *userInfoSuite) TestUpdate() {
 	require.NoError(u.T(), err)
 }
 
-func (u *userInfoSuite) TestDelete() {
+func (u *userInfoSuite) TestUpdateError() {
+	u.sqlMock.ExpectBegin()
+	u.sqlMock.ExpectExec(regexp.QuoteMeta("UPDATE `user_infos` SET `updated_at`=?,`login_id`=?,`role`=?,`phone`=?,`email`=? WHERE `id` = ?")).
+		WithArgs(sqlmock.AnyArg(), test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect, test.UserIDCorrect).
+		WillReturnError(fmt.Errorf("error"))
+	u.sqlMock.ExpectRollback()
+
+	err := u.repo.Update(context.Background(), &entity.UserInfo{
+		ID:      test.UserIDCorrect,
+		LoginID: test.UserLoginIDCorrect,
+		Role:    test.UserRoleCorrect,
+		Phone:   test.UserPhoneCorrect,
+		Email:   test.UserEmailCorrect,
+	})
+	require.Error(u.T(), err)
+}
+
+func (u *userInfoSuite) TestDeleteSuccess() {
 	u.sqlMock.ExpectBegin()
 	u.sqlMock.ExpectExec(regexp.QuoteMeta("UPDATE `user_infos` SET `deleted_at`=? WHERE id = ? AND `user_infos`.`deleted_at` IS NULL")).
 		WithArgs(sqlmock.AnyArg(), test.UserIDCorrect).
@@ -177,4 +238,15 @@ func (u *userInfoSuite) TestDelete() {
 
 	err := u.repo.Delete(context.Background(), test.UserIDCorrect)
 	require.NoError(u.T(), err)
+}
+
+func (u *userInfoSuite) TestDeleteError() {
+	u.sqlMock.ExpectBegin()
+	u.sqlMock.ExpectExec(regexp.QuoteMeta("UPDATE `user_infos` SET `deleted_at`=? WHERE id = ? AND `user_infos`.`deleted_at` IS NULL")).
+		WithArgs(sqlmock.AnyArg(), test.UserIDCorrect).
+		WillReturnError(fmt.Errorf("error"))
+	u.sqlMock.ExpectRollback()
+
+	err := u.repo.Delete(context.Background(), test.UserIDCorrect)
+	require.Error(u.T(), err)
 }
