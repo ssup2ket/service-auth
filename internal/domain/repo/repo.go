@@ -107,9 +107,3 @@ func getReturnErr(err error) error {
 	}
 	return ErrServerError
 }
-
-// Util
-func isDuplicatedEntryError(err error) bool {
-	var mysqlErr *gomysql.MySQLError
-	return errors.As(err, &mysqlErr) && mysqlErr.Number == 1062
-}

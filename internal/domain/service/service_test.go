@@ -27,6 +27,6 @@ func (s *serviceSuite) TestGetRetrunError() {
 	errServerError := getReturnErr(repo.ErrServerError)
 	require.Equal(s.T(), ErrRepoServerError, errServerError)
 
-	errTestError := getReturnErr(nil)
-	require.Equal(s.T(), ErrServerErr, errTestError)
+	errNullError := getReturnErr(nil)
+	require.Equal(s.T(), ErrServerErr, errNullError)
 }

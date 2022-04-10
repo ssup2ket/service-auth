@@ -68,7 +68,7 @@ func (o *outboxSuite) TestCreate() {
 	require.NoError(o.T(), err)
 }
 
-func (o *outboxSuite) TestCreateTx() {
+func (o *outboxSuite) TestCreateWithTx() {
 	o.sqlMock.ExpectBegin()
 	o.sqlMock.ExpectExec(regexp.QuoteMeta("INSERT INTO `outboxes` (`id`,`created_at`,`aggregatetype`,`aggregateid`,`eventtype`,`payload`,`spancontext`) VALUES (?,?,?,?,?,?,?)")).
 		WithArgs(test.OutboxIDCorrect, sqlmock.AnyArg(), test.OutboxAggregateTypeCorrect, test.OutboxAggregateIDCorrect, test.OutboxEventTypeCorrect, test.OutboxPayloadCorrect, test.OutboxSpanContextCorrect).
