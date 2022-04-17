@@ -84,11 +84,11 @@ func (_m *UserSecretRepo) Update(ctx context.Context, userSecret *entity.UserSec
 }
 
 // WithTx provides a mock function with given fields: tx
-func (_m *UserSecretRepo) WithTx(tx *repo.DBTx) repo.UserSecretRepo {
+func (_m *UserSecretRepo) WithTx(tx repo.DBTx) repo.UserSecretRepo {
 	ret := _m.Called(tx)
 
 	var r0 repo.UserSecretRepo
-	if rf, ok := ret.Get(0).(func(*repo.DBTx) repo.UserSecretRepo); ok {
+	if rf, ok := ret.Get(0).(func(repo.DBTx) repo.UserSecretRepo); ok {
 		r0 = rf(tx)
 	} else {
 		if ret.Get(0) != nil {

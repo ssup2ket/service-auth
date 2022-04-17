@@ -12,7 +12,7 @@ import (
 
 // User info repo
 type UserInfoRepo interface {
-	WithTx(tx *DBTx) UserInfoRepo
+	WithTx(tx DBTx) UserInfoRepo
 
 	List(ctx context.Context, offset int, limit int) ([]entity.UserInfo, error)
 	Create(ctx context.Context, userInfo *entity.UserInfo) error
@@ -32,8 +32,8 @@ func NewUserInfoRepoImp(repoDB *gorm.DB) *UserInfoRepoImp {
 	}
 }
 
-func (u *UserInfoRepoImp) WithTx(tx *DBTx) UserInfoRepo {
-	transaction := tx.getTx()
+func (u *UserInfoRepoImp) WithTx(tx DBTx) UserInfoRepo {
+	transaction := tx.GetTx()
 	return NewUserInfoRepoImp(transaction)
 }
 

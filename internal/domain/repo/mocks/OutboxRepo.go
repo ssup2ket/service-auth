@@ -47,11 +47,11 @@ func (_m *OutboxRepo) Delete(ctx context.Context, userUUID uuid.EntityUUID) erro
 }
 
 // WithTx provides a mock function with given fields: tx
-func (_m *OutboxRepo) WithTx(tx *repo.DBTx) repo.OutboxRepo {
+func (_m *OutboxRepo) WithTx(tx repo.DBTx) repo.OutboxRepo {
 	ret := _m.Called(tx)
 
 	var r0 repo.OutboxRepo
-	if rf, ok := ret.Get(0).(func(*repo.DBTx) repo.OutboxRepo); ok {
+	if rf, ok := ret.Get(0).(func(repo.DBTx) repo.OutboxRepo); ok {
 		r0 = rf(tx)
 	} else {
 		if ret.Get(0) != nil {

@@ -19,13 +19,17 @@ type TokenService interface {
 }
 
 type TokenServiceImp struct {
+	repoDBTx repo.DBTx
+
 	userInfoRepoSecondary   repo.UserInfoRepo
 	userSecretRepoPrimary   repo.UserSecretRepo
 	userSecretRepoSecondary repo.UserSecretRepo
 }
 
-func NewTokenServiceImp(userInfoSecondary repo.UserInfoRepo, userSecretPrimary, userSecretSecondary repo.UserSecretRepo) *TokenServiceImp {
+func NewTokenServiceImp(dbTx repo.DBTx, userInfoSecondary repo.UserInfoRepo, userSecretPrimary, userSecretSecondary repo.UserSecretRepo) *TokenServiceImp {
 	return &TokenServiceImp{
+		repoDBTx: dbTx,
+
 		userInfoRepoSecondary:   userInfoSecondary,
 		userSecretRepoPrimary:   userSecretPrimary,
 		userSecretRepoSecondary: userSecretSecondary,

@@ -36,6 +36,8 @@ type UserService interface {
 }
 
 type UserServiceImp struct {
+	repoDBTx repo.DBTx
+
 	outBoxRepoPrimary       repo.OutboxRepo
 	userInfoRepoPrimary     repo.UserInfoRepo
 	userInfoRepoSecondary   repo.UserInfoRepo
@@ -43,9 +45,11 @@ type UserServiceImp struct {
 	userSecretRepoSecondary repo.UserSecretRepo
 }
 
-func NewUserServiceImp(userOutBoxPrimary repo.OutboxRepo, userInfoPrimary, userInfoSecondary repo.UserInfoRepo,
+func NewUserServiceImp(dbTx repo.DBTx, userOutBoxPrimary repo.OutboxRepo, userInfoPrimary, userInfoSecondary repo.UserInfoRepo,
 	userSecretPrimary, userSecretSecondary repo.UserSecretRepo) *UserServiceImp {
 	return &UserServiceImp{
+		repoDBTx: dbTx,
+
 		outBoxRepoPrimary:       userOutBoxPrimary,
 		userInfoRepoPrimary:     userInfoPrimary,
 		userInfoRepoSecondary:   userInfoSecondary,
@@ -75,8 +79,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *entity.UserIn
 	var err error
 
 	// Begin transaction
-	tx := repo.NewDBTx()
-	_ = tx.Begin()
+	tx, _ := u.repoDBTx.Begin()
 	defer func() {
 		if err != nil {
 			if err = tx.Rollback(); err != nil {
@@ -173,8 +176,7 @@ func (u *UserServiceImp) UpdateUser(ctx context.Context, userInfo *entity.UserIn
 	var err error
 
 	// Begin transaction
-	tx := repo.NewDBTx()
-	tx.Begin()
+	tx, _ := u.repoDBTx.Begin()
 	defer func() {
 		if err != nil {
 			if err = tx.Rollback(); err != nil {
@@ -227,7 +229,7 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID uuid.EntityUUI
 	var err error
 
 	// Begin transaction
-	tx := repo.NewDBTx()
+	tx, _ := u.repoDBTx.Begin()
 	tx.Begin()
 	defer func() {
 		if err != nil {

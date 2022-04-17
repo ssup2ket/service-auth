@@ -25,6 +25,7 @@ type userInfoSuite struct {
 	suite.Suite
 	sqlMock sqlmock.Sqlmock
 
+	tx   *DBTxImp
 	repo UserInfoRepo
 }
 
@@ -37,13 +38,14 @@ func (u *userInfoSuite) SetupTest() {
 	require.NoError(u.T(), err)
 
 	// Init DB
-	primaryMySQL, err = gorm.Open(mysql.New(mysql.Config{
+	primaryMySQL, err := gorm.Open(mysql.New(mysql.Config{
 		Conn:                      db,
 		SkipInitializeWithVersion: true,
 	}))
 	require.NoError(u.T(), err)
 
-	// Init repo
+	// Init transaction, repo
+	u.tx = NewDBTxImp(primaryMySQL)
 	u.repo = NewUserInfoRepoImp(primaryMySQL)
 }
 
@@ -174,8 +176,7 @@ func (u *userInfoSuite) TestCreateAndGetWithTxSuccess() {
 			AddRow(test.UserIDCorrect, test.UserLoginIDCorrect, test.UserRoleCorrect, test.UserPhoneCorrect, test.UserEmailCorrect))
 	u.sqlMock.ExpectCommit()
 
-	tx := NewDBTx()
-	tx.Begin()
+	tx, _ := u.tx.Begin()
 	err := u.repo.WithTx(tx).Create(context.Background(), &entity.UserInfo{
 		ID:      test.UserIDCorrect,
 		LoginID: test.UserLoginIDCorrect,

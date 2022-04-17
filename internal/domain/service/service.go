@@ -6,16 +6,6 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
 )
 
-// Config
-var config *ServiceConfigs
-
-type ServiceConfigs struct{}
-
-// Init
-func Init(c *ServiceConfigs) {
-	config = c
-}
-
 // Error
 var (
 	// Common

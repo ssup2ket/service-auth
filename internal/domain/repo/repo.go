@@ -14,38 +14,32 @@ import (
 	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
 )
 
-// Pkg variables
-var cfg *config.Configs
-var primaryMySQL *gorm.DB
-var secondaryMySQL *gorm.DB
-
 // Init
-func Init(c *config.Configs) error {
+func New(c *config.Configs) (DBTx, *gorm.DB, *gorm.DB, error) {
 	var err error
 
 	// Set config
-	cfg = c
 	gormConfig := &gorm.Config{}
-	if cfg.DeployEnv != config.DeployEnvLocal {
+	if c.DeployEnv != config.DeployEnvLocal {
 		gormConfig.Logger = logger.Default.LogMode(logger.Silent)
 	}
 
 	// Connect to primary MySQL
 	primaryDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		c.MySQLPrimaryUser, c.MySQLPrimaryPassword, c.MySQLPrimaryIP, c.MySQLPrimaryPort, c.MySQLDatabase)
-	primaryMySQL, err = gorm.Open(mysql.Open(primaryDSN), gormConfig)
+	primaryMySQL, err := gorm.Open(mysql.Open(primaryDSN), gormConfig)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to connect to primary MySQL")
-		return err
+		return nil, nil, nil, err
 	}
 
 	// Connect to secondary MySQL
 	secondaryDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		c.MySQLSecondaryUser, c.MySQLSecondaryPassword, c.MySQLSecondaryIP, c.MySQLSecondaryPort, c.MySQLDatabase)
-	secondaryMySQL, err = gorm.Open(mysql.Open(secondaryDSN), gormConfig)
+	secondaryMySQL, err := gorm.Open(mysql.Open(secondaryDSN), gormConfig)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to connect to secondary MySQL")
-		return err
+		return nil, nil, nil, err
 	}
 
 	// Init schemas
@@ -55,39 +49,48 @@ func Init(c *config.Configs) error {
 		&entity.Outbox{},
 	); err != nil {
 		log.Error().Err(err).Msg("Failed to init schemas")
-		return err
+		return nil, nil, nil, err
 	}
 
-	return nil
-}
-
-func GetDBConns() (*gorm.DB, *gorm.DB) {
-	return primaryMySQL, secondaryMySQL
+	return NewDBTxImp(primaryMySQL), primaryMySQL, secondaryMySQL, nil
 }
 
 // DB transaction
-type DBTx struct {
+type DBTx interface {
+	GetTx() *gorm.DB
+
+	Begin() (DBTx, error)
+	Commit() error
+	Rollback() error
+}
+
+type DBTxImp struct {
+	db *gorm.DB
 	tx *gorm.DB
 }
 
-func NewDBTx() *DBTx {
-	return &DBTx{}
+func NewDBTxImp(d *gorm.DB) *DBTxImp {
+	return &DBTxImp{
+		db: d,
+	}
 }
 
-func (d *DBTx) getTx() *gorm.DB {
+func (d *DBTxImp) GetTx() *gorm.DB {
 	return d.tx
 }
 
-func (d *DBTx) Begin() error {
-	d.tx = primaryMySQL.Begin()
-	return d.tx.Error
+func (d *DBTxImp) Begin() (DBTx, error) {
+	t := d.db.Begin()
+	return &DBTxImp{
+		tx: t,
+	}, t.Error
 }
 
-func (d *DBTx) Commit() error {
+func (d *DBTxImp) Commit() error {
 	return d.tx.Commit().Error
 }
 
-func (d *DBTx) Rollback() error {
+func (d *DBTxImp) Rollback() error {
 	return d.tx.Rollback().Error
 }
 

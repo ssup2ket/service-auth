@@ -27,6 +27,7 @@ type userSecretSuite struct {
 	suite.Suite
 	sqlMock sqlmock.Sqlmock
 
+	tx   *DBTxImp
 	repo UserSecretRepo
 
 	passwdHash       []byte
@@ -44,13 +45,14 @@ func (u *userSecretSuite) SetupTest() {
 	require.NoError(u.T(), err)
 
 	// Init DB
-	primaryMySQL, err = gorm.Open(mysql.New(mysql.Config{
+	primaryMySQL, err := gorm.Open(mysql.New(mysql.Config{
 		Conn:                      db,
 		SkipInitializeWithVersion: true,
 	}))
 	require.NoError(u.T(), err)
 
-	// Init repo
+	// Init transaction, repo
+	u.tx = NewDBTxImp(primaryMySQL)
 	u.repo = NewUserSecretRepoImp(primaryMySQL)
 
 	// Get password and refresh token's hash and salt
@@ -132,8 +134,7 @@ func (u *userSecretSuite) TestCreateAndGetWithTxSuccess() {
 			AddRow(test.UserIDCorrect, u.passwdHash, u.passwdSalt, u.refreshTokenHash, u.refreshTokenSalt))
 	u.sqlMock.ExpectCommit()
 
-	tx := NewDBTx()
-	tx.Begin()
+	tx, _ := u.tx.Begin()
 	err := u.repo.WithTx(tx).Create(context.Background(), &entity.UserSecret{
 		ID:               test.UserIDCorrect,
 		PasswdHash:       u.passwdHash,

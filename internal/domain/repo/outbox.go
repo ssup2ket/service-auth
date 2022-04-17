@@ -12,7 +12,7 @@ import (
 
 // Outbox repo
 type OutboxRepo interface {
-	WithTx(tx *DBTx) OutboxRepo
+	WithTx(tx DBTx) OutboxRepo
 
 	Create(ctx context.Context, userInfo *entity.Outbox) error
 	Delete(ctx context.Context, userUUID uuid.EntityUUID) error
@@ -28,8 +28,8 @@ func NewOutboxRepoImp(repoDB *gorm.DB) *OutboxRepoImp {
 	}
 }
 
-func (u *OutboxRepoImp) WithTx(tx *DBTx) OutboxRepo {
-	transaction := tx.getTx()
+func (u *OutboxRepoImp) WithTx(tx DBTx) OutboxRepo {
+	transaction := tx.GetTx()
 	return NewOutboxRepoImp(transaction)
 }
 

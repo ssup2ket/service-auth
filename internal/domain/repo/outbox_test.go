@@ -25,6 +25,7 @@ type outboxSuite struct {
 	suite.Suite
 	sqlMock sqlmock.Sqlmock
 
+	tx   *DBTxImp
 	repo OutboxRepo
 }
 
@@ -37,13 +38,14 @@ func (o *outboxSuite) SetupTest() {
 	require.NoError(o.T(), err)
 
 	// Init DB
-	primaryMySQL, err = gorm.Open(mysql.New(mysql.Config{
+	primaryMySQL, err := gorm.Open(mysql.New(mysql.Config{
 		Conn:                      db,
 		SkipInitializeWithVersion: true,
 	}))
 	require.NoError(o.T(), err)
 
-	// Init repo
+	// Init transaction, repo
+	o.tx = NewDBTxImp(primaryMySQL)
 	o.repo = NewOutboxRepoImp(primaryMySQL)
 }
 
@@ -94,8 +96,7 @@ func (o *outboxSuite) TestCreateWithTxSuccess() {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	o.sqlMock.ExpectCommit()
 
-	tx := NewDBTx()
-	tx.Begin()
+	tx, _ := o.tx.Begin()
 	err := o.repo.WithTx(tx).Create(context.Background(), &entity.Outbox{
 		ID:            test.OutboxIDCorrect,
 		AggregateType: test.OutboxAggregateTypeCorrect,

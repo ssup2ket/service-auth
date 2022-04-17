@@ -12,7 +12,7 @@ import (
 
 // User secret repo
 type UserSecretRepo interface {
-	WithTx(tx *DBTx) UserSecretRepo
+	WithTx(tx DBTx) UserSecretRepo
 
 	Create(ctx context.Context, userSecret *entity.UserSecret) error
 	Get(ctx context.Context, userUUID uuid.EntityUUID) (*entity.UserSecret, error)
@@ -30,8 +30,8 @@ func NewUserSecretRepoImp(repoDB *gorm.DB) *UserSecretRepoImp {
 	}
 }
 
-func (u *UserSecretRepoImp) WithTx(tx *DBTx) UserSecretRepo {
-	transaction := tx.getTx()
+func (u *UserSecretRepoImp) WithTx(tx DBTx) UserSecretRepo {
+	transaction := tx.GetTx()
 	return NewUserSecretRepoImp(transaction)
 }
 
