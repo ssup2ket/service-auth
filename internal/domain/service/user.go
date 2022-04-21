@@ -131,7 +131,7 @@ func (u *UserServiceImp) CreateUser(ctx context.Context, userInfo *entity.UserIn
 
 	// Get span context as JSON
 	tracer := opentracing.GlobalTracer()
-	span := opentracing.SpanFromContext(ctx)
+	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateUser")
 	spanContext, err := tracing.GetSpanContextAsJSON(tracer, span)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user outbox spancontext")
@@ -230,7 +230,6 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID uuid.EntityUUI
 
 	// Begin transaction
 	tx, _ := u.repoDBTx.Begin()
-	tx.Begin()
 	defer func() {
 		if err != nil {
 			if err = tx.Rollback(); err != nil {
@@ -275,7 +274,7 @@ func (u *UserServiceImp) DeleteUser(ctx context.Context, userUUID uuid.EntityUUI
 
 	// Get span context as JSON
 	tracer := opentracing.GlobalTracer()
-	span := opentracing.SpanFromContext(ctx)
+	span, ctx := opentracing.StartSpanFromContext(ctx, "DeleteUser")
 	spanContext, err := tracing.GetSpanContextAsJSON(tracer, span)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get user outbox spancontext")

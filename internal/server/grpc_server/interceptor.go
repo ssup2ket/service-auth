@@ -110,9 +110,9 @@ func icAccessLoggerUnary() grpc.UnaryServerInterceptor {
 		}
 
 		// Get span
-		span := opentracing.SpanFromContext(ctx)
+		span, ctx := opentracing.StartSpanFromContext(ctx, "icAccessLoggerUnary")
 		if span == nil {
-			log.Ctx(ctx).Error().Msg("Failed to get opentracing span from context")
+			log.Ctx(ctx).Error().Msg("Failed to start opentracing span")
 			return nil, getErrServerError()
 		}
 

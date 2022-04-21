@@ -3,14 +3,18 @@
 all: test-unit run
 
 # go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.6.0
-# GO111MODULE=on go get github.com/mikefarah/yq/v4
+# go install github.com/mikefarah/yq/v4@latest
 .PHONY: gen-openapi
 gen-openapi:
 	oapi-codegen --generate types,chi-server,spec -o internal/server/http_server/http_server.gen.go --package http_server api/openapi/api.yml
 	echo "var api_spec =" > api/openapi/api.json.js &&  yq eval -o=j api/openapi/api.yml >> api/openapi/api.json.js 
 
-# Ubuntu : apt install protobuf-compiler
-# MacOS : brew install protobuf
+## Ubuntu 
+# apt install protobuf-compiler
+# go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26
+# go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
+## MacOS
+# brew install protobuf
 # go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26
 # go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
 .PHONY: gen-protobuf
@@ -35,11 +39,18 @@ init-local:
 build-image:
 	docker build --tag ssup2/ssup2ket-auth:local .
 
+# go install github.com/vektra/mockery/v2@v2.12.2
 .PHONY: test-unit
 test-unit: gen-mock
 	go test -v -coverprofile=cover.out ./...
 	go tool cover -html=cover.out -o=cover.html
 
+# Ubuntu
+## apt install jq
+## go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.8.6
+# MacOS
+## brew install jq
+## go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.8.6
 .PHONY: test-integration
 test-integration:
 	scripts/test-http-server.sh && scripts/test-grpc-server.sh

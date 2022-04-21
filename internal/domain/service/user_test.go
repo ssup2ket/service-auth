@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -74,18 +75,26 @@ func (u *userSuite) TestListUserServerError() {
 }
 
 func (u *userSuite) TestCreateUserSuccess() {
-	u.userInfoRepo.On("WithTx", mock.Anything).Return(mock.Anything)
-	u.userInfoRepo.On("Create", context.Background(), &entity.UserInfo{
-		ID:      test.UserIDCorrect,
+	opentracing.SetGlobalTracer(opentracing.NoopTracer{})
+
+	userInfo := &entity.UserInfo{
 		LoginID: test.UserLoginIDCorrect,
 		Role:    test.UserRoleCorrect,
 		Phone:   test.UserPhoneCorrect,
 		Email:   test.UserEmailCorrect,
-	}).Return(nil)
+	}
 
-	userInfo, err := u.userService.CreateUser(context.Background(), &entity.UserInfo{}, test.UserPasswdCorrect)
+	u.dbTx.On("Begin").Return(&u.dbTx, nil)
+	u.userInfoRepo.On("WithTx", mock.Anything).Return(&u.userInfoRepo)
+	u.userInfoRepo.On("Create", context.Background(), userInfo).Return(nil)
+	u.userSecretRepo.On("WithTx", mock.Anything).Return(&u.userSecretRepo)
+	u.userSecretRepo.On("Create", context.Background(), mock.Anything).Return(nil)
+	u.outboxRepo.On("WithTx", mock.Anything).Return(&u.outboxRepo)
+	u.outboxRepo.On("Create", mock.Anything, mock.Anything).Return(nil)
+	u.dbTx.On("Commit").Return(nil)
+
+	userInfo, err := u.userService.CreateUser(context.Background(), userInfo, test.UserPasswdCorrect)
 	require.NoError(u.T(), err)
-	require.Equal(u.T(), test.UserIDCorrect, userInfo.ID)
 	require.Equal(u.T(), test.UserLoginIDCorrect, userInfo.LoginID)
 	require.Equal(u.T(), test.UserRoleCorrect, userInfo.Role)
 	require.Equal(u.T(), test.UserPhoneCorrect, userInfo.Phone)
