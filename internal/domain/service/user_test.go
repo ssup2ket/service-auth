@@ -37,6 +37,9 @@ func (u *userSuite) SetupTest() {
 	u.userInfoRepo = mocks.UserInfoRepo{}
 	u.userSecretRepo = mocks.UserSecretRepo{}
 
+	// Set nooptracer
+	opentracing.SetGlobalTracer(opentracing.NoopTracer{})
+
 	// Init service
 	u.userService = NewUserServiceImp(&u.dbTx, &u.outboxRepo, &u.userInfoRepo, &u.userInfoRepo, &u.userSecretRepo, &u.userSecretRepo)
 }
@@ -75,8 +78,6 @@ func (u *userSuite) TestListUserServerError() {
 }
 
 func (u *userSuite) TestCreateUserSuccess() {
-	opentracing.SetGlobalTracer(opentracing.NoopTracer{})
-
 	userInfo := &entity.UserInfo{
 		LoginID: test.UserLoginIDCorrect,
 		Role:    test.UserRoleCorrect,
@@ -124,4 +125,50 @@ func (u *userSuite) TestGetUserRepoNotFoundError() {
 
 	_, err := u.userService.GetUser(context.Background(), test.UserIDCorrect)
 	require.Equal(u.T(), ErrRepoNotFound, err)
+}
+
+func (u *userSuite) TestUpdateUserSuccess() {
+	userInfo := &entity.UserInfo{
+		ID:      test.UserIDCorrect,
+		LoginID: test.UserLoginIDCorrect,
+		Role:    test.UserRoleCorrect,
+		Phone:   test.UserPhoneCorrect,
+		Email:   test.UserEmailCorrect,
+	}
+
+	u.dbTx.On("Begin").Return(&u.dbTx, nil)
+	u.userInfoRepo.On("WithTx", mock.Anything).Return(&u.userInfoRepo)
+	u.userInfoRepo.On("Get", context.Background(), test.UserIDCorrect).Return(nil, nil)
+	u.userInfoRepo.On("WithTx", mock.Anything).Return(&u.userInfoRepo)
+	u.userInfoRepo.On("Update", context.Background(), userInfo).Return(nil)
+	u.userSecretRepo.On("WithTx", mock.Anything).Return(&u.userSecretRepo)
+	u.userSecretRepo.On("Update", context.Background(), mock.Anything).Return(nil)
+	u.dbTx.On("Commit").Return(nil)
+
+	err := u.userService.UpdateUser(context.Background(), userInfo, test.UserPasswdCorrect)
+	require.NoError(u.T(), err)
+}
+
+func (u *userSuite) TestDeleteUserSuccess() {
+	userInfo := &entity.UserInfo{
+		ID:      test.UserIDCorrect,
+		LoginID: test.UserLoginIDCorrect,
+		Role:    test.UserRoleCorrect,
+		Phone:   test.UserPhoneCorrect,
+		Email:   test.UserEmailCorrect,
+	}
+
+	u.dbTx.On("Begin").Return(&u.dbTx, nil)
+	u.userInfoRepo.On("WithTx", mock.Anything).Return(&u.userInfoRepo)
+	u.userInfoRepo.On("Get", context.Background(), test.UserIDCorrect).Return(userInfo, nil)
+	u.userInfoRepo.On("WithTx", mock.Anything).Return(&u.userInfoRepo)
+	u.userInfoRepo.On("Delete", context.Background(), test.UserIDCorrect).Return(nil)
+	u.userSecretRepo.On("WithTx", mock.Anything).Return(&u.userSecretRepo)
+	u.userSecretRepo.On("Delete", context.Background(), mock.Anything).Return(nil)
+	u.outboxRepo.On("WithTx", mock.Anything).Return(&u.outboxRepo)
+	u.outboxRepo.On("Create", mock.Anything, mock.Anything).Return(nil)
+	u.dbTx.On("Commit").Return(nil)
+
+	err := u.userService.DeleteUser(context.Background(), test.UserIDCorrect)
+	require.NoError(u.T(), err)
 }
