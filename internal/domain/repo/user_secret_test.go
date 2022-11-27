@@ -13,10 +13,10 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/hashing"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/test"
+	"github.com/ssup2ket/service-auth/pkg/auth/hashing"
+	"github.com/ssup2ket/service-auth/pkg/auth/token"
 )
 
 func TestUserSecret(t *testing.T) {

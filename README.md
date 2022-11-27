@@ -1,20 +1,20 @@
-# ssup2ket-auth-service
+# service-auth
 
-ssup2ket-auth-service is the service responsible for user management and authentication/authorization in the [ssup2ket](https://github.com/ssup2ket/ssup2ket) Project. ssup2ket-auth-service follows this [considerations](https://github.com/ssup2ket/ssup2ket#ssup2ket-service-considerations).
+service-auth is the service responsible for user management and authentication/authorization in the [ssup2ket](https://github.com/ssup2ket/ssup2ket) Project. service-auth follows this [considerations](https://github.com/ssup2ket/ssup2ket#ssup2ket-service-considerations).
 
 * [Architecture](https://drive.google.com/file/d/1_2_5P5s8PRkz9UNM-2COEvP5OEXk-5Zu/view?usp=sharing)
-* [Swagger](https://ssup2ket.github.io/ssup2ket-auth-service/api/openapi/swagger.html)
+* [Swagger](https://ssup2ket.github.io/service-auth/api/openapi/swagger.html)
 * [ER Diagram](https://drive.google.com/file/d/17gR4NP3bFl21aqhpr3PnhRePQTzafZoY/view?usp=sharing)
 
 ## Authentication/Authorization
 
-ssup2ket-auth-service uses simple authentication based on **ID/Password**. A user can get the **Access Token** and **Refresh Token** based on  **JWT** required for authentication/authorization by entering ID/Password. Passwords are encrypted and stored using the **PBKDF2** algorithm.
+service-auth uses simple authentication based on **ID/Password**. A user can get the **Access Token** and **Refresh Token** based on  **JWT** required for authentication/authorization by entering ID/Password. Passwords are encrypted and stored using the **PBKDF2** algorithm.
 
 In JWT Token, **User's ID(UUID), Login ID, Password and Role** are stored. Other services of the ssup2ket Project need to implement authentication and RBAC-based authorization through JWT Token. Each User can have only one Role. There are two role types, admin and user.
 
 ## Used main external packages and tools
 
-ssup2ket-auth-service uses following external packages and tools.
+service-auth uses following external packages and tools.
 
 * **HTTP Server, Middleware** - [chi](https://github.com/go-chi/chi), [HTTP](https://pkg.go.dev/net/http), [oapi-codegen](https://github.com/deepmap/oapi-codegen)
 * **GRPC Server, Intercepter** - [grpc](https://pkg.go.dev/google.golang.org/grpc), [protoc-gen-go](https://pkg.go.dev/github.com/golang/protobuf/protoc-gen-go)
@@ -35,6 +35,7 @@ ssup2ket-auth-service uses following external packages and tools.
 
 ```
 $ go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.6.0
+$ go get github.com/mikefarah/yq/v4
 $ go install github.com/mikefarah/yq/v4
 ```
 
@@ -55,7 +56,16 @@ $ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
 * For Test, CI
 
 ```
-$ go install github.com/vektra/mockery/v2@latest
+// Ubuntu
+$ apt install jq
+$ go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.8.7
+$ go install github.com/vektra/mockery/v2@v2.15.0
+$ go install github.com/nektos/act@latest
+
+// MacOS
+$ brew install jq
+$ go install github.com/fullstorydev/grpcurl/cmd/grpcurl@v1.8.7
+$ go install github.com/vektra/mockery/v2@v2.15.0
 $ go install github.com/nektos/act@latest
 ```
 

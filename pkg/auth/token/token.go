@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
 )
 
 const (

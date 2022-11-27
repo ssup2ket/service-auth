@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
+	"github.com/ssup2ket/service-auth/internal/domain/service"
+	"github.com/ssup2ket/service-auth/internal/server/errors"
 )
 
 func (s *ServerGRPC) LoginToken(ctx context.Context, req *TokenLoginRequest) (*TokenInfosResponse, error) {

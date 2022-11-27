@@ -19,9 +19,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
-	authtoken "github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
-	grpcmeta "github.com/ssup2ket/ssup2ket-auth-service/pkg/grpc/meta"
+	"github.com/ssup2ket/service-auth/internal/server/middleware"
+	authtoken "github.com/ssup2ket/service-auth/pkg/auth/token"
+	grpcmeta "github.com/ssup2ket/service-auth/pkg/grpc/meta"
 )
 
 func icLoggerSetterUnary() grpc.UnaryServerInterceptor {

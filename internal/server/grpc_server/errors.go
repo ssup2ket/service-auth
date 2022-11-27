@@ -4,7 +4,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
+	"github.com/ssup2ket/service-auth/internal/server/errors"
 )
 
 func getErrBadRequest() error {

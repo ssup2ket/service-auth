@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo/mocks"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/domain/repo"
+	"github.com/ssup2ket/service-auth/internal/domain/repo/mocks"
+	"github.com/ssup2ket/service-auth/internal/test"
 )
 
 func TestUser(t *testing.T) {

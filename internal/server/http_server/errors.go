@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/render"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
+	"github.com/ssup2ket/service-auth/internal/server/errors"
 )
 
 // Error response

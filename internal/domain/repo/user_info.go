@@ -6,8 +6,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/pkg/entity/uuid"
 )
 
 // User info repo

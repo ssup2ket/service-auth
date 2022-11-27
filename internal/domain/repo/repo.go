@@ -10,8 +10,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/config"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/config"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
 )
 
 // Init

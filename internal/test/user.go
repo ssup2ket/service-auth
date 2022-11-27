@@ -1,8 +1,8 @@
 package test
 
 import (
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/pkg/entity/uuid"
 )
 
 const (

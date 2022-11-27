@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
+	"github.com/ssup2ket/service-auth/internal/domain/repo"
 )
 
 func TestService(t *testing.T) {

@@ -24,4 +24,4 @@ jobs:
       run: go test -v ./... 
 
     - name: Run build test
-      run: go build ./cmd/ssup2ket-auth/main.go
+      run: go build ./cmd/service-auth/main.go

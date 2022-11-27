@@ -3,7 +3,7 @@ package request
 import (
 	"testing"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
+	"github.com/ssup2ket/service-auth/internal/test"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )

@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
+	"github.com/ssup2ket/service-auth/internal/domain/repo"
 )
 
 // Error

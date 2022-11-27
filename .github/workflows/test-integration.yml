@@ -32,8 +32,8 @@ jobs:
 
     - name: Run auth service and integration test
       run: |
-        CGO_ENABLED=0 GO111MODULE=on go build -a -o ssup2ket-auth ./cmd/ssup2ket-auth
-        . scripts/env-local && sudo -E ./ssup2ket-auth &
+        CGO_ENABLED=0 GO111MODULE=on go build -a -o service-auth ./cmd/service-auth
+        . scripts/env-local && sudo -E ./service-auth &
         sleep 30s
         scripts/test-http-server.sh
         scripts/test-grpc-server.sh

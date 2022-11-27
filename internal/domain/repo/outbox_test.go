@@ -13,8 +13,8 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/test"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/test"
 )
 
 func TestOutbox(t *testing.T) {

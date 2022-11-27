@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	gouuid "github.com/satori/go.uuid"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
 )
 
 func ValidateUserUUID(uuid string) error {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
 )
 
 type ctxKeyUserID int

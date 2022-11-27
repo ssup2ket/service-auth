@@ -15,10 +15,10 @@ import (
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-client-go/zipkin"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/config"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/grpc_server"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/http_server"
+	"github.com/ssup2ket/service-auth/internal/config"
+	"github.com/ssup2ket/service-auth/internal/domain"
+	"github.com/ssup2ket/service-auth/internal/server/grpc_server"
+	"github.com/ssup2ket/service-auth/internal/server/http_server"
 )
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
 
 	// Set jeager tracer config
 	jeagerCfg := jaegercfg.Configuration{
-		ServiceName: "ssup2ket-auth-" + string(cfg.DeployEnv),
+		ServiceName: "service-auth-" + string(cfg.DeployEnv),
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,

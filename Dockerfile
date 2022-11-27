@@ -1,13 +1,13 @@
-# Build ssup2ket-auth binary
+# Build service-auth binary
 FROM golang:1.16 as builder
 WORKDIR /workspace
 COPY . .
-RUN CGO_ENABLED=0 GO111MODULE=on go build -a -o ssup2ket-auth ./cmd/ssup2ket-auth
+RUN CGO_ENABLED=0 GO111MODULE=on go build -a -o service-auth ./cmd/service-auth
 
 # Make up image
 FROM alpine:3.13.1
 WORKDIR /root
-COPY --from=builder /workspace/ssup2ket-auth /usr/bin/ssup2ket-auth
+COPY --from=builder /workspace/service-auth /usr/bin/service-auth
 COPY --from=builder /workspace/configs configs
 
-CMD ["ssup2ket-auth"]
+CMD ["service-auth"]

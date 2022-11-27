@@ -6,12 +6,12 @@ import (
 	"github.com/go-chi/render"
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/errors"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/request"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/domain/service"
+	"github.com/ssup2ket/service-auth/internal/server/errors"
+	"github.com/ssup2ket/service-auth/internal/server/middleware"
+	"github.com/ssup2ket/service-auth/internal/server/request"
+	"github.com/ssup2ket/service-auth/pkg/entity/uuid"
 )
 
 // List users

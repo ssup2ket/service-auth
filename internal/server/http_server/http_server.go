@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain"
+	"github.com/ssup2ket/service-auth/internal/domain"
 )
 
 // ServerHTTP

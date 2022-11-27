@@ -5,9 +5,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/config"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
+	"github.com/ssup2ket/service-auth/internal/config"
+	"github.com/ssup2ket/service-auth/internal/domain/repo"
+	"github.com/ssup2ket/service-auth/internal/domain/service"
 )
 
 type Domain struct {

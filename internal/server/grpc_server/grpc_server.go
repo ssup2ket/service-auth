@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain"
+	"github.com/ssup2ket/service-auth/internal/domain"
 )
 
 // ServerGRPC

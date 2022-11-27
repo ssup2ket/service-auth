@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/service"
+	"github.com/ssup2ket/service-auth/internal/domain/service"
 )
 
 // Login

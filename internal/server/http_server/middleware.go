@@ -15,8 +15,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/uber/jaeger-client-go"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/server/middleware"
-	authtoken "github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
+	"github.com/ssup2ket/service-auth/internal/server/middleware"
+	authtoken "github.com/ssup2ket/service-auth/pkg/auth/token"
 )
 
 func mwRequestIDSetter() func(next http.Handler) http.Handler {

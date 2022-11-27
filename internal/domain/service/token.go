@@ -5,11 +5,11 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/entity"
-	"github.com/ssup2ket/ssup2ket-auth-service/internal/domain/repo"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/hashing"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/auth/token"
-	"github.com/ssup2ket/ssup2ket-auth-service/pkg/entity/uuid"
+	"github.com/ssup2ket/service-auth/internal/domain/entity"
+	"github.com/ssup2ket/service-auth/internal/domain/repo"
+	"github.com/ssup2ket/service-auth/pkg/auth/hashing"
+	"github.com/ssup2ket/service-auth/pkg/auth/token"
+	"github.com/ssup2ket/service-auth/pkg/entity/uuid"
 )
 
 // Token service
